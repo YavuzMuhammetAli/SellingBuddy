@@ -1,0 +1,43 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="ServiceUrls.txt" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/ApiGateways/" />
+  <Folder Name="/src/ApiGateways/WebApiGateway/">
+    <Project Path="src/ApiGateways/WebApiGateway/Web.ApiGateway/Web.ApiGateway.csproj" Id="8d5a125c-fc52-4660-8d22-19fa738d8504" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/" />
+  <Folder Name="/src/BuildingBlocks/EventBus/">
+    <Project Path="src/BuildingBlocks/EventBus/EventBus.AzureServiceBus/EventBus.AzureServiceBus.csproj" Id="d8ba1dcb-cb6f-4013-8691-267ce87dbd5d" />
+    <Project Path="src/BuildingBlocks/EventBus/EventBus.Base/EventBus.Base.csproj" Id="98798feb-9104-446c-a132-b86bc3d2aee7" />
+    <Project Path="src/BuildingBlocks/EventBus/EventBus.Factory/EventBus.Factory.csproj" Id="28ff4e44-532a-4ce6-a3aa-5d8fe0547a4d" />
+    <Project Path="src/BuildingBlocks/EventBus/EventBus.RabbitMQ/EventBus.RabbitMQ.csproj" Id="b624a85d-b3b3-4081-8daa-5e01e717b9f8" />
+  </Folder>
+  <Folder Name="/src/Clients/" />
+  <Folder Name="/src/Clients/BlazorWebApp/">
+    <Project Path="src/Clients/BlazorWebApp/WebApp/WebApp.csproj" Id="4824dda0-c3bc-49cb-b377-8761651d688f" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/BasketService/">
+    <Project Path="src/Services/BasketService/BasketService.Api/BasketService.Api.csproj" Id="b6f7f8d7-0067-4572-8117-049024838c9a" />
+  </Folder>
+  <Folder Name="/src/Services/CatalogService/">
+    <Project Path="src/Services/CatalogService/CatalogService.Api/CatalogService.Api.csproj" Id="c7a6cf4e-8d80-46e1-9cb3-a8b7d0527085" />
+  </Folder>
+  <Folder Name="/src/Services/IdentityService/">
+    <Project Path="src/Services/IdentityService/IdentityService.Api/IdentityService.Api.csproj" Id="0b1c9285-c4fc-4215-b93e-20a36ab4abb6" />
+  </Folder>
+  <Folder Name="/src/Services/NotificationService/">
+    <Project Path="src/Services/NotificationService/NotificationService/NotificationService.csproj" Id="60510788-0df8-4931-ba4e-27bc6d68e37c" />
+  </Folder>
+  <Folder Name="/src/Services/OrderService/">
+    <Project Path="src/Services/OrderService/OrderService.Api/OrderService.Api.csproj" Id="614f22e3-98a1-4fbc-bfbc-260bac620091" />
+    <Project Path="src/Services/OrderService/OrderService.Application/OrderService.Application.csproj" Id="3228e329-19af-4b3f-b3e2-adeca9632a4b" />
+    <Project Path="src/Services/OrderService/OrderService.Domain/OrderService.Domain.csproj" Id="394c237c-a2f7-4bb7-9343-53696bb1c427" />
+    <Project Path="src/Services/OrderService/OrderService.Infrastructure/OrderService.Infrastructure.csproj" Id="bcf59738-9380-4216-baa1-049472ab3224" />
+  </Folder>
+  <Folder Name="/src/Services/PaymentService/">
+    <Project Path="src/Services/PaymentService/PaymentService.Api/PaymentService.Api.csproj" Id="e49e5a6f-d04b-4f87-9fd3-ba0a629f165e" />
+  </Folder>
+</Solution>
