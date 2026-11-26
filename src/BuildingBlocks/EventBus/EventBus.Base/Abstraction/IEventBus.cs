@@ -1,11 +1,8 @@
 ﻿using EventBus.Base.Events;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBus.Base.Abstraction
 {
-    public interface IEventBus
+    public interface IEventBus : IDisposable
     {
         void Publish(IntegrationEvent @event);
 

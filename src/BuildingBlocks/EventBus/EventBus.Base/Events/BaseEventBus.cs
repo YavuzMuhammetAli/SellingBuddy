@@ -10,7 +10,7 @@ namespace EventBus.Base.Events
         public readonly IEventBusSubscriptionManager _subsManager;
         public IServiceProvider _serviceProvider;
 
-        private EventBusConfig eventBusConfig;
+        public EventBusConfig eventBusConfig { get; set; }
 
         public BaseEventBus(EventBusConfig config, IServiceProvider serviceProvider) 
         {
@@ -38,6 +38,7 @@ namespace EventBus.Base.Events
         public virtual void Dispose()
         {
             eventBusConfig = null;
+            _subsManager.Clear();
         }
 
         public async Task<bool> ProcessEvent(string eventName, string message)
