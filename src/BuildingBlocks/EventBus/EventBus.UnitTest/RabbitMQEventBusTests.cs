@@ -53,10 +53,28 @@ namespace EventBus.UnitTest
             eventBus.Subscribe<OrderCreatedIntegrationEvent, OrderCreatedIntegrationEventHandler>();
             eventBus.Publish(new OrderCreatedIntegrationEvent(7));
 
-            var handled = await provider.GetRequiredService<HandledEventSink>().Received.Task
-                .WaitAsync(TimeSpan.FromSeconds(15), TestContext.Current.CancellationToken);
+            try
+            {
+                var handled = await provider.GetRequiredService<HandledEventSink>().Received.Task
+                    .WaitAsync(TimeSpan.FromSeconds(15), TestContext.Current.CancellationToken);
 
-            Assert.Equal(7, handled.OrderId);
+                Assert.Equal(7, handled.OrderId);
+            }
+            finally
+            {
+                await DeleteTestQueueAsync();
+            }
+        }
+
+        //queue is durable, removed so it doesn't show up as orphan in the status dashboard
+        private static async Task DeleteTestQueueAsync()
+        {
+            var factory = new ConnectionFactory { HostName = Host };
+
+            await using var connection = await factory.CreateConnectionAsync();
+            await using var channel = await connection.CreateChannelAsync();
+
+            await channel.QueueDeleteAsync("EventBus.UnitTest.OrderCreated", ifUnused: false, ifEmpty: false);
         }
     }
 }
