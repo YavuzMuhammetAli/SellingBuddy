@@ -1,3 +1,7 @@
+using IdentityService.Api.Application.Models;
+using IdentityService.Api.Application.Services;
+using IdentityService.Api.Extensions;
+using Serilog;
 
 namespace IdentityService.Api
 {
@@ -7,26 +11,32 @@ namespace IdentityService.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            //logging class added
+            builder.Host.UseSerilog((context, loggerConfig) =>
+                loggerConfig.ReadFrom.Configuration(context.Configuration));
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddHealthChecks();
+
+            //token settings and service added
+            builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection("AuthConfig"));
+            builder.Services.AddScoped<IIdentityService, Application.Services.IdentityService>();
+
+            //consul registration added
+            builder.Services.ConfigureConsul(builder.Configuration);
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
-            {
                 app.MapOpenApi();
-            }
 
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
+            app.UseSerilogRequestLogging();
 
             app.MapControllers();
+            app.MapHealthChecks("/health");
+
+            app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 
             app.Run();
         }

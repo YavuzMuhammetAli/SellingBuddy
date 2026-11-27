@@ -1,6 +1,11 @@
 @IdentityService.Api_HostAddress = http://localhost:5095
 
-GET {{IdentityService.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{IdentityService.Api_HostAddress}}/api/auth
+Content-Type: application/json
+
+{
+  "userName": "demo",
+  "password": "demo123"
+}
 
 ###
