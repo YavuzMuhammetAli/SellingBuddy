@@ -35,9 +35,20 @@ namespace Web.ApiGateway.Controllers
             if (item == null)
                 return BadRequest($"Catalog item {request.CatalogItemId} not found");
 
+            //price and seller always come from the catalog offer, never from the client
+            var offer = request.OfferId.HasValue
+                ? item.Offers.FirstOrDefault(o => o.Id == request.OfferId.Value)
+                : item.Offers.FirstOrDefault(o => o.IsBestOffer) ?? item.Offers.FirstOrDefault();
+
+            if (offer == null)
+                return BadRequest($"Offer {request.OfferId} not found for item {request.CatalogItemId}");
+
+            if (offer.Stock <= 0)
+                return BadRequest("Offer is out of stock");
+
             var currentBasket = await _basketService.GetBasketAsync();
 
-            var existingItem = currentBasket.Items.FirstOrDefault(i => i.ProductId == item.Id);
+            var existingItem = currentBasket.Items.FirstOrDefault(i => i.ProductId == item.Id && i.OfferId == offer.Id);
 
             if (existingItem != null)
             {
@@ -50,9 +61,18 @@ namespace Web.ApiGateway.Controllers
                     Id = Guid.NewGuid().ToString(),
                     ProductId = item.Id,
                     ProductName = item.Name,
-                    UnitPrice = item.Price,
+                    ProductSlug = item.Slug,
+                    BrandName = item.BrandName,
+                    UnitPrice = offer.Price,
+                    OldUnitPrice = offer.OldPrice ?? 0,
                     PictureUrl = item.PictureUri,
-                    Quantity = request.Quantity
+                    Quantity = request.Quantity,
+                    OfferId = offer.Id,
+                    SellerId = offer.SellerId,
+                    SellerSlug = offer.SellerSlug,
+                    SellerName = offer.SellerName,
+                    ShippingFee = offer.ShippingFee,
+                    DeliveryDaysMax = offer.DeliveryDaysMax
                 });
             }
 

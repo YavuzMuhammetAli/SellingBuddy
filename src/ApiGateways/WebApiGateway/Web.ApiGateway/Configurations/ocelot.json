@@ -6,7 +6,12 @@
       "DownstreamPathTemplate": "/api/catalog/{everything}",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/catalog/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Delete", "Put" ],
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Delete",
+        "Put"
+      ],
       "UpstreamScheme": "http"
     },
     {
@@ -15,7 +20,9 @@
       "DownstreamPathTemplate": "/api/auth",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/auth",
-      "UpstreamHttpMethod": [ "Post" ],
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
       "UpstreamScheme": "http"
     },
     {
@@ -24,7 +31,9 @@
       "DownstreamPathTemplate": "/api/basket",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/basket",
-      "UpstreamHttpMethod": [ "Get" ],
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
       "UpstreamScheme": "http"
     },
     {
@@ -33,7 +42,12 @@
       "DownstreamPathTemplate": "/api/basket/{everything}",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/basket/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Delete", "Put" ],
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Delete",
+        "Put"
+      ],
       "UpstreamScheme": "http"
     },
     {
@@ -42,7 +56,9 @@
       "DownstreamPathTemplate": "/api/order",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/order",
-      "UpstreamHttpMethod": [ "Get" ],
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
       "UpstreamScheme": "http"
     },
     {
@@ -51,7 +67,36 @@
       "DownstreamPathTemplate": "/api/order/{everything}",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/order/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Delete", "Put" ],
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Delete",
+        "Put"
+      ],
+      "UpstreamScheme": "http"
+    },
+    {
+      "UseServiceDiscovery": true,
+      "ServiceName": "BasketService",
+      "DownstreamPathTemplate": "/api/wishlist",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/wishlist",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "UpstreamScheme": "http"
+    },
+    {
+      "UseServiceDiscovery": true,
+      "ServiceName": "BasketService",
+      "DownstreamPathTemplate": "/api/wishlist/{everything}",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/wishlist/{everything}",
+      "UpstreamHttpMethod": [
+        "Get",
+        "Post",
+        "Delete"
+      ],
       "UpstreamScheme": "http"
     }
   ],

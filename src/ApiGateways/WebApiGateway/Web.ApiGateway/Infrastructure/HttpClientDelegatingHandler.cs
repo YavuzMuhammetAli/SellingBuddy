@@ -20,6 +20,15 @@ namespace Web.ApiGateway.Infrastructure
                 request.Headers.TryAddWithoutValidation("Authorization", authorizationHeader);
             }
 
+            //language forwarded so catalog texts match the client
+            var language = _httpContextAccessor.HttpContext?.Request.Headers.AcceptLanguage.ToString();
+
+            if (!string.IsNullOrEmpty(language))
+            {
+                request.Headers.Remove("Accept-Language");
+                request.Headers.TryAddWithoutValidation("Accept-Language", language);
+            }
+
             return base.SendAsync(request, cancellationToken);
         }
     }

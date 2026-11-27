@@ -31,5 +31,21 @@ namespace Web.ApiGateway.Models
         public int Quantity { get; set; }
 
         public string PictureUrl { get; set; }
+
+        public string ProductSlug { get; set; }
+
+        public string BrandName { get; set; }
+
+        public int? OfferId { get; set; }
+
+        public int? SellerId { get; set; }
+
+        public string SellerSlug { get; set; }
+
+        public string SellerName { get; set; }
+
+        public decimal ShippingFee { get; set; }
+
+        public int DeliveryDaysMax { get; set; }
     }
 }
