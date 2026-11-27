@@ -1,0 +1,30 @@
+@inherits LiveComponentBase
+
+<span class="text-secondary small me-2 d-none d-md-inline">
+    <Icon IconType="AppIcons.Clock" Size="16" />
+    @if (Snapshot.HasData)
+    {
+        <span>Updated @Snapshot.UpdatedAt.ToString("HH:mm:ss") UTC · every @(Store.RefreshSeconds)s</span>
+    }
+    else
+    {
+        <span>Waiting for first check…</span>
+    }
+</span>
+<Button BackgroundColor="TablerColor.Primary" OnClick="Refresh" IsLoading="busy">
+    <Icon IconType="AppIcons.Refresh" Size="18" class="me-1" /> Refresh now
+</Button>
+
+@code {
+    private bool busy;
+
+    private async Task Refresh()
+    {
+        busy = true;
+        Store.RequestRefresh();
+
+        //short wait so the spinner is visible until the new snapshot lands
+        await Task.Delay(800);
+        busy = false;
+    }
+}

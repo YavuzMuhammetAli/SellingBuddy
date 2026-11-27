@@ -18,9 +18,15 @@
     <Project Path="src/BuildingBlocks/EventBus/EventBus.RabbitMQ/EventBus.RabbitMQ.csproj" Id="b624a85d-b3b3-4081-8daa-5e01e717b9f8" />
     <Project Path="src/BuildingBlocks/EventBus/EventBus.UnitTest/EventBus.UnitTest.csproj" />
   </Folder>
+  <Folder Name="/src/BuildingBlocks/HealthChecks/">
+    <Project Path="src/BuildingBlocks/HealthChecks/HealthChecks.Common/HealthChecks.Common.csproj" />
+  </Folder>
   <Folder Name="/src/Clients/" />
   <Folder Name="/src/Clients/BlazorWebApp/">
     <Project Path="src/Clients/BlazorWebApp/WebApp/WebApp.csproj" Id="4824dda0-c3bc-49cb-b377-8761651d688f" />
+  </Folder>
+  <Folder Name="/src/Monitoring/">
+    <Project Path="src/Monitoring/StatusDashboard/StatusDashboard.csproj" />
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/BasketService/">

@@ -1,0 +1,56 @@
+@page "/services"
+@inherits LiveComponentBase
+
+<PageTitle>Services · SellingBuddy Status</PageTitle>
+
+<DashboardHeader Pretitle="Monitoring" Title="Services">
+    <Actions><RefreshButton /></Actions>
+</DashboardHeader>
+
+<div class="mb-3 d-flex flex-wrap gap-2">
+    @foreach (var status in new[] { OverallStatus.Passing, OverallStatus.Warning, OverallStatus.Critical, OverallStatus.Unknown })
+    {
+        <StatusBadge Status="status" Text="@($"{status.ToText()} {Snapshot.CountServices(status)}")" />
+    }
+</div>
+
+<Card>
+    <DataView Items="Snapshot.Services" KeySelector="s => s.Name" Title="All services" PageSize="25" Hover="true"
+              RowHref="@(s => $"services/{s.Name}")">
+        <DataColumn Value="s => s.Name" Title="Service" Sortable Searchable>
+            <Template>
+                <div class="d-flex align-items-center">
+                    <span class="avatar avatar-sm me-2"><Icon IconType="StatusStyle.KindIcon(context.Kind)" Size="16" /></span>
+                    <div>
+                        <div class="fw-medium">@context.Name</div>
+                        @if (!string.IsNullOrEmpty(context.Error))
+                        {
+                            <div class="text-danger small">@context.Error</div>
+                        }
+                    </div>
+                </div>
+            </Template>
+        </DataColumn>
+        <DataColumn Value="s => s.Status" Title="Status" Sortable Filterable>
+            <Template><StatusBadge Status="context.Status" /></Template>
+        </DataColumn>
+        <DataColumn Value="s => s.Kind" Title="Kind" Sortable Filterable />
+        <DataColumn Value="s => s.Instances.Count" Title="Instances" Sortable Align="Align.End">
+            <Template>@context.PassingInstances / @context.Instances.Count</Template>
+        </DataColumn>
+        <DataColumn Value="s => s.LatencyMs" Title="Response time" Sortable Align="Align.End">
+            <Template>@StatusStyle.Latency(context.LatencyMs)</Template>
+        </DataColumn>
+        <DataColumn Value="s => s.Name" Title="Trend" Id="trend" HideBelow="md">
+            <Template><LatencySparkline Samples="Store.GetHistory(StatusStore.ServiceKey(context.Name))" Width="100" Height="24" Color="StatusStyle.Color(context.Status)" /></Template>
+        </DataColumn>
+        <DataColumn Value="s => string.Join(',', s.Tags)" Title="Tags" Id="tags" HideBelow="lg">
+            <Template>
+                @foreach (var tag in context.Tags)
+                {
+                    <Badge BadgeType="BadgeType.Outline" class="me-1">@tag</Badge>
+                }
+            </Template>
+        </DataColumn>
+    </DataView>
+</Card>

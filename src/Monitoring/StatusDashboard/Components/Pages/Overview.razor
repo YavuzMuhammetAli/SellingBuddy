@@ -1,0 +1,150 @@
+@page "/"
+@inherits LiveComponentBase
+
+<PageTitle>Overview · SellingBuddy Status</PageTitle>
+
+<DashboardHeader Pretitle="SellingBuddy" Title="System overview">
+    <Actions><RefreshButton /></Actions>
+</DashboardHeader>
+
+@if (!Snapshot.HasData)
+{
+    <Card><CardBody><EmptyState Title="Collecting the first status" Subtitle="The monitor checks every service right after start." IconType="AppIcons.Clock" /></CardBody></Card>
+}
+else
+{
+    @if (!Snapshot.ConsulReachable)
+    {
+        <Alert BackgroundColor="TablerColor.Danger" Title="Consul is not reachable" Important="true" class="mb-3">
+            Services registered in Consul can't be listed. @Snapshot.ConsulError
+        </Alert>
+    }
+
+    <div class="row row-deck row-cards mb-3">
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Services" Value="@Snapshot.Services.Count.ToString()" IconType="AppIcons.Server" Color="TablerColor.Primary"
+                     Subtitle="@($"{Snapshot.Services.Sum(s => s.Instances.Count)} instances / queues")" />
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Healthy" Value="@healthy.ToString()" IconType="AppIcons.CircleCheck" Color="TablerColor.Success"
+                     Subtitle="@($"{HealthyPercent}% of all services")" Percentage="HealthyPercent" />
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Need attention" Value="@((critical + warning).ToString())" IconType="AppIcons.Alert"
+                     Color="@(critical > 0 ? TablerColor.Danger : warning > 0 ? TablerColor.Yellow : TablerColor.Secondary)"
+                     Subtitle="@($"{critical} critical · {warning} degraded · {unknown} unknown")" />
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Messages waiting" Value="@((Snapshot.Broker.MessagesReady + Snapshot.Broker.MessagesUnacknowledged).ToString("N0"))"
+                     IconType="AppIcons.Exchange" Color="TablerColor.Azure"
+                     Subtitle="@(Snapshot.Broker.Reachable ? $"{Snapshot.Broker.Queues} queues · {Snapshot.Broker.Consumers} consumers" : "Broker not reachable")" />
+        </div>
+    </div>
+
+    <div class="row row-cards mb-3">
+        @foreach (var service in Snapshot.Services)
+        {
+            <div class="col-md-6 col-xl-4">
+                <Card StatusTop="StatusStyle.Color(service.Status)" class="service-card">
+                    <CardBody>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="avatar avatar-sm me-3">
+                                <Icon IconType="StatusStyle.KindIcon(service.Kind)" Size="18" />
+                            </span>
+                            <div class="flex-fill">
+                                <CardTitle HtmlTag="h3" class="mb-0">
+                                    <a href="@($"services/{service.Name}")">@service.Name</a>
+                                </CardTitle>
+                                <div class="text-secondary small">@service.Kind · @InstanceText(service)</div>
+                            </div>
+                            <StatusBadge Status="service.Status" />
+                        </div>
+                        <div class="d-flex align-items-end justify-content-between">
+                            <div>
+                                <div class="text-secondary small">Response time</div>
+                                <div class="h3 mb-0">@StatusStyle.Latency(service.LatencyMs)</div>
+                            </div>
+                            <div class="sparkline-cell text-end">
+                                <LatencySparkline Samples="Store.GetHistory(StatusStore.ServiceKey(service.Name))" Color="StatusStyle.Color(service.Status)" />
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(service.Error))
+                        {
+                            <div class="text-danger small mt-2 text-truncate" title="@service.Error">@service.Error</div>
+                        }
+                    </CardBody>
+                </Card>
+            </div>
+        }
+    </div>
+
+    <div class="row row-cards">
+        <div class="col-lg-7">
+            <Card>
+                <CardHeader>
+                    <CardTitle HtmlTag="h3">Infrastructure</CardTitle>
+                    <div class="card-actions"><a href="infrastructure" class="btn btn-sm btn-ghost-primary">Details <Icon IconType="AppIcons.ArrowRight" Size="16" class="ms-1" /></a></div>
+                </CardHeader>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                        <thead>
+                            <tr><th>Component</th><th>Endpoint</th><th>Status</th><th class="text-end">Latency</th><th>Trend</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var infra in Snapshot.Infrastructure)
+                            {
+                                <tr>
+                                    <td><Icon IconType="StatusStyle.InfrastructureIcon(infra.Kind)" Size="18" class="me-2 text-secondary" />@infra.Name</td>
+                                    <td class="text-mono text-secondary">@infra.Host:@infra.Port</td>
+                                    <td><StatusBadge Status="infra.Status" /></td>
+                                    <td class="text-end">@StatusStyle.Latency(infra.LatencyMs)</td>
+                                    <td><LatencySparkline Samples="Store.GetHistory(StatusStore.InfrastructureKey(infra.Name))" Width="90" Height="24" Color="StatusStyle.Color(infra.Status)" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
+        </div>
+        <div class="col-lg-5">
+            <Card>
+                <CardHeader><CardTitle HtmlTag="h3">Recent status changes</CardTitle></CardHeader>
+                <CardBody>
+                    @if (!changes.Any())
+                    {
+                        <EmptyState Title="No changes yet" Subtitle="Every status change since the dashboard started shows up here." IconType="AppIcons.CircleCheck" />
+                    }
+                    else
+                    {
+                        <Timeline Type="TimelineType.Simple">
+                            @foreach (var change in changes)
+                            {
+                                <TimelineItem Title="@change.Message" Time="@($"{change.Time:HH:mm:ss} UTC")" IconColor="StatusStyle.Color(change.To)">
+                                    <IconTemplate><Icon IconType="StatusStyle.Icon(change.To)" Size="18" /></IconTemplate>
+                                    <ChildContent>
+                                        <span class="text-secondary small">@change.From.ToText() → @change.To.ToText()</span>
+                                    </ChildContent>
+                                </TimelineItem>
+                            }
+                        </Timeline>
+                    }
+                </CardBody>
+            </Card>
+        </div>
+    </div>
+}
+
+@code {
+    //read from the latest snapshot on every render
+    private int healthy => Snapshot.CountServices(OverallStatus.Passing);
+    private int warning => Snapshot.CountServices(OverallStatus.Warning);
+    private int critical => Snapshot.CountServices(OverallStatus.Critical);
+    private int unknown => Snapshot.CountServices(OverallStatus.Unknown);
+    private IReadOnlyList<StatusChange> changes => Store.GetRecentChanges(8);
+
+    private int HealthyPercent => Snapshot.Services.Count == 0 ? 0 : (int)Math.Round(100.0 * healthy / Snapshot.Services.Count);
+
+    private static string InstanceText(ServiceStatus service) => service.Kind == ServiceKind.Worker
+        ? $"{service.Instances.Count} queue(s)"
+        : $"{service.PassingInstances}/{service.Instances.Count} instance(s) healthy";
+}

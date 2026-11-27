@@ -1,0 +1,51 @@
+@inherits LiveComponentBase
+
+<Navbar Background="NavbarBackground.Dark" Direction="NavbarDirection.Vertical" CollapseAt="PageBreakpoint.Lg"
+        NavLinkMatch="NavLinkMatch.All" IsExpanded="false">
+    <Footer>
+        <div class="px-3 py-3 navbar-footer-status text-white-50">
+            <div class="d-flex align-items-center mb-2">
+                <StatusDot BackgroundColor="StatusStyle.Color(OverallHealth)" Animate="OverallHealth == OverallStatus.Critical" class="me-2" />
+                <span>@HealthSummary</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+                <span>@(Snapshot.HasData ? $"Checked {Snapshot.UpdatedAt:HH:mm:ss} UTC" : "Waiting for first check")</span>
+                <ThemeToggle />
+            </div>
+        </div>
+    </Footer>
+    <ChildContent>
+        <div class="navbar-brand navbar-brand-autodark">
+            <a href="" class="text-reset text-decoration-none d-flex align-items-center gap-2 navbar-brand-text">
+                <Icon IconType="AppIcons.Heartbeat" Size="28" TextColor="TablerColor.Primary" />
+                <span>SellingBuddy <small>Status</small></span>
+            </a>
+        </div>
+        <NavbarMenu>
+            <NavbarMenuItem Href="" Text="Overview">
+                <MenuItemIcon><Icon class="icon" IconType="AppIcons.Dashboard" /></MenuItemIcon>
+            </NavbarMenuItem>
+            <NavbarMenuItem Href="services" Text="@ServicesText">
+                <MenuItemIcon><Icon class="icon" IconType="AppIcons.Server" /></MenuItemIcon>
+            </NavbarMenuItem>
+            <NavbarMenuItem Href="eventbus" Text="Event Bus">
+                <MenuItemIcon><Icon class="icon" IconType="AppIcons.Exchange" /></MenuItemIcon>
+            </NavbarMenuItem>
+            <NavbarMenuItem Href="infrastructure" Text="Infrastructure">
+                <MenuItemIcon><Icon class="icon" IconType="AppIcons.Database" /></MenuItemIcon>
+            </NavbarMenuItem>
+        </NavbarMenu>
+    </ChildContent>
+</Navbar>
+
+@code {
+    private OverallStatus OverallHealth => Snapshot.Services.Select(s => s.Status)
+        .Concat(Snapshot.Infrastructure.Select(i => i.Status))
+        .Worst();
+
+    private string HealthSummary => !Snapshot.HasData ? "No data yet"
+        : OverallHealth == OverallStatus.Passing ? "All systems operational"
+        : $"{Snapshot.Services.Count(s => s.Status is OverallStatus.Critical or OverallStatus.Warning)} service(s) need attention";
+
+    private string ServicesText => Snapshot.HasData ? $"Services ({Snapshot.Services.Count})" : "Services";
+}

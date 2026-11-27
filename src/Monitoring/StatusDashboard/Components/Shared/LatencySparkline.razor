@@ -1,0 +1,31 @@
+@if (values.Count > 1)
+{
+    <Sparkline Values="values" Color="Color" Width="Width" Height="Height" Fill="true" StrokeWidth="2" Min="0"
+               AriaLabel="Response time history" />
+}
+else
+{
+    <span class="text-secondary small">collecting…</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<StatusSample> Samples { get; set; }
+
+    [Parameter]
+    public TablerColor Color { get; set; } = TablerColor.Primary;
+
+    [Parameter]
+    public double Width { get; set; } = 120;
+
+    [Parameter]
+    public double Height { get; set; } = 32;
+
+    private List<double> values = new();
+
+    protected override void OnParametersSet()
+    {
+        //missing latency drawn as zero so gaps stay visible
+        values = (Samples ?? Array.Empty<StatusSample>()).Select(s => s.LatencyMs ?? 0).ToList();
+    }
+}

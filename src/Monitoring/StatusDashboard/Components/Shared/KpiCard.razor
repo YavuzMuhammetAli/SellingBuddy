@@ -1,0 +1,52 @@
+<Card Size="CardSize.Small">
+    <CardBody>
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span class="avatar bg-@ColorName-lt text-@ColorName">
+                    <Icon IconType="IconType" Size="24" />
+                </span>
+            </div>
+            <div class="col">
+                <div class="text-secondary small text-uppercase fw-medium">@Title</div>
+                <div class="h2 mb-0">@Value</div>
+                @if (!string.IsNullOrEmpty(Subtitle))
+                {
+                    <div class="text-secondary small">@Subtitle</div>
+                }
+            </div>
+        </div>
+        @if (Percentage.HasValue)
+        {
+            <Progress Percentage="Percentage.Value" Color="Color" Size="ProgressSize.Small" class="mt-3" />
+        }
+    </CardBody>
+</Card>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Value { get; set; }
+
+    [Parameter]
+    public string Subtitle { get; set; }
+
+    [Parameter]
+    public IIconType IconType { get; set; } = AppIcons.Heartbeat;
+
+    [Parameter]
+    public TablerColor Color { get; set; } = TablerColor.Primary;
+
+    [Parameter]
+    public int? Percentage { get; set; }
+
+    //tabler utility classes like bg-green-lt need the lowercase color name
+    private string ColorName => Color switch
+    {
+        TablerColor.Success => "green",
+        TablerColor.Danger => "red",
+        TablerColor.Secondary => "secondary",
+        _ => Color.ToString().ToLowerInvariant()
+    };
+}

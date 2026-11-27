@@ -1,0 +1,12 @@
+<Badge BackgroundColor="StatusStyle.Color(Status)" BadgeType="BadgeType.Light">
+    <StatusDot BackgroundColor="StatusStyle.Color(Status)" Animate="Status == OverallStatus.Critical" class="me-1" />
+    @(Text ?? Status.ToText())
+</Badge>
+
+@code {
+    [Parameter, EditorRequired]
+    public OverallStatus Status { get; set; }
+
+    [Parameter]
+    public string Text { get; set; }
+}

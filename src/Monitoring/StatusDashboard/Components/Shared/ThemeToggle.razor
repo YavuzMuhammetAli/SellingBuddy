@@ -1,0 +1,24 @@
+@inject IJSRuntime JS
+
+<button type="button" class="btn btn-ghost-secondary btn-icon" title="@(dark ? "Switch to light theme" : "Switch to dark theme")" @onclick="ToggleAsync">
+    <Icon IconType="dark ? AppIcons.Sun : AppIcons.Moon" Size="20" />
+</button>
+
+@code {
+    private bool dark;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        //theme lives in browser storage, only readable after render
+        dark = await JS.InvokeAsync<string>("statusTheme.get") == "dark";
+        StateHasChanged();
+    }
+
+    private async Task ToggleAsync()
+    {
+        dark = await JS.InvokeAsync<string>("statusTheme.toggle") == "dark";
+    }
+}

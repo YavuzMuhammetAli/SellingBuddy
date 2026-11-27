@@ -1,0 +1,218 @@
+@page "/services/{Name}"
+@inherits LiveComponentBase
+
+<PageTitle>@Name · SellingBuddy Status</PageTitle>
+
+<DashboardHeader Pretitle="Service" Title="@Name">
+    <TitleExtra>
+        @if (service != null)
+        {
+            <StatusBadge Status="service.Status" />
+        }
+    </TitleExtra>
+    <Actions>
+        <a href="services" class="btn btn-ghost-secondary"><Icon IconType="AppIcons.ArrowLeft" Size="18" class="me-1" /> All services</a>
+        <RefreshButton />
+    </Actions>
+</DashboardHeader>
+
+@if (service == null)
+{
+    <Card>
+        <CardBody>
+            <EmptyState Title="@(Snapshot.HasData ? "Service not found" : "Collecting the first status")"
+                        Subtitle="@(Snapshot.HasData ? $"{Name} is not registered in Consul and is not a configured target." : "Try again in a few seconds.")"
+                        IconType="AppIcons.Help">
+                <a href="services" class="btn btn-primary">Back to services</a>
+            </EmptyState>
+        </CardBody>
+    </Card>
+}
+else
+{
+    <div class="row row-deck row-cards mb-3">
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Status" Value="@service.Status.ToText()" IconType="StatusStyle.Icon(service.Status)" Color="StatusStyle.Color(service.Status)"
+                     Subtitle="@(service.Error ?? service.Kind.ToString())" />
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="@(service.Kind == ServiceKind.Worker ? "Queues" : "Instances")" Value="@($"{service.PassingInstances}/{service.Instances.Count}")"
+                     IconType="AppIcons.Box" Color="TablerColor.Primary" Subtitle="healthy / total" />
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Response time" Value="@StatusStyle.Latency(service.LatencyMs)" IconType="AppIcons.Clock" Color="TablerColor.Azure"
+                     Subtitle="@AverageLatencyText" />
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <KpiCard Title="Availability" Value="@($"{Availability}%")" IconType="AppIcons.Heartbeat"
+                     Color="@(Availability >= 99 ? TablerColor.Success : Availability >= 90 ? TablerColor.Yellow : TablerColor.Danger)"
+                     Subtitle="@($"last {history.Count} checks")" Percentage="Availability" />
+        </div>
+    </div>
+
+    <Card>
+        <Tabs UrlParameter="tab" KeepAlive="true">
+            <Tab Id="instances" Title="@(service.Kind == ServiceKind.Worker ? "Queues" : "Instances")" Icon="AppIcons.Box" Badge="@service.Instances.Count.ToString()">
+                @if (!service.Instances.Any())
+                {
+                    <EmptyState Title="No instance" Subtitle="Nothing is registered for this service right now." IconType="AppIcons.Alert" />
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr><th>Instance</th><th>Endpoint</th><th>Node</th><th>Status</th><th class="text-end">Latency</th><th>Message</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var instance in service.Instances)
+                                {
+                                    <tr>
+                                        <td class="text-mono">@instance.Id</td>
+                                        <td class="text-mono text-secondary">@instance.Endpoint</td>
+                                        <td class="text-secondary">@instance.Node</td>
+                                        <td><StatusBadge Status="instance.Status" /></td>
+                                        <td class="text-end">@StatusStyle.Latency(instance.LatencyMs)</td>
+                                        <td class="text-secondary small">@(instance.Error ?? "-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </Tab>
+
+            @if (service.Kind == ServiceKind.Consul)
+            {
+                <Tab Id="checks" Title="Consul checks" Icon="AppIcons.CircleCheck" Badge="@checks.Count.ToString()">
+                    @if (!checks.Any())
+                    {
+                        <EmptyState Title="No Consul check registered"
+                                    Subtitle="Checks are only registered when ConsulConfig:HealthCheckAddress is set (docker). The dashboard still calls /health itself."
+                                    IconType="AppIcons.Help" />
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-vcenter card-table">
+                                <thead><tr><th>Check</th><th>Instance</th><th>Type</th><th>Status</th><th>Output</th></tr></thead>
+                                <tbody>
+                                    @foreach (var (instance, check) in checks)
+                                    {
+                                        <tr>
+                                            <td>@check.Name</td>
+                                            <td class="text-mono text-secondary">@instance.Id</td>
+                                            <td><Badge BadgeType="BadgeType.Outline">@check.Type</Badge></td>
+                                            <td><StatusBadge Status="check.OverallStatus" /></td>
+                                            <td><div class="check-output text-secondary">@check.Output</div></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </Tab>
+            }
+
+            @if (service.Kind != ServiceKind.Worker)
+            {
+                <Tab Id="dependencies" Title="Dependencies" Icon="AppIcons.Database" Badge="@dependencies.Count.ToString()">
+                    @if (!dependencies.Any())
+                    {
+                        <EmptyState Title="No health report" Subtitle="The /health endpoint did not answer with a report." IconType="AppIcons.Alert" />
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-vcenter card-table">
+                                <thead><tr><th>Check</th><th>Instance</th><th>Status</th><th class="text-end">Duration</th><th>Description</th><th>Tags</th></tr></thead>
+                                <tbody>
+                                    @foreach (var (instance, entry) in dependencies)
+                                    {
+                                        <tr>
+                                            <td class="fw-medium">@entry.Name</td>
+                                            <td class="text-mono text-secondary">@instance.Id</td>
+                                            <td><StatusBadge Status="entry.OverallStatus" Text="@entry.Status" /></td>
+                                            <td class="text-end">@($"{entry.DurationMs:0.##} ms")</td>
+                                            <td class="text-secondary small">@entry.Description</td>
+                                            <td>
+                                                @foreach (var tag in entry.Tags)
+                                                {
+                                                    <Badge BadgeType="BadgeType.Outline" class="me-1">@tag</Badge>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </Tab>
+            }
+
+            <Tab Id="history" Title="Response time" Icon="AppIcons.Clock">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <LatencySparkline Samples="history" Width="900" Height="90" Color="StatusStyle.Color(service.Status)" />
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-vcenter">
+                            <thead><tr><th>Time (UTC)</th><th>Status</th><th class="text-end">Latency</th></tr></thead>
+                            <tbody>
+                                @foreach (var sample in history.Reverse().Take(15))
+                                {
+                                    <tr>
+                                        <td class="text-mono">@sample.Time.ToString("HH:mm:ss")</td>
+                                        <td><StatusBadge Status="sample.Status" /></td>
+                                        <td class="text-end">@StatusStyle.Latency(sample.LatencyMs)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </Tab>
+
+            <Tab Id="queues" Title="Queues" Icon="AppIcons.Exchange" Badge="@queues.Count.ToString()">
+                @if (!queues.Any())
+                {
+                    <EmptyState Title="No queue" Subtitle="This service does not subscribe to any integration event." IconType="AppIcons.Exchange" />
+                }
+                else
+                {
+                    <QueueTable Queues="queues" />
+                }
+            </Tab>
+        </Tabs>
+    </Card>
+}
+
+@code {
+    [Parameter]
+    public string Name { get; set; }
+
+    private ServiceStatus service => Snapshot.Services.FirstOrDefault(s => string.Equals(s.Name, Name, StringComparison.OrdinalIgnoreCase));
+
+    private IReadOnlyList<StatusSample> history => Store.GetHistory(StatusStore.ServiceKey(service?.Name ?? Name));
+
+    private List<(ServiceInstanceStatus Instance, ConsulCheck Check)> checks =>
+        service?.Instances.SelectMany(i => i.Checks.Select(c => (i, c))).ToList() ?? new();
+
+    private List<(ServiceInstanceStatus Instance, HealthReportEntry Entry)> dependencies =>
+        service?.Instances.Where(i => i.Health != null).SelectMany(i => i.Health.Entries.Select(e => (i, e))).ToList() ?? new();
+
+    private List<QueueInfo> queues => Snapshot.Queues.Where(q => string.Equals(q.OwnerService, service?.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    //share of checks that were healthy in the kept history
+    private int Availability => history.Count == 0 ? 0
+        : (int)Math.Round(100.0 * history.Count(h => h.Status == OverallStatus.Passing) / history.Count);
+
+    private string AverageLatencyText
+    {
+        get
+        {
+            var values = history.Where(h => h.LatencyMs.HasValue).Select(h => h.LatencyMs.Value).ToList();
+            return values.Any() ? $"avg {values.Average():0.#} ms · max {values.Max():0.#} ms" : "no samples yet";
+        }
+    }
+}

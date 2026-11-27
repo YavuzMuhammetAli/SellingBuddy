@@ -1,0 +1,99 @@
+@page "/eventbus"
+@inherits LiveComponentBase
+
+<PageTitle>Event Bus · SellingBuddy Status</PageTitle>
+
+<DashboardHeader Pretitle="Messaging" Title="Event bus">
+    <TitleExtra>
+        @if (Snapshot.HasData)
+        {
+            <StatusBadge Status="BrokerStatus" Text="@(Snapshot.Broker.Reachable ? "RabbitMQ online" : "RabbitMQ offline")" />
+        }
+    </TitleExtra>
+    <Actions><RefreshButton /></Actions>
+</DashboardHeader>
+
+@if (Snapshot.HasData && !Snapshot.Broker.Reachable)
+{
+    <Alert BackgroundColor="TablerColor.Danger" Title="RabbitMQ management API is not reachable" Important="true" class="mb-3">
+        @Snapshot.Broker.Error
+    </Alert>
+}
+
+@if (orphanQueues.Any())
+{
+    <Alert BackgroundColor="TablerColor.Yellow" Title="Queues without a consumer" class="mb-3">
+        Messages for @string.Join(", ", orphanQueues.Select(q => q.Name)) are not being processed. The subscriber service is probably down.
+    </Alert>
+}
+
+<div class="row row-deck row-cards mb-3">
+    <div class="col-sm-6 col-xl-3">
+        <KpiCard Title="Ready messages" Value="@Snapshot.Broker.MessagesReady.ToString("N0")" IconType="AppIcons.Mail"
+                 Color="@(Snapshot.Broker.MessagesReady > 0 ? TablerColor.Yellow : TablerColor.Success)" Subtitle="waiting for a consumer" />
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <KpiCard Title="Unacknowledged" Value="@Snapshot.Broker.MessagesUnacknowledged.ToString("N0")" IconType="AppIcons.Clock"
+                 Color="TablerColor.Azure" Subtitle="being processed right now" />
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <KpiCard Title="Throughput" Value="@($"{Snapshot.Broker.PublishRate:0.##}/s")" IconType="AppIcons.Exchange"
+                 Color="TablerColor.Primary" Subtitle="@($"published · {Snapshot.Broker.DeliverRate:0.##}/s delivered")" />
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <KpiCard Title="Consumers" Value="@Snapshot.Broker.Consumers.ToString()" IconType="AppIcons.Server" Color="TablerColor.Purple"
+                 Subtitle="@($"{Snapshot.Broker.Connections} connections · {Snapshot.Broker.Channels} channels")" />
+    </div>
+</div>
+
+<div class="row row-cards">
+    <div class="col-12">
+        <Card>
+            <CardHeader>
+                <CardTitle HtmlTag="h3">Queues</CardTitle>
+                <div class="card-actions text-secondary small">queue name = subscriber.event</div>
+            </CardHeader>
+            @if (!Snapshot.Queues.Any())
+            {
+                <EmptyState Title="No queue" Subtitle="Queues are created when a service subscribes to an event." IconType="AppIcons.Exchange" />
+            }
+            else
+            {
+                <QueueTable Queues="Snapshot.Queues" ShowOwner="true" />
+            }
+        </Card>
+    </div>
+
+    <div class="col-12">
+        <Card>
+            <CardHeader><CardTitle HtmlTag="h3">Event flow</CardTitle></CardHeader>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead><tr><th>Integration event</th><th>Publisher</th><th>Consumers</th><th>Payload</th></tr></thead>
+                    <tbody>
+                        @foreach (var flow in EventCatalog.Flows)
+                        {
+                            <tr>
+                                <td class="fw-medium">@flow.EventName</td>
+                                <td><ServiceLink Name="@flow.Publisher" /></td>
+                                <td>
+                                    @foreach (var consumer in flow.Consumers)
+                                    {
+                                        <span class="me-2"><Icon IconType="AppIcons.ArrowRight" Size="14" class="text-secondary me-1" /><ServiceLink Name="@consumer" /></span>
+                                    }
+                                </td>
+                                <td class="text-secondary small">@flow.Payload</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </Card>
+    </div>
+</div>
+
+@code {
+    private OverallStatus BrokerStatus => Snapshot.Broker.Reachable ? OverallStatus.Passing : OverallStatus.Critical;
+
+    private List<QueueInfo> orphanQueues => Snapshot.Queues.Where(q => q.Consumers == 0).ToList();
+}

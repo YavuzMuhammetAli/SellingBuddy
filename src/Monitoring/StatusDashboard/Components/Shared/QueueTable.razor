@@ -1,0 +1,54 @@
+<div class="table-responsive">
+    <table class="table table-vcenter card-table">
+        <thead>
+            <tr>
+                <th>Queue</th>
+                @if (ShowOwner)
+                {
+                    <th>Subscriber</th>
+                }
+                <th>Event</th>
+                <th class="text-end">Ready</th>
+                <th class="text-end">Unacked</th>
+                <th class="text-end">In / Out per s</th>
+                <th>Consumers</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var queue in Queues)
+            {
+                <tr>
+                    <td class="text-mono">@queue.Name</td>
+                    @if (ShowOwner)
+                    {
+                        <td><a href="@($"services/{queue.OwnerService}")">@queue.OwnerService</a></td>
+                    }
+                    <td>@queue.EventName</td>
+                    <td class="text-end @(queue.MessagesReady > 0 ? "text-yellow fw-bold" : "")">@queue.MessagesReady.ToString("N0")</td>
+                    <td class="text-end">@queue.MessagesUnacknowledged.ToString("N0")</td>
+                    <td class="text-end text-secondary">@($"{queue.PublishRate:0.##} / {queue.DeliverRate:0.##}")</td>
+                    <td>
+                        @if (queue.Consumers > 0)
+                        {
+                            <StatusBadge Status="OverallStatus.Passing" Text="@($"{queue.Consumers} listening")" />
+                        }
+                        else
+                        {
+                            <StatusBadge Status="OverallStatus.Critical" Text="no consumer" />
+                        }
+                    </td>
+                    <td><Badge BadgeType="BadgeType.Outline">@queue.State</Badge></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<QueueInfo> Queues { get; set; }
+
+    [Parameter]
+    public bool ShowOwner { get; set; }
+}

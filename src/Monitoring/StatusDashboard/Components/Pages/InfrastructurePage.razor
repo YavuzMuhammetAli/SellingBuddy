@@ -1,0 +1,84 @@
+@page "/infrastructure"
+@inherits LiveComponentBase
+
+<PageTitle>Infrastructure · SellingBuddy Status</PageTitle>
+
+<DashboardHeader Pretitle="Platform" Title="Infrastructure">
+    <Actions><RefreshButton /></Actions>
+</DashboardHeader>
+
+@if (!Snapshot.Infrastructure.Any())
+{
+    <Card><CardBody><EmptyState Title="No infrastructure target" Subtitle="Add entries to Monitoring:InfrastructureTargets." IconType="AppIcons.Database" /></CardBody></Card>
+}
+else
+{
+    <div class="row row-cards mb-3">
+        @foreach (var infra in Snapshot.Infrastructure)
+        {
+            <div class="col-md-6 col-xl-3">
+                <Card StatusStart="StatusStyle.Color(infra.Status)">
+                    <CardBody>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="avatar me-3"><Icon IconType="StatusStyle.InfrastructureIcon(infra.Kind)" Size="22" /></span>
+                            <div class="flex-fill">
+                                <div class="fw-bold">@infra.Name</div>
+                                <div class="text-mono text-secondary">@infra.Host:@infra.Port</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <StatusBadge Status="infra.Status" />
+                            <span class="h3 mb-0">@StatusStyle.Latency(infra.LatencyMs)</span>
+                        </div>
+                        <LatencySparkline Samples="Store.GetHistory(StatusStore.InfrastructureKey(infra.Name))" Width="220" Height="36" Color="StatusStyle.Color(infra.Status)" />
+                        <div class="text-secondary small mt-2">@(infra.Error ?? infra.Detail ?? "TCP port reachable")</div>
+                    </CardBody>
+                </Card>
+            </div>
+        }
+    </div>
+
+    <div class="row row-cards">
+        <div class="col-lg-6">
+            <Card>
+                <CardHeader><CardTitle HtmlTag="h3">Consul</CardTitle></CardHeader>
+                <CardBody>
+                    <dl class="row mb-0">
+                        <dt class="col-5">Status</dt>
+                        <dd class="col-7"><StatusBadge Status="@(Snapshot.ConsulReachable ? OverallStatus.Passing : OverallStatus.Critical)" Text="@(Snapshot.ConsulReachable ? "API reachable" : "API not reachable")" /></dd>
+                        <dt class="col-5">Leader</dt>
+                        <dd class="col-7 text-mono">@(Snapshot.ConsulLeader ?? "-")</dd>
+                        <dt class="col-5">Registered services</dt>
+                        <dd class="col-7">@Snapshot.Services.Count(s => s.Kind == ServiceKind.Consul)</dd>
+                        <dt class="col-5">Instances with checks</dt>
+                        <dd class="col-7">@Snapshot.Services.Where(s => s.Kind == ServiceKind.Consul).SelectMany(s => s.Instances).Count(i => i.Checks.Any())</dd>
+                        @if (!string.IsNullOrEmpty(Snapshot.ConsulError))
+                        {
+                            <dt class="col-5">Error</dt>
+                            <dd class="col-7 text-danger small">@Snapshot.ConsulError</dd>
+                        }
+                    </dl>
+                </CardBody>
+            </Card>
+        </div>
+        <div class="col-lg-6">
+            <Card>
+                <CardHeader><CardTitle HtmlTag="h3">RabbitMQ</CardTitle></CardHeader>
+                <CardBody>
+                    <dl class="row mb-0">
+                        <dt class="col-5">Status</dt>
+                        <dd class="col-7"><StatusBadge Status="@(Snapshot.Broker.Reachable ? OverallStatus.Passing : OverallStatus.Critical)" Text="@(Snapshot.Broker.Reachable ? "Management API reachable" : "Management API not reachable")" /></dd>
+                        <dt class="col-5">Cluster</dt>
+                        <dd class="col-7 text-mono">@(Snapshot.Broker.ClusterName ?? "-")</dd>
+                        <dt class="col-5">Version</dt>
+                        <dd class="col-7">@(Snapshot.Broker.RabbitMqVersion ?? "-") (Erlang @(Snapshot.Broker.ErlangVersion ?? "-"))</dd>
+                        <dt class="col-5">Queues / consumers</dt>
+                        <dd class="col-7">@Snapshot.Broker.Queues / @Snapshot.Broker.Consumers</dd>
+                        <dt class="col-5">Connections / channels</dt>
+                        <dd class="col-7">@Snapshot.Broker.Connections / @Snapshot.Broker.Channels</dd>
+                    </dl>
+                </CardBody>
+            </Card>
+        </div>
+    </div>
+}

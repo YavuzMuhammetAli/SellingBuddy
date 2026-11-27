@@ -1,0 +1,28 @@
+<div class="empty py-5">
+    <div class="empty-icon">
+        <Icon IconType="IconType ?? AppIcons.Help" Size="48" />
+    </div>
+    <p class="empty-title">@Title</p>
+    @if (!string.IsNullOrEmpty(Subtitle))
+    {
+        <p class="empty-subtitle text-secondary">@Subtitle</p>
+    }
+    @if (ChildContent != null)
+    {
+        <div class="empty-action">@ChildContent</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string Subtitle { get; set; }
+
+    [Parameter]
+    public IIconType IconType { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

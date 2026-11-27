@@ -1,0 +1,14 @@
+@inherits LiveComponentBase
+
+@* name with the live status dot of that service *@
+<a href="@($"services/{Name}")" class="text-reset d-inline-flex align-items-center">
+    <StatusDot BackgroundColor="StatusStyle.Color(Status)" Animate="Status == OverallStatus.Critical" class="me-1" />
+    @Name
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Name { get; set; }
+
+    private OverallStatus Status => Snapshot.Services.FirstOrDefault(s => s.Name == Name)?.Status ?? OverallStatus.Unknown;
+}

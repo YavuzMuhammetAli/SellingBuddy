@@ -1,0 +1,67 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject StatusStore Store
+@inject ToastService ToastService
+
+@* hosts required by tabblazor services *@
+<ModalContainer />
+<ToastContainer />
+<OffcanvasContainer />
+
+<div class="page">
+    <MainNavigation />
+
+    <div class="page-wrapper">
+        <div class="page-body">
+            <div class="container-xl">
+                @Body
+            </div>
+        </div>
+
+        <footer class="footer footer-transparent d-print-none">
+            <div class="container-xl">
+                <div class="row text-center align-items-center">
+                    <div class="col-12 col-lg-auto text-secondary small">
+                        SellingBuddy status dashboard · data from Consul, service health endpoints and RabbitMQ
+                    </div>
+                    <div class="col-lg-auto ms-lg-auto text-secondary small">
+                        Built with TabBlazor
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Store.StatusChanged += OnStatusChanged;
+    }
+
+    //toast when something breaks or comes back
+    private void OnStatusChanged(StatusChange change)
+    {
+        if (change.To != OverallStatus.Critical && change.To != OverallStatus.Passing)
+            return;
+
+        _ = InvokeAsync(() => ToastService.AddToastAsync(new ToastModel
+        {
+            Title = change.To == OverallStatus.Critical ? "Service problem" : "Service recovered",
+            SubTitle = change.Time.ToString("HH:mm:ss"),
+            Message = change.Message,
+            Options = new ToastOptions { Delay = 8000 }
+        }));
+    }
+
+    public void Dispose()
+    {
+        Store.StatusChanged -= OnStatusChanged;
+    }
+}
