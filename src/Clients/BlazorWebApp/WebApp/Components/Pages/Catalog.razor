@@ -1,0 +1,101 @@
+@page "/"
+@page "/catalog"
+@inject ICatalogService CatalogService
+@inject IBasketService BasketService
+@inject NavigationManager Navigation
+
+<PageTitle>Catalog</PageTitle>
+
+<h1>Catalog</h1>
+
+@if (message != null)
+{
+    <div class="alert alert-@messageType py-2">@message</div>
+}
+
+@if (items == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+        @foreach (var item in items.Data)
+        {
+            <div class="col">
+                <ProductCard Item="item" IsBusy="isBusy" OnAddToBasket="AddToBasketAsync" />
+            </div>
+        }
+    </div>
+
+    <nav class="mt-4 d-flex justify-content-between align-items-center">
+        <button class="btn btn-outline-secondary" disabled="@(pageIndex == 0)" @onclick="() => LoadAsync(pageIndex - 1)">Previous</button>
+        <span>Page @(pageIndex + 1) of @TotalPages</span>
+        <button class="btn btn-outline-secondary" disabled="@(pageIndex + 1 >= TotalPages)" @onclick="() => LoadAsync(pageIndex + 1)">Next</button>
+    </nav>
+}
+
+@code {
+    private const int PageSize = 6;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private PaginatedItemsViewModel<CatalogItem> items;
+    private int pageIndex;
+    private bool isBusy;
+    private string message;
+    private string messageType = "success";
+
+    private int TotalPages => items == null ? 1 : Math.Max(1, (int)Math.Ceiling(items.Count / (double)PageSize));
+
+    protected override Task OnInitializedAsync() => LoadAsync(0);
+
+    private async Task LoadAsync(int page)
+    {
+        try
+        {
+            pageIndex = page;
+            items = await CatalogService.GetCatalogItemsAsync(pageIndex, PageSize);
+        }
+        catch (HttpRequestException)
+        {
+            items = new PaginatedItemsViewModel<CatalogItem>();
+            ShowMessage("Catalog service is not reachable right now.", "danger");
+        }
+    }
+
+    private async Task AddToBasketAsync(CatalogItem item)
+    {
+        var state = await AuthenticationState;
+
+        //login needed before basket actions
+        if (state.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("login?returnUrl=catalog");
+            return;
+        }
+
+        isBusy = true;
+
+        try
+        {
+            await BasketService.AddItemToBasketAsync(item.Id);
+            ShowMessage($"{item.Name} added to your basket.", "success");
+        }
+        catch (HttpRequestException)
+        {
+            ShowMessage("Item could not be added to the basket.", "danger");
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void ShowMessage(string text, string type)
+    {
+        message = text;
+        messageType = type;
+    }
+}

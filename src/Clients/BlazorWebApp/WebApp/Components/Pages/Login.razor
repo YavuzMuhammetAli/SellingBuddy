@@ -1,0 +1,72 @@
+@page "/login"
+@inject IIdentityService IdentityService
+@inject NavigationManager Navigation
+
+<PageTitle>Login</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h1>Login</h1>
+
+        @if (error != null)
+        {
+            <div class="alert alert-danger py-2">@error</div>
+        }
+
+        <EditForm Model="model" OnValidSubmit="LoginAsync" FormName="login">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label" for="userName">User name</label>
+                <InputText id="userName" class="form-control" @bind-Value="model.UserName" />
+                <ValidationMessage For="() => model.UserName" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="password">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="model.Password" />
+                <ValidationMessage For="() => model.Password" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@isBusy">Login</button>
+        </EditForm>
+
+        <p class="text-muted small mt-3">Demo users: demo / demo123, admin / admin123</p>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string ReturnUrl { get; set; }
+
+    private readonly LoginRequest model = new();
+    private string error;
+    private bool isBusy;
+
+    private async Task LoginAsync()
+    {
+        isBusy = true;
+        error = null;
+
+        try
+        {
+            var success = await IdentityService.LoginAsync(model.UserName, model.Password);
+
+            if (!success)
+            {
+                error = "User name or password is wrong.";
+                return;
+            }
+
+            Navigation.NavigateTo(string.IsNullOrEmpty(ReturnUrl) ? "" : ReturnUrl);
+        }
+        catch (HttpRequestException)
+        {
+            error = "Identity service is not reachable right now.";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

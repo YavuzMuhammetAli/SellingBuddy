@@ -1,0 +1,91 @@
+@page "/basket"
+@inject IBasketService BasketService
+@inject NavigationManager Navigation
+
+<PageTitle>Basket</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Basket</h1>
+
+        @if (basket == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (!basket.Items.Any())
+        {
+            <p>Your basket is empty. <a href="">Go to catalog</a></p>
+        }
+        else
+        {
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th style="width: 10rem">Quantity</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in basket.Items)
+                    {
+                        <tr>
+                            <td><img src="@item.PictureUrl" alt="@item.ProductName" width="56" height="56" /></td>
+                            <td>@item.ProductName</td>
+                            <td>@Money(item.UnitPrice)</td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary" disabled="@(item.Quantity <= 1)" @onclick="() => ChangeQuantityAsync(item, -1)">-</button>
+                                    <span class="form-control text-center">@item.Quantity</span>
+                                    <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantityAsync(item, 1)">+</button>
+                                </div>
+                            </td>
+                            <td>@Money(item.UnitPrice * item.Quantity)</td>
+                            <td><button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveAsync(item)">Remove</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-end align-items-center gap-3">
+                <span class="fs-5">Total: <strong>@Money(basket.Total())</strong></span>
+                <button class="btn btn-primary" @onclick='() => Navigation.NavigateTo("checkout")'>Checkout</button>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private Basket basket;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        if (state.User.Identity?.IsAuthenticated == true)
+            basket = await BasketService.GetBasketAsync();
+    }
+
+    private async Task ChangeQuantityAsync(BasketItem item, int delta)
+    {
+        item.Quantity += delta;
+        basket = await BasketService.UpdateBasketAsync(basket);
+    }
+
+    private async Task RemoveAsync(BasketItem item)
+    {
+        basket.Items.Remove(item);
+        basket = await BasketService.UpdateBasketAsync(basket);
+    }
+
+    private static string Money(decimal value) => value.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+}
