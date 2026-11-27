@@ -1,5 +1,8 @@
 ﻿using EventBus.Base;
 using EventBus.Base.Events;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using Polly;
 using RabbitMQ.Client;
@@ -12,25 +15,33 @@ namespace EventBus.RabbitMQ
 {
     public class EventBusRabbitMQ : BaseEventBus
     {
-        RabbitMQPersistentConnection rabbitMQPersistentConnection;
+        private readonly RabbitMQPersistentConnection rabbitMQPersistentConnection;
         private readonly IConnectionFactory connectionFactory;
         private readonly IChannel consumeChannel;
+        private readonly ILogger<EventBusRabbitMQ> logger;
 
         public EventBusRabbitMQ(EventBusConfig config, IServiceProvider serviceProvider) : base(config, serviceProvider)
         {
-            if(config.Connection != null)
+            logger = serviceProvider.GetService<ILogger<EventBusRabbitMQ>>() ?? NullLogger<EventBusRabbitMQ>.Instance;
+
+            //factory can be passed directly or as a plain settings object
+            if (config.Connection is IConnectionFactory factory)
             {
-                var connctionJSON = JsonConvert.SerializeObject(eventBusConfig.Connection, new JsonSerializerSettings()
+                connectionFactory = factory;
+            }
+            else if (config.Connection != null)
+            {
+                var connectionJson = JsonConvert.SerializeObject(eventBusConfig.Connection, new JsonSerializerSettings()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
 
-                connectionFactory = JsonConvert.DeserializeObject<ConnectionFactory>(connctionJSON);
+                connectionFactory = JsonConvert.DeserializeObject<ConnectionFactory>(connectionJson) ?? new ConnectionFactory();
             }
             else
                 connectionFactory = new ConnectionFactory();
 
-            rabbitMQPersistentConnection = new RabbitMQPersistentConnection(connectionFactory, config.ConnectionRetryCount);
+            rabbitMQPersistentConnection = new RabbitMQPersistentConnection(connectionFactory, config.ConnectionRetryCount, logger);
 
             consumeChannel = CreateConsumeChannel();
 
@@ -45,8 +56,8 @@ namespace EventBus.RabbitMQ
                 rabbitMQPersistentConnection.TryConnectAsync().GetAwaiter().GetResult();
 
             consumeChannel.QueueUnbindAsync(
-                queue: GetSubName(eventName), 
-                exchange: eventBusConfig.DefaultTopicName, 
+                queue: GetSubName(eventName),
+                exchange: eventBusConfig.DefaultTopicName,
                 routingKey: eventName).GetAwaiter().GetResult();
 
             if (_subsManager.IsEmpty)
@@ -55,42 +66,40 @@ namespace EventBus.RabbitMQ
 
         public override void Publish(IntegrationEvent @event)
         {
-            if(!rabbitMQPersistentConnection.IsConnected)
+            if (!rabbitMQPersistentConnection.IsConnected)
                 rabbitMQPersistentConnection.TryConnectAsync().GetAwaiter().GetResult();
 
+            //retry policy for publish
             var policy = Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
                 .WaitAndRetry(
-                    eventBusConfig.ConnectionRetryCount, 
-                    retryAttempt => TimeSpan.FromSeconds(
-                        Math.Pow(2, retryAttempt)), (ex, time) =>
-                             {
-                                 // Log
-                             });
+                    eventBusConfig.ConnectionRetryCount,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (ex, time) =>
+                    {
+                        logger.LogWarning(ex, "Could not publish event {EventId} after {Timeout}s", @event.Id, $"{time.TotalSeconds:n1}");
+                    });
 
-            var eventName = @event.GetType().Name;
-            eventName = ProcessEventName(eventName);
-
-            consumeChannel.ExchangeDeclareAsync(exchange: eventBusConfig.DefaultTopicName, type: "direct").GetAwaiter().GetResult();
+            var eventName = ProcessEventName(@event.GetType().Name);
 
             var message = JsonConvert.SerializeObject(@event);
             var body = Encoding.UTF8.GetBytes(message);
 
             policy.Execute(() =>
             {
+                //separate channel for publish, channels are not thread safe
+                using var channel = rabbitMQPersistentConnection.CreateModelAsync().GetAwaiter().GetResult();
+
+                channel.ExchangeDeclareAsync(exchange: eventBusConfig.DefaultTopicName, type: "direct").GetAwaiter().GetResult();
+
                 var properties = new BasicProperties
                 {
                     DeliveryMode = DeliveryModes.Persistent
                 };
-               
-                consumeChannel.BasicPublishAsync(
-                    exchange: eventBusConfig.DefaultTopicName,
-                    routingKey: eventName,
-                    mandatory: true,
-                    basicProperties: properties,
-                    body: body).GetAwaiter().GetResult();
 
-                consumeChannel.BasicPublishAsync(
+                logger.LogInformation("Publishing event {EventName} ({EventId}) to RabbitMQ", eventName, @event.Id);
+
+                channel.BasicPublishAsync(
                     exchange: eventBusConfig.DefaultTopicName,
                     routingKey: eventName,
                     mandatory: true,
@@ -101,39 +110,54 @@ namespace EventBus.RabbitMQ
 
         public override void Subscribe<T, TH>()
         {
-            var eventName = typeof(T).Name;
-            eventName = ProcessEventName(eventName);
+            var eventName = ProcessEventName(typeof(T).Name);
+            var isFirstSubscription = !_subsManager.HasSubscriptionsForEvent(eventName);
 
-            if(!_subsManager.HasSubscriptionsForEvent(eventName))
+            if (isFirstSubscription)
             {
-                if(!rabbitMQPersistentConnection.IsConnected)
+                if (!rabbitMQPersistentConnection.IsConnected)
                     rabbitMQPersistentConnection.TryConnectAsync().GetAwaiter().GetResult();
 
                 consumeChannel.QueueDeclareAsync(
-                    queue: GetSubName(eventName), 
-                    durable: true, 
-                    exclusive: false, 
-                    autoDelete: false, 
+                    queue: GetSubName(eventName),
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
                     arguments: null).GetAwaiter().GetResult();
 
                 consumeChannel.QueueBindAsync(
-                    queue: GetSubName(eventName), 
-                    exchange: eventBusConfig.DefaultTopicName, 
+                    queue: GetSubName(eventName),
+                    exchange: eventBusConfig.DefaultTopicName,
                     routingKey: eventName).GetAwaiter().GetResult();
             }
 
+            logger.LogInformation("Subscribing to event {EventName} with {EventHandler}", eventName, typeof(TH).Name);
+
             _subsManager.AddSubscription<T, TH>();
-            StartBasicConsumeChannel(eventName);
+
+            //one consumer per queue
+            if (isFirstSubscription)
+                StartBasicConsume(eventName);
         }
 
         public override void UnSubscribe<T, TH>()
         {
+            logger.LogInformation("Unsubscribing from event {EventName}", typeof(T).Name);
+
             _subsManager.RemoveSubscription<T, TH>();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            consumeChannel?.Dispose();
+            rabbitMQPersistentConnection.Dispose();
         }
 
         private IChannel CreateConsumeChannel()
         {
-            if(!rabbitMQPersistentConnection.IsConnected)
+            if (!rabbitMQPersistentConnection.IsConnected)
                 rabbitMQPersistentConnection.TryConnectAsync().GetAwaiter().GetResult();
 
             var channel = rabbitMQPersistentConnection.CreateModelAsync().GetAwaiter().GetResult();
@@ -143,37 +167,42 @@ namespace EventBus.RabbitMQ
             return channel;
         }
 
-        private void StartBasicConsumeChannel(string eventName)
+        private void StartBasicConsume(string eventName)
         {
-            if(consumeChannel != null)
+            if (consumeChannel == null)
             {
-                var consumer = new AsyncEventingBasicConsumer(consumeChannel);
-                
-                consumer.ReceivedAsync += Consumer_Received;
-                
-                consumeChannel.BasicConsumeAsync(
-                    queue: GetSubName(eventName),
-                    autoAck: false,
-                    consumer: consumer).GetAwaiter().GetResult();
+                logger.LogError("StartBasicConsume can't be called on a null consume channel");
+                return;
             }
+
+            var consumer = new AsyncEventingBasicConsumer(consumeChannel);
+
+            consumer.ReceivedAsync += Consumer_Received;
+
+            consumeChannel.BasicConsumeAsync(
+                queue: GetSubName(eventName),
+                autoAck: false,
+                consumer: consumer).GetAwaiter().GetResult();
         }
 
         private async Task Consumer_Received(object sender, BasicDeliverEventArgs @event)
         {
-            var eventName = @event.RoutingKey;
-            eventName = ProcessEventName(eventName);
-
+            var eventName = ProcessEventName(@event.RoutingKey);
             var message = Encoding.UTF8.GetString(@event.Body.ToArray());
 
             try
             {
                 await ProcessEvent(eventName, message);
+
+                await consumeChannel.BasicAckAsync(@event.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
-            }
+                logger.LogError(ex, "Error processing message {EventName}: {Message}", eventName, message);
 
-            await consumeChannel.BasicAckAsync(@event.DeliveryTag, multiple: false);
+                //failed message rejected so it doesn't loop forever
+                await consumeChannel.BasicNackAsync(@event.DeliveryTag, multiple: false, requeue: false);
+            }
         }
     }
 }

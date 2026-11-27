@@ -1,4 +1,6 @@
-﻿using Polly;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -8,17 +10,20 @@ namespace EventBus.RabbitMQ
 {
     public class RabbitMQPersistentConnection : IDisposable
     {
-        private IConnection _connection;
+        private IConnection? _connection;
         private readonly IConnectionFactory connectionFactory;
         private readonly int retryCount;
-        public bool IsConnected => _connection != null && _connection.IsOpen;
-        private object lock_object = new object();
+        private readonly ILogger logger;
+        private readonly SemaphoreSlim connectLock = new SemaphoreSlim(1, 1);
         private bool _disposed;
 
-        public RabbitMQPersistentConnection(IConnectionFactory connectionFactory, int retryCount = 5)
+        public bool IsConnected => _connection != null && _connection.IsOpen && !_disposed;
+
+        public RabbitMQPersistentConnection(IConnectionFactory connectionFactory, int retryCount = 5, ILogger? logger = null)
         {
             this.connectionFactory = connectionFactory;
             this.retryCount = retryCount;
+            this.logger = logger ?? NullLogger.Instance;
         }
 
         public async Task<IChannel> CreateModelAsync()
@@ -31,8 +36,19 @@ namespace EventBus.RabbitMQ
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+
             _disposed = true;
-            _connection.Dispose();
+
+            try
+            {
+                _connection?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                logger.LogCritical(ex, "RabbitMQ connection could not be disposed");
+            }
         }
 
         public async Task<bool> TryConnectAsync()
@@ -40,66 +56,80 @@ namespace EventBus.RabbitMQ
             if (_disposed)
                 return false;
 
-            var policy = Policy
-                .Handle<BrokerUnreachableException>()
-                .Or<SocketException>()
-                .WaitAndRetryAsync(retryCount, retryAttempt => 
-                    TimeSpan.FromSeconds(
-                        Math.Pow(2, retryAttempt)),
-                                (ex, time) =>
-                                {
-                                    // Log
-                                });
+            //only one connect attempt at a time
+            await connectLock.WaitAsync();
 
             try
             {
+                if (IsConnected)
+                    return true;
+
+                logger.LogInformation("RabbitMQ client is trying to connect");
+
+                //retry policy for broker connection
+                var policy = Policy
+                    .Handle<BrokerUnreachableException>()
+                    .Or<SocketException>()
+                    .WaitAndRetryAsync(retryCount,
+                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                        (ex, time) =>
+                        {
+                            logger.LogWarning(ex, "RabbitMQ client could not connect after {TimeOut}s", $"{time.TotalSeconds:n1}");
+                        });
+
                 await policy.ExecuteAsync(async () =>
                 {
-                    _connection =
-                        await connectionFactory.CreateConnectionAsync();
+                    _connection = await connectionFactory.CreateConnectionAsync();
                 });
 
                 if (IsConnected)
                 {
                     _connection!.ConnectionShutdownAsync += OnConnectionShutdownAsync;
-
                     _connection.CallbackExceptionAsync += OnCallbackExceptionAsync;
-
                     _connection.ConnectionBlockedAsync += OnConnectionBlockedAsync;
+
+                    logger.LogInformation("RabbitMQ client acquired a persistent connection to {HostName}", _connection.Endpoint.HostName);
 
                     return true;
                 }
+
+                logger.LogCritical("RabbitMQ connection could not be created and opened");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log connection failure
+                logger.LogCritical(ex, "RabbitMQ connection failed");
+            }
+            finally
+            {
+                connectLock.Release();
             }
 
             return false;
         }
 
-        private async Task OnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs @event)
+        //client auto recovery handles reconnect, events only logged
+        private Task OnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs @event)
         {
             if (!_disposed)
-            {
-                await Task.Run(() => TryConnectAsync());
-            }
+                logger.LogWarning("RabbitMQ connection is blocked: {Reason}", @event.Reason);
+
+            return Task.CompletedTask;
         }
 
-        private async Task OnConnectionShutdownAsync(object sender, ShutdownEventArgs e)
+        private Task OnConnectionShutdownAsync(object sender, ShutdownEventArgs e)
         {
             if (!_disposed)
-            {
-                await Task.Run(() => TryConnectAsync());
-            }
+                logger.LogWarning("RabbitMQ connection is shut down: {ReplyText}", e.ReplyText);
+
+            return Task.CompletedTask;
         }
 
-        private async Task OnCallbackExceptionAsync(object sender, CallbackExceptionEventArgs e)
+        private Task OnCallbackExceptionAsync(object sender, CallbackExceptionEventArgs e)
         {
             if (!_disposed)
-            {
-                await Task.Run(() => TryConnectAsync());
-            }
+                logger.LogWarning(e.Exception, "RabbitMQ connection threw a callback exception");
+
+            return Task.CompletedTask;
         }
     }
 }

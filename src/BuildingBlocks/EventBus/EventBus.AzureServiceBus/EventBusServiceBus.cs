@@ -58,7 +58,8 @@ namespace EventBus.AzureServiceBus
             var eventName = typeof(T).Name;
             eventName = ProcessEventName(eventName);
 
-            if(_subsManager.HasSubscriptionsForEvent(eventName))
+            //subscription client created only for the first handler
+            if (!_subsManager.HasSubscriptionsForEvent(eventName))
             {
                 var subscriptionClient = CreateSubscriptionClientIfNotExists(eventName);
 

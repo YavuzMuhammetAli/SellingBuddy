@@ -21,12 +21,13 @@ namespace EventBus.Base.Events
 
         public virtual string ProcessEventName(string eventName)
         {
-            if(eventBusConfig.DeleteEventPrefix)
-                eventName = eventName.TrimStart(eventBusConfig.EventNamePrefix.ToCharArray());
+            //prefix and suffix removed as whole strings, trim removed chars one by one
+            if (eventBusConfig.DeleteEventPrefix && eventName.StartsWith(eventBusConfig.EventNamePrefix))
+                eventName = eventName.Substring(eventBusConfig.EventNamePrefix.Length);
 
-            if(eventBusConfig.DeleteEventSuffix)
-                eventName = eventName.TrimEnd(eventBusConfig.EventNameSuffix.ToCharArray());
-            
+            if (eventBusConfig.DeleteEventSuffix && eventName.EndsWith(eventBusConfig.EventNameSuffix))
+                eventName = eventName.Substring(0, eventName.Length - eventBusConfig.EventNameSuffix.Length);
+
             return eventName;
         }
 
@@ -37,7 +38,6 @@ namespace EventBus.Base.Events
 
         public virtual void Dispose()
         {
-            eventBusConfig = null;
             _subsManager.Clear();
         }
 
@@ -55,7 +55,8 @@ namespace EventBus.Base.Events
                 {
                     foreach (var subscription in subscriptions)
                     {
-                        var handler = _serviceProvider.GetService(subscription.HandleType);
+                        //handler resolved from message scope
+                        var handler = scope.ServiceProvider.GetService(subscription.HandleType);
 
                         if (handler == null) continue;
 

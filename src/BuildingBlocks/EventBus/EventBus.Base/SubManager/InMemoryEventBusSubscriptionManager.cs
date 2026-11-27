@@ -19,7 +19,8 @@ namespace EventBus.Base.SubManager
             _eventNameGetter = eventNameGetter;
         }
 
-        public bool IsEmpty => _handlers.Keys.Any();
+        //empty when there is no handler
+        public bool IsEmpty => !_handlers.Keys.Any();
 
         public void AddSubscription<T, TH>()
             where T : IntegrationEvent
@@ -52,7 +53,8 @@ namespace EventBus.Base.SubManager
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            _handlers.Clear();
+            _eventTypes.Clear();
         }
 
         public string GetEventKey<T>()
@@ -115,7 +117,8 @@ namespace EventBus.Base.SubManager
                 if (!_handlers[eventName].Any())
                 {
                     _handlers.Remove(eventName);
-                    var eventType = _eventTypes.SingleOrDefault(e => e.Name == eventName);
+                    //event type stored with full class name, key is processed name
+                    var eventType = _eventTypes.SingleOrDefault(e => _eventNameGetter(e.Name) == eventName);
                     if (eventType != null)
                     {
                         _eventTypes.Remove(eventType);
