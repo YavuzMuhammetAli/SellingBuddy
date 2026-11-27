@@ -1,0 +1,215 @@
+name: sellingbuddy
+
+services:
+  #infrastructure
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: c_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Pass@word1
+    ports:
+      - "1435:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - net_backendservices
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: c_redis
+    ports:
+      - "6389:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - net_backendservices
+
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    container_name: c_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    #services wait until broker accepts connections
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - net_backendservices
+
+  consul:
+    image: hashicorp/consul:1.20
+    container_name: c_consul
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - net_backendservices
+
+  #services
+  catalogservice:
+    build:
+      context: .
+      dockerfile: src/Services/CatalogService/CatalogService.Api/Dockerfile
+    container_name: c_catalogservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__CatalogDb=Server=c_sqlserver,1433;Database=catalog;User Id=sa;Password=Pass@word1;TrustServerCertificate=True
+      - ConsulConfig__Address=http://c_consul:8500
+      - ConsulConfig__ServiceAddress=http://c_catalogservice:8080
+    ports:
+      - "5140:8080"
+    depends_on:
+      - sqlserver
+      - consul
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  identityservice:
+    build:
+      context: .
+      dockerfile: src/Services/IdentityService/IdentityService.Api/Dockerfile
+    container_name: c_identityservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConsulConfig__Address=http://c_consul:8500
+      - ConsulConfig__ServiceAddress=http://c_identityservice:8080
+    ports:
+      - "5095:8080"
+    depends_on:
+      - consul
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  basketservice:
+    build:
+      context: .
+      dockerfile: src/Services/BasketService/BasketService.Api/Dockerfile
+    container_name: c_basketservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RedisSettings__ConnectionString=c_redis:6379
+      - RabbitMQ__Host=c_rabbitmq
+      - ConsulConfig__Address=http://c_consul:8500
+      - ConsulConfig__ServiceAddress=http://c_basketservice:8080
+    ports:
+      - "5166:8080"
+    depends_on:
+      redis:
+        condition: service_started
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: src/Services/OrderService/OrderService.Api/Dockerfile
+    container_name: c_orderservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__OrderDb=Server=c_sqlserver,1433;Database=order;User Id=sa;Password=Pass@word1;TrustServerCertificate=True
+      - RabbitMQ__Host=c_rabbitmq
+      - ConsulConfig__Address=http://c_consul:8500
+      - ConsulConfig__ServiceAddress=http://c_orderservice:8080
+    ports:
+      - "5226:8080"
+    depends_on:
+      sqlserver:
+        condition: service_started
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  paymentservice:
+    build:
+      context: .
+      dockerfile: src/Services/PaymentService/PaymentService.Api/Dockerfile
+    container_name: c_paymentservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__Host=c_rabbitmq
+      - ConsulConfig__Address=http://c_consul:8500
+      - ConsulConfig__ServiceAddress=http://c_paymentservice:8080
+    ports:
+      - "5278:8080"
+    depends_on:
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  notificationservice:
+    build:
+      context: .
+      dockerfile: src/Services/NotificationService/NotificationService/Dockerfile
+    container_name: c_notificationservice
+    environment:
+      - RabbitMQ__Host=c_rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  webapigateway:
+    build:
+      context: .
+      dockerfile: src/ApiGateways/WebApiGateway/Web.ApiGateway/Dockerfile
+    container_name: c_webapigateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - GlobalConfiguration__ServiceDiscoveryProvider__Host=c_consul
+      - urls__gateway=http://localhost:8080/
+    ports:
+      - "5131:8080"
+    depends_on:
+      - consul
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  webapp:
+    build:
+      context: .
+      dockerfile: src/Clients/BlazorWebApp/WebApp/Dockerfile
+    container_name: c_webapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiGateway__BaseUrl=http://c_webapigateway:8080/
+    ports:
+      - "5198:8080"
+    depends_on:
+      - webapigateway
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+networks:
+  net_backendservices:
+    driver: bridge
+
+volumes:
+  sqlserver_data:
+  redis_data:
+  rabbitmq_data:

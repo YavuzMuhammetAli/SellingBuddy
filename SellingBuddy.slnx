@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path="ServiceUrls.txt" />
+    <File Path="docker-compose.yml" />
+    <File Path="CLAUDE.md" />
+    <File Path="Directory.Build.props" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/ApiGateways/" />
@@ -13,6 +16,7 @@
     <Project Path="src/BuildingBlocks/EventBus/EventBus.Base/EventBus.Base.csproj" Id="98798feb-9104-446c-a132-b86bc3d2aee7" />
     <Project Path="src/BuildingBlocks/EventBus/EventBus.Factory/EventBus.Factory.csproj" Id="28ff4e44-532a-4ce6-a3aa-5d8fe0547a4d" />
     <Project Path="src/BuildingBlocks/EventBus/EventBus.RabbitMQ/EventBus.RabbitMQ.csproj" Id="b624a85d-b3b3-4081-8daa-5e01e717b9f8" />
+    <Project Path="src/BuildingBlocks/EventBus/EventBus.UnitTest/EventBus.UnitTest.csproj" />
   </Folder>
   <Folder Name="/src/Clients/" />
   <Folder Name="/src/Clients/BlazorWebApp/">

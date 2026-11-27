@@ -1,0 +1,18 @@
+SellingBuddy service urls (local http / docker host port)
+
+Web.ApiGateway        http://localhost:5131
+WebApp (Blazor)       http://localhost:5198
+CatalogService.Api    http://localhost:5140
+IdentityService.Api   http://localhost:5095
+BasketService.Api     http://localhost:5166
+OrderService.Api      http://localhost:5226
+PaymentService.Api    http://localhost:5278
+NotificationService   console app, no port
+
+Infrastructure
+SQL Server            localhost,1435   (sa / Pass@word1)
+Redis                 localhost:6389
+RabbitMQ              localhost:5672, UI http://localhost:15672 (guest / guest)
+Consul                http://localhost:8500
+
+Demo users            demo / demo123, admin / admin123
