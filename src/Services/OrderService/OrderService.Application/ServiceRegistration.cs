@@ -13,6 +13,8 @@ namespace OrderService.Application
 
             //integration event handlers resolved by eventbus
             services.AddTransient<OrderCreatedIntegrationEventHandler>();
+            services.AddTransient<OrderPaymentSuccessIntegrationEventHandler>();
+            services.AddTransient<OrderPaymentFailedIntegrationEventHandler>();
 
             return services;
         }

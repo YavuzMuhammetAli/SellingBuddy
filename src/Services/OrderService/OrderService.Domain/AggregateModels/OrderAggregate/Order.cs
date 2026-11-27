@@ -22,6 +22,10 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
 
         public Guid? PaymentMethodId { get; private set; }
 
+        public string ShippingMethod { get; private set; }
+
+        public decimal ShippingFee { get; private set; }
+
         private readonly List<OrderItem> orderItems;
 
         public IReadOnlyCollection<OrderItem> OrderItems => orderItems;
@@ -33,8 +37,15 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
         }
 
         public Order(string userName, Address address, int cardTypeId, string cardNumber, string cardSecurityNumber,
-            string cardHolderName, DateTime cardExpiration, Guid? paymentMethodId, Guid? buyerId = null) : this()
+            string cardHolderName, DateTime cardExpiration, Guid? paymentMethodId, Guid? buyerId = null,
+            Guid? orderId = null, string shippingMethod = null, decimal shippingFee = 0) : this()
         {
+            //id comes from the basket checkout so the client knows it already
+            if (orderId.HasValue && orderId.Value != Guid.Empty)
+                Id = orderId.Value;
+
+            ShippingMethod = shippingMethod;
+            ShippingFee = shippingFee;
             BuyerId = buyerId;
             PaymentMethodId = paymentMethodId;
             OrderStatusId = OrderStatus.Submitted.Id;
@@ -45,9 +56,10 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
             AddOrderStartedDomainEvent(userName, cardTypeId, cardNumber, cardSecurityNumber, cardHolderName, cardExpiration);
         }
 
-        public void AddOrderItem(int productId, string productName, decimal unitPrice, string pictureUrl, int units = 1)
+        public void AddOrderItem(int productId, string productName, decimal unitPrice, string pictureUrl, int units = 1,
+            int? sellerId = null, string sellerName = null, string productSlug = null)
         {
-            var existingOrderForProduct = orderItems.SingleOrDefault(o => o.ProductId == productId);
+            var existingOrderForProduct = orderItems.SingleOrDefault(o => o.ProductId == productId && o.SellerId == sellerId);
 
             if (existingOrderForProduct != null)
             {
@@ -55,7 +67,7 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
                 return;
             }
 
-            orderItems.Add(new OrderItem(productId, productName, unitPrice, pictureUrl, units));
+            orderItems.Add(new OrderItem(productId, productName, unitPrice, pictureUrl, units, sellerId, sellerName, productSlug));
         }
 
         public void SetBuyerId(Guid buyerId)
@@ -89,6 +101,11 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
         public decimal GetTotal()
         {
             return orderItems.Sum(o => o.Units * o.UnitPrice);
+        }
+
+        public decimal GetGrandTotal()
+        {
+            return GetTotal() + ShippingFee;
         }
 
         private void AddOrderStartedDomainEvent(string userName, int cardTypeId, string cardNumber, string cardSecurityNumber,

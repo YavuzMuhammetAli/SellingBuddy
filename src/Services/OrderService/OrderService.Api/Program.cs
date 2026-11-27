@@ -78,6 +78,8 @@ namespace OrderService.Api
             //subscriptions added after build
             var eventBus = app.Services.GetRequiredService<IEventBus>();
             eventBus.Subscribe<OrderCreatedIntegrationEvent, OrderCreatedIntegrationEventHandler>();
+            eventBus.Subscribe<OrderPaymentSuccessIntegrationEvent, OrderPaymentSuccessIntegrationEventHandler>();
+            eventBus.Subscribe<OrderPaymentFailedIntegrationEvent, OrderPaymentFailedIntegrationEventHandler>();
 
             app.Run();
         }

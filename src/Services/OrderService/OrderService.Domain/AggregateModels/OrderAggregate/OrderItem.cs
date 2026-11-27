@@ -17,13 +17,24 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
 
         public Guid OrderId { get; private set; }
 
+        //seller of the offer the item was bought from
+        public int? SellerId { get; private set; }
+
+        public string SellerName { get; private set; }
+
+        public string ProductSlug { get; private set; }
+
         //used by ef core
         protected OrderItem()
         {
         }
 
-        public OrderItem(int productId, string productName, decimal unitPrice, string pictureUrl, int units = 1)
+        public OrderItem(int productId, string productName, decimal unitPrice, string pictureUrl, int units = 1,
+            int? sellerId = null, string sellerName = null, string productSlug = null)
         {
+            SellerId = sellerId;
+            SellerName = sellerName;
+            ProductSlug = productSlug;
             if (units <= 0)
                 throw new OrderingDomainException("Invalid number of units");
 

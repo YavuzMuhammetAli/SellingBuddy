@@ -145,6 +145,14 @@ namespace OrderService.Infrastructure.Migrations
                     b.Property<Guid?>("PaymentMethodId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("ShippingFee")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ShippingMethod")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BuyerId");
@@ -178,6 +186,17 @@ namespace OrderService.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ProductSlug")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int?>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SellerName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
@@ -284,9 +303,17 @@ namespace OrderService.Infrastructure.Migrations
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
 
+                            b1.Property<string>("ContactName")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
                             b1.Property<string>("Country")
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
+
+                            b1.Property<string>("Phone")
+                                .HasMaxLength(40)
+                                .HasColumnType("nvarchar(40)");
 
                             b1.Property<string>("State")
                                 .HasMaxLength(100)

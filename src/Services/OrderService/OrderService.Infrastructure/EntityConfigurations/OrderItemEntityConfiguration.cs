@@ -20,6 +20,8 @@ namespace OrderService.Infrastructure.EntityConfigurations
             builder.Property(i => i.PictureUrl).HasMaxLength(500);
             builder.Property(i => i.UnitPrice).HasPrecision(18, 2).IsRequired();
             builder.Property(i => i.Units).IsRequired();
+            builder.Property(i => i.SellerName).HasMaxLength(100);
+            builder.Property(i => i.ProductSlug).HasMaxLength(150);
         }
     }
 }

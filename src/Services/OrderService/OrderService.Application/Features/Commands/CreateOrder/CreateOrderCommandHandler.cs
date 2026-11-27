@@ -22,13 +22,20 @@ namespace OrderService.Application.Features.Commands.CreateOrder
 
         public async Task<bool> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
-            var address = new Address(request.Street, request.City, request.State, request.Country, request.ZipCode);
+            //same checkout delivered twice is ignored
+            if (request.OrderId != Guid.Empty && await _orderRepository.GetByIdAsync(request.OrderId) != null)
+            {
+                _logger.LogWarning("Order {OrderId} already exists, duplicate message skipped", request.OrderId);
+                return true;
+            }
+
+            var address = new Address(request.Street, request.City, request.State, request.Country, request.ZipCode, request.ContactName, request.Phone);
 
             var order = new Order(request.UserName, address, request.CardTypeId, request.CardNumber, request.CardSecurityNumber,
-                request.CardHolderName, request.CardExpiration, null);
+                request.CardHolderName, request.CardExpiration, null, null, request.OrderId, request.ShippingMethod, request.ShippingFee);
 
             foreach (var item in request.OrderItems)
-                order.AddOrderItem(item.ProductId, item.ProductName, item.UnitPrice, item.PictureUrl, item.Units);
+                order.AddOrderItem(item.ProductId, item.ProductName, item.UnitPrice, item.PictureUrl, item.Units, item.SellerId, item.SellerName, item.ProductSlug);
 
             await _orderRepository.AddAsync(order);
 

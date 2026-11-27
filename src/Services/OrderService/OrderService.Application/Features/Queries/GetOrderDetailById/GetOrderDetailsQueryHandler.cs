@@ -7,10 +7,12 @@ namespace OrderService.Application.Features.Queries.GetOrderDetailById
     public class GetOrderDetailsQueryHandler : IRequestHandler<GetOrderDetailsQuery, OrderDetailViewModel>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IBuyerRepository _buyerRepository;
 
-        public GetOrderDetailsQueryHandler(IOrderRepository orderRepository)
+        public GetOrderDetailsQueryHandler(IOrderRepository orderRepository, IBuyerRepository buyerRepository)
         {
             _orderRepository = orderRepository;
+            _buyerRepository = buyerRepository;
         }
 
         public async Task<OrderDetailViewModel> Handle(GetOrderDetailsQuery request, CancellationToken cancellationToken)
@@ -20,26 +22,37 @@ namespace OrderService.Application.Features.Queries.GetOrderDetailById
             if (order == null)
                 return null;
 
-            //manual mapping, no automapper
-            return new OrderDetailViewModel
+            var model = new OrderDetailViewModel
             {
                 OrderNumber = order.Id.ToString(),
                 Date = order.OrderDate,
                 Status = order.OrderStatus?.Name,
                 Description = order.Description,
+                ContactName = order.Address.ContactName,
+                Phone = order.Address.Phone,
                 Street = order.Address.Street,
                 City = order.Address.City,
+                State = order.Address.State,
                 ZipCode = order.Address.ZipCode,
                 Country = order.Address.Country,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemViewModel
-                {
-                    ProductName = oi.ProductName,
-                    Units = oi.Units,
-                    UnitPrice = oi.UnitPrice,
-                    PictureUrl = oi.PictureUrl
-                }).ToList(),
-                Total = order.GetTotal()
+                ShippingMethod = order.ShippingMethod,
+                ShippingFee = order.ShippingFee,
+                OrderItems = order.OrderItems.Select(OrderMapper.ToItem).ToList(),
+                ItemsTotal = order.GetTotal(),
+                Total = order.GetGrandTotal()
             };
+
+            //only the last digits of the card leave the service
+            if (order.BuyerId.HasValue && order.PaymentMethodId.HasValue)
+            {
+                var buyer = await _buyerRepository.GetSingleAsync(b => b.Id == order.BuyerId.Value, b => b.PaymentMethods);
+                var cardNumber = buyer?.PaymentMethods.FirstOrDefault(p => p.Id == order.PaymentMethodId.Value)?.CardNumber;
+
+                if (!string.IsNullOrEmpty(cardNumber) && cardNumber.Length >= 4)
+                    model.CardLast4 = cardNumber[^4..];
+            }
+
+            return model;
         }
     }
 }

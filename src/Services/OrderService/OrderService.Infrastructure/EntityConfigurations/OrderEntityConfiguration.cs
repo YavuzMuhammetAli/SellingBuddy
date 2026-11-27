@@ -26,10 +26,14 @@ namespace OrderService.Infrastructure.EntityConfigurations
                 a.Property(x => x.State).HasMaxLength(100);
                 a.Property(x => x.Country).HasMaxLength(100);
                 a.Property(x => x.ZipCode).HasMaxLength(20);
+                a.Property(x => x.ContactName).HasMaxLength(200);
+                a.Property(x => x.Phone).HasMaxLength(40);
             });
 
             builder.Property(o => o.OrderDate).IsRequired();
             builder.Property(o => o.Description).HasMaxLength(500);
+            builder.Property(o => o.ShippingMethod).HasMaxLength(30);
+            builder.Property(o => o.ShippingFee).HasPrecision(18, 2);
 
             builder.HasOne(o => o.OrderStatus)
                 .WithMany()

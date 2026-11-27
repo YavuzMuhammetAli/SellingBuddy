@@ -14,13 +14,19 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
 
         public string ZipCode { get; private set; }
 
+        public string ContactName { get; private set; }
+
+        public string Phone { get; private set; }
+
         //used by ef core
         public Address()
         {
         }
 
-        public Address(string street, string city, string state, string country, string zipCode)
+        public Address(string street, string city, string state, string country, string zipCode, string contactName = null, string phone = null)
         {
+            ContactName = contactName;
+            Phone = phone;
             Street = street;
             City = city;
             State = state;
@@ -35,6 +41,8 @@ namespace OrderService.Domain.AggregateModels.OrderAggregate
             yield return State;
             yield return Country;
             yield return ZipCode;
+            yield return ContactName;
+            yield return Phone;
         }
     }
 }

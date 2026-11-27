@@ -11,6 +11,17 @@ namespace OrderService.Application.IntegrationEvents.Events
 
         public int OrderNumber { get; set; }
 
+        //decided by the basket service at checkout
+        public Guid OrderId { get; set; }
+
+        public string ContactName { get; set; }
+
+        public string Phone { get; set; }
+
+        public string ShippingMethod { get; set; }
+
+        public decimal ShippingFee { get; set; }
+
         public string City { get; set; }
 
         public string Street { get; set; }

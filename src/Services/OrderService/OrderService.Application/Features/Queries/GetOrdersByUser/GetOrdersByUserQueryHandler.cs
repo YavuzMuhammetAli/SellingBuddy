@@ -25,7 +25,11 @@ namespace OrderService.Application.Features.Queries.GetOrdersByUser
                 OrderNumber = o.Id.ToString(),
                 Date = o.OrderDate,
                 Status = o.OrderStatus?.Name,
-                Total = o.GetTotal()
+                Total = o.GetGrandTotal(),
+                ItemCount = o.OrderItems.Sum(i => i.Units),
+                Items = o.OrderItems.Select(OrderMapper.ToItem).ToList(),
+                City = o.Address.City,
+                Street = o.Address.Street
             }).ToList();
         }
     }

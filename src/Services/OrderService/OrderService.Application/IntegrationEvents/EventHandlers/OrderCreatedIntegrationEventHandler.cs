@@ -26,7 +26,8 @@ namespace OrderService.Application.IntegrationEvents.EventHandlers
             //basket checkout turned into create order command
             var createOrderCommand = new CreateOrderCommand(@event.Basket.Items, @event.UserName, @event.City, @event.Street,
                 @event.State, @event.Country, @event.ZipCode, @event.CardNumber, @event.CardHolderName,
-                @event.CardExpiration, @event.CardSecurityNumber, @event.CardTypeId);
+                @event.CardExpiration, @event.CardSecurityNumber, @event.CardTypeId)
+                .WithCheckoutDetails(@event.OrderId, @event.ContactName, @event.Phone, @event.ShippingMethod, @event.ShippingFee);
 
             await _mediator.Send(createOrderCommand);
         }
