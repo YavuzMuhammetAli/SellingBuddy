@@ -1,0 +1,11 @@
+<Project>
+
+  <!--shared assembly info for every project-->
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <Product>SellingBuddy</Product>
+    <Company>SellingBuddy</Company>
+    <Copyright>Copyright (c) SellingBuddy</Copyright>
+  </PropertyGroup>
+
+</Project>
