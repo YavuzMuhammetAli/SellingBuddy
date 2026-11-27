@@ -1,6 +1,7 @@
 @OrderService.Api_HostAddress = http://localhost:5226
+@token = paste-token-from-identity
 
-GET {{OrderService.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+GET {{OrderService.Api_HostAddress}}/api/order
+Authorization: Bearer {{token}}
 
 ###
