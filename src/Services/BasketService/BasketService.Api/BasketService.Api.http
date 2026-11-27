@@ -1,6 +1,21 @@
 @BasketService.Api_HostAddress = http://localhost:5166
+@token = paste-token-from-identity
 
-GET {{BasketService.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+GET {{BasketService.Api_HostAddress}}/api/basket
+Authorization: Bearer {{token}}
+
+###
+
+POST {{BasketService.Api_HostAddress}}/api/basket/additem
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id": "1",
+  "productId": 1,
+  "productName": ".NET Bot Black Hoodie",
+  "unitPrice": 19.5,
+  "quantity": 1
+}
 
 ###
