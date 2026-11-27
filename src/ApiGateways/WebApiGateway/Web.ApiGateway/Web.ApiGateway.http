@@ -1,6 +1,26 @@
-@Web.ApiGateway_HostAddress = http://localhost:5131
+@Gateway = http://localhost:5131
+@token = paste-token-from-auth
 
-GET {{Web.ApiGateway_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{Gateway}}/auth
+Content-Type: application/json
+
+{ "userName": "demo", "password": "demo123" }
+
+###
+
+GET {{Gateway}}/catalog/items?pageSize=5
+
+###
+
+POST {{Gateway}}/api/basket/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "catalogItemId": 1, "quantity": 1 }
+
+###
+
+GET {{Gateway}}/basket
+Authorization: Bearer {{token}}
 
 ###

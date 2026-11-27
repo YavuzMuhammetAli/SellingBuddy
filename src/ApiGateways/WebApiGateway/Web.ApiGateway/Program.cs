@@ -1,34 +1,83 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
+using Ocelot.Provider.Consul;
+using Serilog;
+using System.Text;
+using Web.ApiGateway.Infrastructure;
+using Web.ApiGateway.Services;
+using Web.ApiGateway.Services.Interfaces;
 
 namespace Web.ApiGateway
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            //ocelot routes added, env vars re-added so docker can override them
+            builder.Configuration
+                .AddJsonFile("Configurations/ocelot.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            //logging class added
+            builder.Host.UseSerilog((context, loggerConfig) =>
+                loggerConfig.ReadFrom.Configuration(context.Configuration));
+
+            //ocelot with consul added
+            builder.Services.AddOcelot(builder.Configuration).AddConsul<ServiceAddressConsulServiceBuilder>();
+
+            //cors for blazor webapp
+            builder.Services.AddCors(options => options.AddPolicy("CorsPolicy", policy =>
+                policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials()));
+
+            //jwt auth for aggregator endpoints
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AuthConfig:Secret"]))
+                    };
+                });
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddTransient<HttpClientDelegatingHandler>();
+
+            //typed clients call the gateway itself, ocelot routes them
+            var gatewayBaseUrl = builder.Configuration["urls:gateway"];
+
+            builder.Services.AddHttpClient<ICatalogService, CatalogService>(c => c.BaseAddress = new Uri(gatewayBaseUrl))
+                .AddHttpMessageHandler<HttpClientDelegatingHandler>();
+
+            builder.Services.AddHttpClient<IBasketService, BasketService>(c => c.BaseAddress = new Uri(gatewayBaseUrl))
+                .AddHttpMessageHandler<HttpClientDelegatingHandler>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-            }
+            app.UseSerilogRequestLogging();
 
-            app.UseHttpsRedirection();
+            app.UseCors("CorsPolicy");
 
+            //aggregator endpoints run before ocelot, unmatched requests fall through
+            app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
 
+            //ocelot must be the last middleware
+            await app.UseOcelot();
 
-            app.MapControllers();
-
-            app.Run();
+            await app.RunAsync();
         }
     }
 }
