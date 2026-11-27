@@ -8,6 +8,7 @@ BasketService.Api     http://localhost:5166
 OrderService.Api      http://localhost:5226
 PaymentService.Api    http://localhost:5278
 NotificationService   console app, no port
+StatusDashboard       http://localhost:5300   (service health, queues, infrastructure)
 
 Infrastructure
 SQL Server            localhost,1435   (sa / Pass@word1)

@@ -63,6 +63,7 @@ services:
       - ConnectionStrings__CatalogDb=Server=c_sqlserver,1433;Database=catalog;User Id=sa;Password=Pass@word1;TrustServerCertificate=True
       - ConsulConfig__Address=http://c_consul:8500
       - ConsulConfig__ServiceAddress=http://c_catalogservice:8080
+      - ConsulConfig__HealthCheckAddress=http://c_catalogservice:8080
     ports:
       - "5140:8080"
     depends_on:
@@ -81,6 +82,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConsulConfig__Address=http://c_consul:8500
       - ConsulConfig__ServiceAddress=http://c_identityservice:8080
+      - ConsulConfig__HealthCheckAddress=http://c_identityservice:8080
     ports:
       - "5095:8080"
     depends_on:
@@ -100,6 +102,7 @@ services:
       - RabbitMQ__Host=c_rabbitmq
       - ConsulConfig__Address=http://c_consul:8500
       - ConsulConfig__ServiceAddress=http://c_basketservice:8080
+      - ConsulConfig__HealthCheckAddress=http://c_basketservice:8080
     ports:
       - "5166:8080"
     depends_on:
@@ -124,6 +127,7 @@ services:
       - RabbitMQ__Host=c_rabbitmq
       - ConsulConfig__Address=http://c_consul:8500
       - ConsulConfig__ServiceAddress=http://c_orderservice:8080
+      - ConsulConfig__HealthCheckAddress=http://c_orderservice:8080
     ports:
       - "5226:8080"
     depends_on:
@@ -147,6 +151,7 @@ services:
       - RabbitMQ__Host=c_rabbitmq
       - ConsulConfig__Address=http://c_consul:8500
       - ConsulConfig__ServiceAddress=http://c_paymentservice:8080
+      - ConsulConfig__HealthCheckAddress=http://c_paymentservice:8080
     ports:
       - "5278:8080"
     depends_on:
@@ -201,6 +206,23 @@ services:
       - "5198:8080"
     depends_on:
       - webapigateway
+    restart: on-failure
+    networks:
+      - net_backendservices
+
+  #monitoring
+  statusdashboard:
+    build:
+      context: .
+      dockerfile: src/Monitoring/StatusDashboard/Dockerfile
+    container_name: c_statusdashboard
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    ports:
+      - "5300:8080"
+    depends_on:
+      - consul
+      - rabbitmq
     restart: on-failure
     networks:
       - net_backendservices
