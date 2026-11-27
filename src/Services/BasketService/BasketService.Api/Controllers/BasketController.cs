@@ -62,8 +62,8 @@ namespace BasketService.Api.Controllers
 
             var basket = await _repository.GetBasketAsync(userName) ?? new CustomerBasket(userName);
 
-            //same product increases quantity
-            var existingItem = basket.Items.FirstOrDefault(i => i.ProductId == basketItem.ProductId);
+            //same product from the same offer increases quantity
+            var existingItem = basket.Items.FirstOrDefault(i => i.ProductId == basketItem.ProductId && i.OfferId == basketItem.OfferId);
 
             if (existingItem != null)
                 existingItem.Quantity += basketItem.Quantity;
@@ -90,7 +90,14 @@ namespace BasketService.Api.Controllers
             var eventMessage = new OrderCreatedIntegrationEvent(userName, userName, basketCheckout.City, basketCheckout.Street,
                 basketCheckout.State, basketCheckout.Country, basketCheckout.ZipCode, basketCheckout.CardNumber,
                 basketCheckout.CardHolderName, basketCheckout.CardExpiration, basketCheckout.CardSecurityNumber,
-                basketCheckout.CardTypeId, userName, basket);
+                basketCheckout.CardTypeId, userName, basket)
+            {
+                OrderId = Guid.NewGuid(),
+                ContactName = basketCheckout.ContactName,
+                Phone = basketCheckout.Phone,
+                ShippingMethod = ShippingOptions.Normalize(basketCheckout.ShippingMethod),
+                ShippingFee = ShippingOptions.FeeFor(ShippingOptions.Normalize(basketCheckout.ShippingMethod))
+            };
 
             try
             {
@@ -103,7 +110,7 @@ namespace BasketService.Api.Controllers
                 throw;
             }
 
-            return Accepted();
+            return Accepted(new { orderId = eventMessage.OrderId });
         }
 
         [HttpDelete("{id}")]

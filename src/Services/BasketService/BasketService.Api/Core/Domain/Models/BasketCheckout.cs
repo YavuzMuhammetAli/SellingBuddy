@@ -2,6 +2,13 @@ namespace BasketService.Api.Core.Domain.Models
 {
     public class BasketCheckout
     {
+        public string ContactName { get; set; }
+
+        public string Phone { get; set; }
+
+        //standard or same-day, fee is decided by the basket service
+        public string ShippingMethod { get; set; }
+
         public string City { get; set; }
 
         public string Street { get; set; }

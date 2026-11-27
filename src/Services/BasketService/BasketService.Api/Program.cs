@@ -36,6 +36,7 @@ namespace BasketService.Api
             //redis basket store added
             builder.Services.ConfigureRedis(builder.Configuration);
             builder.Services.AddTransient<IBasketRepository, RedisBasketRepository>();
+            builder.Services.AddTransient<IWishlistRepository, RedisWishlistRepository>();
             builder.Services.AddTransient<IIdentityService, IdentityService>();
 
             //consul registration added

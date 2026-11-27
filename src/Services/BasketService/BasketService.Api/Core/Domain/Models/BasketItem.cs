@@ -18,6 +18,23 @@ namespace BasketService.Api.Core.Domain.Models
 
         public string PictureUrl { get; set; }
 
+        public string ProductSlug { get; set; }
+
+        public string BrandName { get; set; }
+
+        //offer the item was added from, a product can have many sellers
+        public int? OfferId { get; set; }
+
+        public int? SellerId { get; set; }
+
+        public string SellerSlug { get; set; }
+
+        public string SellerName { get; set; }
+
+        public decimal ShippingFee { get; set; }
+
+        public int DeliveryDaysMax { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (Quantity < 1)
