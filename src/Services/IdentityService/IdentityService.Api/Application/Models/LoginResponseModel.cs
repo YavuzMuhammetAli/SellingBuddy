@@ -7,5 +7,11 @@ namespace IdentityService.Api.Application.Models
         public string UserToken { get; set; }
 
         public DateTime Expiration { get; set; }
+
+        public string Email { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
     }
 }

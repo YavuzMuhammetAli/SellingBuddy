@@ -20,9 +20,10 @@ namespace IdentityService.Api.Application.Services
 
         public Task<LoginResponseModel> Login(LoginRequestModel requestModel)
         {
-            //demo users come from config, no user store yet
+            //demo users come from config, no user store yet; user name or email both work
             var user = _authConfig.Users.FirstOrDefault(u =>
-                string.Equals(u.UserName, requestModel.UserName, StringComparison.OrdinalIgnoreCase) &&
+                (string.Equals(u.UserName, requestModel.UserName, StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(u.Email, requestModel.UserName, StringComparison.OrdinalIgnoreCase)) &&
                 u.Password == requestModel.Password);
 
             if (user == null)
@@ -39,7 +40,10 @@ namespace IdentityService.Api.Application.Services
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.UserName),
-                    new Claim(ClaimTypes.Name, user.UserName)
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                    new Claim(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
+                    new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty)
                 }),
                 Expires = expiration,
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -53,7 +57,10 @@ namespace IdentityService.Api.Application.Services
             {
                 UserName = user.UserName,
                 UserToken = token,
-                Expiration = expiration
+                Expiration = expiration,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName
             });
         }
     }
