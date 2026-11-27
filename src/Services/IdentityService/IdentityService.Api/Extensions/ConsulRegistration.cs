@@ -31,6 +31,19 @@ namespace IdentityService.Api.Extensions
                 Tags = new[] { serviceName }
             };
 
+            //http check only when the address is reachable by consul (docker)
+            var healthCheckAddress = configuration["ConsulConfig:HealthCheckAddress"];
+
+            if (!string.IsNullOrEmpty(healthCheckAddress))
+            {
+                registration.Check = new AgentServiceCheck
+                {
+                    HTTP = $"{healthCheckAddress.TrimEnd('/')}/health",
+                    Interval = TimeSpan.FromSeconds(10),
+                    Timeout = TimeSpan.FromSeconds(5)
+                };
+            }
+
             //old registration removed before register
             lifetime.ApplicationStarted.Register(() =>
             {

@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
@@ -49,6 +50,12 @@ namespace Web.ApiGateway
                     };
                 });
 
+            //gateway health with consul reachability
+            builder.Services.AddDefaultHealthChecks()
+                .AddTcpCheck("consul",
+                    builder.Configuration["GlobalConfiguration:ServiceDiscoveryProvider:Host"] ?? "localhost",
+                    builder.Configuration.GetValue("GlobalConfiguration:ServiceDiscoveryProvider:Port", 8500));
+
             builder.Services.AddControllers();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddTransient<HttpClientDelegatingHandler>();
@@ -72,7 +79,11 @@ namespace Web.ApiGateway
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapDefaultHealthChecks();
+            });
 
             //ocelot must be the last middleware
             await app.UseOcelot();

@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using CatalogService.Api.Extensions;
 using CatalogService.Api.Infrastructure;
 using CatalogService.Api.Infrastructure.Context;
@@ -19,7 +20,9 @@ namespace CatalogService.Api
             //async suffix kept for CreatedAtAction routes
             builder.Services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+            //health checks with dependencies added
+            builder.Services.AddDefaultHealthChecks()
+                .AddDbContextCheck<CatalogContext>("sqlserver", tags: new[] { "dependency" });
 
             builder.Services.Configure<CatalogSettings>(builder.Configuration.GetSection("CatalogSettings"));
 
@@ -50,7 +53,7 @@ namespace CatalogService.Api
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHealthChecks("/health");
+            app.MapDefaultHealthChecks();
 
             app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 

@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using Microsoft.AspNetCore.Components.Authorization;
 using WebApp.Application.Services;
 using WebApp.Application.Services.Interfaces;
@@ -15,6 +16,8 @@ namespace WebApp
 
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            builder.Services.AddDefaultHealthChecks();
 
             //gateway http client added, webapp only talks to the gateway
             builder.Services.AddHttpClient<GatewayClient>(client =>
@@ -42,6 +45,8 @@ namespace WebApp
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
             app.UseAntiforgery();
+
+            app.MapDefaultHealthChecks();
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()

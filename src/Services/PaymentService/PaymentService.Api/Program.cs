@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using EventBus.Base;
 using EventBus.Base.Abstraction;
 using EventBus.Factory;
@@ -20,7 +21,9 @@ namespace PaymentService.Api
                 loggerConfig.ReadFrom.Configuration(context.Configuration));
 
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+            //health checks with dependencies added
+            builder.Services.AddDefaultHealthChecks()
+                .AddTcpCheck("rabbitmq", builder.Configuration["RabbitMQ:Host"] ?? "localhost", 5672);
 
             //consul registration added
             builder.Services.ConfigureConsul(builder.Configuration);
@@ -52,7 +55,7 @@ namespace PaymentService.Api
 
             app.UseSerilogRequestLogging();
 
-            app.MapHealthChecks("/health");
+            app.MapDefaultHealthChecks();
 
             app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 

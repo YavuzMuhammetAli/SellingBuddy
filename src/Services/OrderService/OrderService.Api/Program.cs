@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using EventBus.Base;
 using EventBus.Base.Abstraction;
 using EventBus.Factory;
@@ -24,7 +25,10 @@ namespace OrderService.Api
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+            //health checks with dependencies added
+            builder.Services.AddDefaultHealthChecks()
+                .AddDbContextCheck<OrderDbContext>("sqlserver", tags: new[] { "dependency" })
+                .AddTcpCheck("rabbitmq", builder.Configuration["RabbitMQ:Host"] ?? "localhost", 5672);
 
             builder.Services.ConfigureAuth(builder.Configuration);
 
@@ -67,7 +71,7 @@ namespace OrderService.Api
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHealthChecks("/health");
+            app.MapDefaultHealthChecks();
 
             app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 

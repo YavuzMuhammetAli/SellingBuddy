@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using BasketService.Api.Core.Application.Repository;
 using BasketService.Api.Core.Application.Services;
 using BasketService.Api.Extensions;
@@ -24,7 +25,10 @@ namespace BasketService.Api
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+            //health checks with dependencies added
+            builder.Services.AddDefaultHealthChecks()
+                .AddCheck<RedisHealthCheck>("redis", tags: new[] { "dependency" })
+                .AddTcpCheck("rabbitmq", builder.Configuration["RabbitMQ:Host"] ?? "localhost", 5672);
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.ConfigureAuth(builder.Configuration);
@@ -68,7 +72,7 @@ namespace BasketService.Api
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHealthChecks("/health");
+            app.MapDefaultHealthChecks();
 
             app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 

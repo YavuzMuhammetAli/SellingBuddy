@@ -7,4 +7,8 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\HealthChecks\HealthChecks.Common\HealthChecks.Common.csproj" />
+  </ItemGroup>
+
 </Project>

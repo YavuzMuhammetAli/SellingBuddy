@@ -1,3 +1,4 @@
+using HealthChecks.Common;
 using IdentityService.Api.Application.Models;
 using IdentityService.Api.Application.Services;
 using IdentityService.Api.Extensions;
@@ -17,7 +18,7 @@ namespace IdentityService.Api
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+            builder.Services.AddDefaultHealthChecks();
 
             //token settings and service added
             builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection("AuthConfig"));
@@ -34,7 +35,7 @@ namespace IdentityService.Api
             app.UseSerilogRequestLogging();
 
             app.MapControllers();
-            app.MapHealthChecks("/health");
+            app.MapDefaultHealthChecks();
 
             app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 
