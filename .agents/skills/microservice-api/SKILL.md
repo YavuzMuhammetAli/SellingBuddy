@@ -34,7 +34,9 @@ namespace CatalogService.Api
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+            //health checks with dependencies added (HealthChecks.Common)
+            builder.Services.AddDefaultHealthChecks()
+                .AddDbContextCheck<CatalogContext>("sqlserver", tags: new[] { "dependency" });
 
             //consul registration added
             builder.Services.ConfigureConsul(builder.Configuration);
@@ -52,7 +54,7 @@ namespace CatalogService.Api
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHealthChecks("/health");
+            app.MapDefaultHealthChecks();   // /health (json) + /health/live
 
             app.RegisterWithConsul(app.Lifetime, builder.Configuration);
 
@@ -122,8 +124,24 @@ namespace CatalogService.Api.Extensions
 }
 ```
 
-No HTTP check is registered on purpose: Consul runs in docker and can't reach
-`localhost` services on the host, and Ocelot only routes to passing services.
+An HTTP check (`{HealthCheckAddress}/health`, every 10s) is registered only when
+`ConsulConfig:HealthCheckAddress` is set — docker-compose sets it to `http://c_<service>:8080`.
+Locally it stays empty: Consul runs in docker and can't reach `localhost` services, and
+Ocelot only routes to passing services.
+
+## Health checks
+
+Every service references `src/BuildingBlocks/HealthChecks/HealthChecks.Common`:
+
+| Need | Call |
+|---|---|
+| self check + builder | `builder.Services.AddDefaultHealthChecks()` |
+| SQL Server (EF) | `.AddDbContextCheck<TContext>("sqlserver", tags: new[] { "dependency" })` (pkg `Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore`) |
+| RabbitMQ / Consul reachability | `.AddTcpCheck("rabbitmq", host, 5672)` |
+| Redis | `.AddCheck<RedisHealthCheck>("redis", tags: ...)` (Basket `Extensions/RedisHealthCheck.cs`) |
+| endpoints | `app.MapDefaultHealthChecks()` → `/health` JSON, `/health/live` self only |
+
+The JSON body is read by the status dashboard (`status-dashboard` skill).
 
 ## appsettings.json layout
 
@@ -233,7 +251,8 @@ ENTRYPOINT ["dotnet", "CatalogService.Api.dll"]
 
 - [ ] Project under `src/Services/<Name>Service/<Name>Service.Api` and added to `SellingBuddy.slnx`, `<Nullable>disable</Nullable>`
 - [ ] Fixed port in `launchSettings.json`, added to the port table in `sellingbuddy-architecture` and `ServiceUrls.txt`
-- [ ] Serilog, `/health`, `ConsulRegistration` wired as above
+- [ ] Serilog, `AddDefaultHealthChecks` + dependency checks, `MapDefaultHealthChecks`, `ConsulRegistration` wired as above
+- [ ] `ConsulConfig__HealthCheckAddress` set in docker-compose
 - [ ] `ConsulConfig` section in appsettings
 - [ ] Gateway route added (`api-gateway-ocelot`)
 - [ ] Dockerfile + `docker-compose.yml` entry

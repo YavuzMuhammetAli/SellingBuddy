@@ -21,6 +21,7 @@ SellingBuddy.slnx
 docker-compose.yml                      # infra: sqlserver, redis, rabbitmq, consul (+ services)
 src/
   ApiGateways/WebApiGateway/Web.ApiGateway      # Ocelot + Consul, aggregators
+  BuildingBlocks/HealthChecks/HealthChecks.Common   # /health json writer, tcp check, MapDefaultHealthChecks
   BuildingBlocks/EventBus/
     EventBus.Base            # IEventBus, IntegrationEvent, BaseEventBus, subscription manager
     EventBus.RabbitMQ        # default transport
@@ -28,6 +29,7 @@ src/
     EventBus.Factory         # EventBusFactory.Create(config, sp)
     EventBus.UnitTest        # xUnit tests
   Clients/BlazorWebApp/WebApp                   # Blazor Web App (InteractiveServer)
+  Monitoring/StatusDashboard                    # TabBlazor service status dashboard
   Services/
     CatalogService/CatalogService.Api           # EF Core + SQL Server
     IdentityService/IdentityService.Api         # JWT issuer
@@ -52,10 +54,11 @@ Keep them stable — the gateway, Consul registration and the WebApp depend on t
 | PaymentService.Api | 5278 | 7138 | – | `PaymentService` |
 | NotificationService | – (console) | – | – | – |
 | WebApp (Blazor) | 5198 | 7125 | – | – |
+| StatusDashboard | 5300 | – | – (in memory) | – |
 
 Infra (from `docker-compose.yml`, host ports): SQL Server `1435` (container `c_sqlserver:1433`),
 Redis `6389` (container `c_redis:6379`), RabbitMQ `5672` / UI `15672` (guest/guest),
-Consul `8500`. SQL/Redis use non-default host ports to avoid clashes with other local
+Consul `8500` (raw UI; the themed view is the StatusDashboard on `5300`). SQL/Redis use non-default host ports to avoid clashes with other local
 SQL Server / Redis instances. Inside docker every service listens on `8080` and is reached by
 its container name (`c_catalogservice`, `c_basketservice`, ...).
 

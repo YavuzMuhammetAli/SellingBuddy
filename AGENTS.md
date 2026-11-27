@@ -14,6 +14,7 @@ dotnet run --project src/Services/CatalogService/CatalogService.Api
 docker compose up -d --build                             # everything in containers
 ```
 
+Status dashboard: http://localhost:5300 (services, health, queues, infrastructure).
 Infra UIs: RabbitMQ http://localhost:15672 (guest/guest), Consul http://localhost:8500.
 Host ports: SQL Server 1435, Redis 6389 (non-default to avoid clashes with other local SQL Server / Redis instances). Full list in `ServiceUrls.txt`.
 
@@ -37,6 +38,7 @@ MSYS_NO_PATHCONV=1 docker run --rm --network sellingbuddy_net_backendservices -e
 | `order-ddd-cqrs` | anything in OrderService |
 | `api-gateway-ocelot` | gateway routes and aggregators |
 | `blazor-client` | WebApp pages and services |
+| `status-dashboard` | StatusDashboard (TabBlazor) and the `/health` contract |
 
 ## Hard rules
 
