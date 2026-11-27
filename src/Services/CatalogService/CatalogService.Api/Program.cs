@@ -1,4 +1,5 @@
 using HealthChecks.Common;
+using CatalogService.Api.Core.Application;
 using CatalogService.Api.Extensions;
 using CatalogService.Api.Infrastructure;
 using CatalogService.Api.Infrastructure.Context;
@@ -25,6 +26,10 @@ namespace CatalogService.Api
                 .AddDbContextCheck<CatalogContext>("sqlserver", tags: new[] { "dependency" });
 
             builder.Services.Configure<CatalogSettings>(builder.Configuration.GetSection("CatalogSettings"));
+            builder.Services.AddScoped<CatalogQueryService>();
+
+            //texts are returned in the accept-language of the request
+            builder.Services.AddLocalization();
 
             //sql server context added
             builder.Services.AddDbContext<CatalogContext>(options =>
@@ -42,13 +47,19 @@ namespace CatalogService.Api
             app.MigrateDbContext<CatalogContext>((context, services) =>
             {
                 var logger = services.GetRequiredService<ILogger<CatalogContextSeed>>();
-                return new CatalogContextSeed().SeedAsync(context, logger);
+                return new CatalogContextSeed().SeedAsync(context, builder.Environment.ContentRootPath, logger);
             });
 
             if (app.Environment.IsDevelopment())
                 app.MapOpenApi();
 
             app.UseSerilogRequestLogging();
+
+            app.UseRequestLocalization(options =>
+            {
+                var cultures = new[] { "en", "tr" };
+                options.SetDefaultCulture("en").AddSupportedCultures(cultures).AddSupportedUICultures(cultures);
+            });
 
             app.UseAuthorization();
 

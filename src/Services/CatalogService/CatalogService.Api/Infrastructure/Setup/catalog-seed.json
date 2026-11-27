@@ -1,0 +1,279 @@
+{
+  "brands": [ "Sony", "Apple", "KeyCraft", "AudioLab", "Vero Atelier", "Terra Studio", "Kinetix Lab" ],
+  "sellers": [
+    {
+      "slug": "teknovizyon", "name": "TeknoVizyon", "initials": "TV", "city": "Istanbul",
+      "tagline": { "en": "Authorized electronics and audio systems seller", "tr": "Yetkili elektronik ve ses sistemleri satıcısı" },
+      "rating": 4.9, "reviewCount": 1420, "salesCount": 1420, "verified": true, "onTimeShippingRate": 99, "banner": "hero-electronics.jpg"
+    },
+    {
+      "slug": "atelier-moda", "name": "Atelier Moda", "initials": "AM", "city": "Izmir",
+      "tagline": { "en": "Timeless fashion pieces from independent ateliers", "tr": "Bağımsız atölyelerden zamansız moda parçaları" },
+      "rating": 4.8, "reviewCount": 960, "salesCount": 2310, "verified": true, "onTimeShippingRate": 97, "banner": "cat-fashion.jpg"
+    },
+    {
+      "slug": "nordic-home", "name": "Nordic Home", "initials": "NH", "city": "Ankara",
+      "tagline": { "en": "Minimal home and kitchen essentials", "tr": "Sade ev ve mutfak ürünleri" },
+      "rating": 4.9, "reviewCount": 640, "salesCount": 1180, "verified": true, "onTimeShippingRate": 98, "banner": "cat-home-living.jpg"
+    },
+    {
+      "slug": "sport-world", "name": "Sport World", "initials": "SW", "city": "Bursa",
+      "tagline": { "en": "Running and outdoor gear for every pace", "tr": "Her tempoya uygun koşu ve outdoor ekipmanları" },
+      "rating": 4.7, "reviewCount": 820, "salesCount": 1960, "verified": true, "onTimeShippingRate": 96, "banner": "cat-sports.jpg"
+    },
+    {
+      "slug": "soundlab", "name": "SoundLab", "initials": "SL", "city": "Istanbul",
+      "tagline": { "en": "Headphones and personal audio specialists", "tr": "Kulaklık ve kişisel ses uzmanı" },
+      "rating": 4.8, "reviewCount": 510, "salesCount": 870, "verified": true, "onTimeShippingRate": 95, "banner": "prod-studio-bundle.jpg"
+    },
+    {
+      "slug": "marmara-audio", "name": "Marmara Audio", "initials": "MA", "city": "Kocaeli",
+      "tagline": { "en": "Audio equipment at sharp prices", "tr": "Uygun fiyatlı ses ekipmanları" },
+      "rating": 4.6, "reviewCount": 230, "salesCount": 410, "verified": false, "onTimeShippingRate": 92, "banner": "prod-sony-case-set.jpg"
+    }
+  ],
+  "categories": [
+    {
+      "slug": "electronics", "image": "cat-electronics.jpg",
+      "name": { "en": "Electronics", "tr": "Elektronik" },
+      "description": { "en": "From headphones to smart watches and wireless keyboards, the newest products from verified technology sellers.", "tr": "Kulaklıklardan akıllı saatlere, kablosuz klavyelerden çalışma alanı aksesuarlarına kadar onaylı teknoloji satıcılarının en yeni ürünleri." },
+      "children": [
+        { "slug": "wireless-headphones", "image": "prod-sony-wh1000xm5.jpg", "name": { "en": "Wireless Headphones", "tr": "Kablosuz Kulaklık" }, "description": { "en": "Noise cancelling and wireless headphones.", "tr": "Gürültü engelleyici ve kablosuz kulaklıklar." } },
+        { "slug": "smart-watches", "image": "prod-apple-watch-10.jpg", "name": { "en": "Smart Watches", "tr": "Akıllı Saat" }, "description": { "en": "Smart watches and wearables.", "tr": "Akıllı saatler ve giyilebilir teknoloji." } },
+        { "slug": "keyboards-mice", "image": "prod-mech-keyboard.jpg", "name": { "en": "Keyboards & Mice", "tr": "Klavye & Fare" }, "description": { "en": "Keyboards and mice for your desk.", "tr": "Çalışma masanız için klavye ve fareler." } }
+      ]
+    },
+    {
+      "slug": "fashion", "image": "cat-fashion.jpg",
+      "name": { "en": "Fashion", "tr": "Moda" },
+      "description": { "en": "Natural textures, timeless cuts and everyday leather pieces from independent ateliers.", "tr": "Bağımsız atölyelerden doğal dokular, zamansız kesimler ve günlük deri parçalar." },
+      "children": [
+        { "slug": "outerwear", "image": "prod-wool-coat.jpg", "name": { "en": "Outerwear", "tr": "Dış Giyim" }, "description": { "en": "Coats and jackets.", "tr": "Kaban ve ceketler." } },
+        { "slug": "bags", "image": "prod-leather-backpack.jpg", "name": { "en": "Bags", "tr": "Çanta" }, "description": { "en": "Backpacks and everyday bags.", "tr": "Sırt çantaları ve günlük çantalar." } }
+      ]
+    },
+    {
+      "slug": "home-living", "image": "cat-home-living.jpg",
+      "name": { "en": "Home & Living", "tr": "Ev & Yaşam" },
+      "description": { "en": "Ceramics, tableware and calm pieces for everyday living.", "tr": "Seramikler, sofra ürünleri ve gündelik yaşam için sade parçalar." },
+      "children": [
+        { "slug": "kitchen-dining", "image": "prod-ceramic-coffee-set.jpg", "name": { "en": "Kitchen & Dining", "tr": "Mutfak & Sofra" }, "description": { "en": "Coffee sets and tableware.", "tr": "Kahve setleri ve sofra ürünleri." } }
+      ]
+    },
+    {
+      "slug": "cosmetics", "image": "cat-cosmetics.svg",
+      "name": { "en": "Cosmetics", "tr": "Kozmetik" },
+      "description": { "en": "Skin care and personal care from trusted brands.", "tr": "Güvenilir markalardan cilt ve kişisel bakım ürünleri." },
+      "children": []
+    },
+    {
+      "slug": "sports-outdoor", "image": "cat-sports.jpg",
+      "name": { "en": "Sports & Outdoor", "tr": "Spor & Outdoor" },
+      "description": { "en": "Running shoes and outdoor gear for every pace.", "tr": "Her tempoya uygun koşu ayakkabıları ve outdoor ekipmanları." },
+      "children": [
+        { "slug": "running", "image": "prod-aerorun-pro.jpg", "name": { "en": "Running", "tr": "Koşu" }, "description": { "en": "Running shoes and gear.", "tr": "Koşu ayakkabıları ve ekipmanları." } }
+      ]
+    },
+    {
+      "slug": "accessories", "image": "cat-accessories.jpg",
+      "name": { "en": "Accessories", "tr": "Aksesuar" },
+      "description": { "en": "Cases, straps and the small things that complete your setup.", "tr": "Kılıflar, kayışlar ve düzeninizi tamamlayan küçük detaylar." },
+      "children": []
+    }
+  ],
+  "products": [
+    {
+      "slug": "sony-wh-1000xm5", "brand": "Sony", "category": "wireless-headphones", "picture": "prod-sony-wh1000xm5.jpg",
+      "name": { "en": "Sony WH-1000XM5 Wireless Headphones", "tr": "Sony WH-1000XM5 Kablosuz Kulaklık" },
+      "description": { "en": "Industry leading noise cancelling with two processors and eight microphones, up to 30 hours of battery and crystal clear calls.", "tr": "İki işlemci ve sekiz mikrofonla sektör lideri gürültü engelleme, 30 saate kadar pil ömrü ve net görüşme kalitesi." },
+      "rating": 4.9, "reviewCount": 428, "badge": null, "createdDaysAgo": 12,
+      "offers": [
+        { "seller": "teknovizyon", "price": 12499, "oldPrice": 15199, "stock": 14, "shipping": 0, "daysMin": 1, "daysMax": 1, "condition": { "en": "New / Sealed Box", "tr": "Sıfır / Kapalı Kutu" } },
+        { "seller": "soundlab", "price": 12749, "oldPrice": 15199, "stock": 6, "shipping": 0, "daysMin": 2, "daysMax": 2, "condition": { "en": "New / Sealed Box", "tr": "Sıfır / Kapalı Kutu" } },
+        { "seller": "marmara-audio", "price": 12459, "oldPrice": null, "stock": 3, "shipping": 59, "daysMin": 2, "daysMax": 3, "condition": { "en": "New / Sealed Box", "tr": "Sıfır / Kapalı Kutu" } }
+      ],
+      "specs": [
+        { "label": { "en": "Driver Unit", "tr": "Sürücü Ünitesi" }, "value": { "en": "30 mm", "tr": "30 mm" } },
+        { "label": { "en": "Battery Life", "tr": "Pil Ömrü" }, "value": { "en": "Up to 30 hours", "tr": "30 saate kadar" } },
+        { "label": { "en": "Connection", "tr": "Bağlantı" }, "value": { "en": "Bluetooth 5.3, LDAC", "tr": "Bluetooth 5.3, LDAC" } },
+        { "label": { "en": "Weight", "tr": "Ağırlık" }, "value": { "en": "250 g", "tr": "250 g" } }
+      ],
+      "reviews": [
+        { "author": "Emre K.", "rating": 5, "daysAgo": 2, "comment": { "en": "Noise cancelling is excellent and it stays comfortable for hours. Arrived the next day.", "tr": "Gürültü engelleme mükemmel, saatlerce rahatsız etmiyor. Ertesi gün elimdeydi." } },
+        { "author": "Selin A.", "rating": 5, "daysAgo": 9, "comment": { "en": "Calls are clear even outside. Worth every penny.", "tr": "Dışarıda bile görüşmeler çok net. Fiyatını hak ediyor." } },
+        { "author": "Burak T.", "rating": 5, "daysAgo": 15, "comment": { "en": "Battery easily lasts a full week of commuting.", "tr": "Pil bir haftalık yol boyunca rahatça yetiyor." } },
+        { "author": "Deniz Y.", "rating": 4, "daysAgo": 21, "comment": { "en": "Great sound, the case could be smaller.", "tr": "Ses harika, kutusu biraz daha küçük olabilirdi." } }
+      ]
+    },
+    {
+      "slug": "sony-wh-1000xm5-platinum-silver", "brand": "Sony", "category": "wireless-headphones", "picture": "prod-sony-wh1000xm5-silver.jpg",
+      "name": { "en": "Sony WH-1000XM5 Platinum Silver", "tr": "Sony WH-1000XM5 Platin Gümüş" },
+      "description": { "en": "The same flagship noise cancelling headphones in a soft platinum silver finish.", "tr": "Aynı amiral gemisi gürültü engelleyici kulaklık, yumuşak platin gümüş renkte." },
+      "rating": 4.8, "reviewCount": 196, "badge": "FastDelivery", "createdDaysAgo": 8,
+      "offers": [
+        { "seller": "soundlab", "price": 12999, "oldPrice": null, "stock": 9, "shipping": 0, "daysMin": 1, "daysMax": 1 },
+        { "seller": "teknovizyon", "price": 13199, "oldPrice": null, "stock": 4, "shipping": 0, "daysMin": 1, "daysMax": 2 }
+      ],
+      "specs": [
+        { "label": { "en": "Battery Life", "tr": "Pil Ömrü" }, "value": { "en": "Up to 30 hours", "tr": "30 saate kadar" } },
+        { "label": { "en": "Color", "tr": "Renk" }, "value": { "en": "Platinum Silver", "tr": "Platin Gümüş" } }
+      ],
+      "reviews": [
+        { "author": "Ayse D.", "rating": 5, "daysAgo": 4, "comment": { "en": "The silver color looks even better in person.", "tr": "Gümüş rengi gerçekte daha da güzel duruyor." } },
+        { "author": "Can M.", "rating": 4, "daysAgo": 11, "comment": { "en": "Very good, fast delivery.", "tr": "Çok iyi, teslimat hızlıydı." } }
+      ]
+    },
+    {
+      "slug": "audiolab-studio-pro-bundle", "brand": "AudioLab", "category": "wireless-headphones", "picture": "prod-studio-bundle.jpg",
+      "name": { "en": "Studio Pro Headphone and Watch Bundle", "tr": "Studio Pro Kulaklık ve Saat Paketi" },
+      "description": { "en": "Studio Pro over-ear headphones bundled with a fitness watch, ideal for training and focus.", "tr": "Studio Pro kulak üstü kulaklık ve fitness saati bir arada; antrenman ve odaklanma için ideal." },
+      "rating": 4.6, "reviewCount": 88, "badge": null, "createdDaysAgo": 30,
+      "offers": [
+        { "seller": "soundlab", "price": 9990, "oldPrice": 11490, "stock": 11, "shipping": 0, "daysMin": 2, "daysMax": 3 }
+      ],
+      "specs": [
+        { "label": { "en": "Contents", "tr": "Kutu İçeriği" }, "value": { "en": "Headphones, watch, charging cables", "tr": "Kulaklık, saat, şarj kabloları" } }
+      ],
+      "reviews": [
+        { "author": "Mert O.", "rating": 5, "daysAgo": 6, "comment": { "en": "Great value bundle.", "tr": "Fiyat performans açısından çok iyi bir paket." } },
+        { "author": "Ece B.", "rating": 4, "daysAgo": 18, "comment": { "en": "Headphones are very good, the watch is basic.", "tr": "Kulaklık çok iyi, saat temel düzeyde." } }
+      ]
+    },
+    {
+      "slug": "apple-watch-series-10-titanium", "brand": "Apple", "category": "smart-watches", "picture": "prod-apple-watch-10.jpg",
+      "name": { "en": "Apple Watch Series 10 Titanium", "tr": "Apple Watch Series 10 Titanyum" },
+      "description": { "en": "Thinner titanium design, a brighter wide-angle display and advanced health features.", "tr": "Daha ince titanyum tasarım, daha parlak geniş açılı ekran ve gelişmiş sağlık özellikleri." },
+      "rating": 4.8, "reviewCount": 312, "badge": "BestSeller", "createdDaysAgo": 20,
+      "offers": [
+        { "seller": "teknovizyon", "price": 18999, "oldPrice": null, "stock": 7, "shipping": 0, "daysMin": 1, "daysMax": 1 },
+        { "seller": "soundlab", "price": 19249, "oldPrice": null, "stock": 3, "shipping": 0, "daysMin": 2, "daysMax": 3 }
+      ],
+      "specs": [
+        { "label": { "en": "Case", "tr": "Kasa" }, "value": { "en": "46 mm titanium", "tr": "46 mm titanyum" } },
+        { "label": { "en": "Water Resistance", "tr": "Suya Dayanıklılık" }, "value": { "en": "50 m", "tr": "50 m" } },
+        { "label": { "en": "Battery Life", "tr": "Pil Ömrü" }, "value": { "en": "Up to 18 hours", "tr": "18 saate kadar" } }
+      ],
+      "reviews": [
+        { "author": "Zeynep K.", "rating": 5, "daysAgo": 3, "comment": { "en": "Light and elegant, the screen is very bright.", "tr": "Hafif ve şık, ekranı çok parlak." } },
+        { "author": "Kerem S.", "rating": 5, "daysAgo": 12, "comment": { "en": "Sleep tracking is accurate.", "tr": "Uyku takibi çok doğru." } },
+        { "author": "Ali R.", "rating": 4, "daysAgo": 25, "comment": { "en": "Battery could be better.", "tr": "Pil daha iyi olabilirdi." } }
+      ]
+    },
+    {
+      "slug": "keycraft-mechanical-keyboard-75", "brand": "KeyCraft", "category": "keyboards-mice", "picture": "prod-mech-keyboard.jpg",
+      "name": { "en": "KeyCraft 75% Wireless Mechanical Keyboard", "tr": "KeyCraft %75 Mekanik Kablosuz Klavye" },
+      "description": { "en": "Hot-swappable switches, gasket mount and tri-mode wireless in a compact 75% layout.", "tr": "Değiştirilebilir switch'ler, gasket yapı ve üç modlu kablosuz bağlantı; kompakt %75 düzen." },
+      "rating": 4.8, "reviewCount": 164, "badge": "FreeShipping", "createdDaysAgo": 5,
+      "offers": [
+        { "seller": "teknovizyon", "price": 4850, "oldPrice": null, "stock": 18, "shipping": 0, "daysMin": 1, "daysMax": 2 }
+      ],
+      "specs": [
+        { "label": { "en": "Layout", "tr": "Düzen" }, "value": { "en": "75%, 84 keys", "tr": "%75, 84 tuş" } },
+        { "label": { "en": "Connection", "tr": "Bağlantı" }, "value": { "en": "Bluetooth, 2.4 GHz, USB-C", "tr": "Bluetooth, 2.4 GHz, USB-C" } }
+      ],
+      "reviews": [
+        { "author": "Onur C.", "rating": 5, "daysAgo": 7, "comment": { "en": "Typing feels amazing.", "tr": "Yazma hissi muhteşem." } },
+        { "author": "Gizem H.", "rating": 4, "daysAgo": 14, "comment": { "en": "Very good, a bit loud.", "tr": "Çok iyi, biraz sesli." } }
+      ]
+    },
+    {
+      "slug": "minimal-leather-backpack", "brand": "Vero Atelier", "category": "bags", "picture": "prod-leather-backpack.jpg",
+      "name": { "en": "Minimal Leather Backpack", "tr": "Minimal Deri Sırt Çantası" },
+      "description": { "en": "Full grain leather backpack with a padded laptop sleeve and clean lines.", "tr": "Dolgulu laptop bölmeli, sade çizgili tam tahıllı deri sırt çantası." },
+      "rating": 4.7, "reviewCount": 186, "badge": null, "createdDaysAgo": 15,
+      "offers": [
+        { "seller": "atelier-moda", "price": 4290, "oldPrice": 4990, "stock": 12, "shipping": 0, "daysMin": 2, "daysMax": 2 }
+      ],
+      "specs": [
+        { "label": { "en": "Material", "tr": "Malzeme" }, "value": { "en": "Full grain leather", "tr": "Tam tahıllı deri" } },
+        { "label": { "en": "Laptop Sleeve", "tr": "Laptop Bölmesi" }, "value": { "en": "Up to 14 inch", "tr": "14 inç'e kadar" } }
+      ],
+      "reviews": [
+        { "author": "Elif N.", "rating": 5, "daysAgo": 5, "comment": { "en": "Leather quality is great.", "tr": "Deri kalitesi harika." } },
+        { "author": "Tolga U.", "rating": 4, "daysAgo": 19, "comment": { "en": "Stylish, a little heavy.", "tr": "Şık, biraz ağır." } }
+      ]
+    },
+    {
+      "slug": "wool-blend-coat", "brand": "Vero Atelier", "category": "outerwear", "picture": "prod-wool-coat.jpg",
+      "name": { "en": "Wool Blend Coat", "tr": "Yün Karışımlı Kaşe Kaban" },
+      "description": { "en": "A relaxed wool blend coat with a timeless cut for the cold season.", "tr": "Soğuk mevsim için zamansız kesimli, rahat yün karışımlı kaban." },
+      "rating": 4.8, "reviewCount": 142, "badge": null, "createdDaysAgo": 10,
+      "offers": [
+        { "seller": "atelier-moda", "price": 6890, "oldPrice": 9190, "stock": 8, "shipping": 0, "daysMin": 2, "daysMax": 3 }
+      ],
+      "specs": [
+        { "label": { "en": "Material", "tr": "Malzeme" }, "value": { "en": "70% wool, 30% polyester", "tr": "%70 yün, %30 polyester" } }
+      ],
+      "reviews": [
+        { "author": "Merve L.", "rating": 5, "daysAgo": 8, "comment": { "en": "Fits perfectly and keeps warm.", "tr": "Tam oturdu, çok sıcak tutuyor." } },
+        { "author": "Sena G.", "rating": 5, "daysAgo": 13, "comment": { "en": "Beautiful fabric.", "tr": "Kumaşı çok güzel." } }
+      ]
+    },
+    {
+      "slug": "modern-ceramic-coffee-set", "brand": "Terra Studio", "category": "kitchen-dining", "picture": "prod-ceramic-coffee-set.jpg",
+      "name": { "en": "Modern Ceramic Coffee Set", "tr": "Modern Seramik Kahve Seti" },
+      "description": { "en": "Handmade stoneware set for two with a matte glaze.", "tr": "Mat sırlı, el yapımı iki kişilik taş seramik set." },
+      "rating": 4.9, "reviewCount": 254, "badge": "BestSeller", "createdDaysAgo": 25,
+      "offers": [
+        { "seller": "nordic-home", "price": 1650, "oldPrice": 2060, "stock": 20, "shipping": 0, "daysMin": 1, "daysMax": 2 }
+      ],
+      "specs": [
+        { "label": { "en": "Pieces", "tr": "Parça" }, "value": { "en": "2 cups, 2 saucers", "tr": "2 fincan, 2 tabak" } },
+        { "label": { "en": "Dishwasher Safe", "tr": "Bulaşık Makinesi" }, "value": { "en": "Yes", "tr": "Uygun" } }
+      ],
+      "reviews": [
+        { "author": "Ceren P.", "rating": 5, "daysAgo": 2, "comment": { "en": "Even nicer than the photos.", "tr": "Fotoğraflardan bile güzel." } },
+        { "author": "Baris E.", "rating": 5, "daysAgo": 16, "comment": { "en": "Perfect gift.", "tr": "Mükemmel bir hediye." } }
+      ]
+    },
+    {
+      "slug": "aerorun-pro-running-shoes", "brand": "Kinetix Lab", "category": "running", "picture": "prod-aerorun-pro.jpg",
+      "name": { "en": "AeroRun Pro Running Shoes", "tr": "AeroRun Pro Koşu Ayakkabısı" },
+      "description": { "en": "Lightweight running shoes with a responsive foam and breathable knit upper.", "tr": "Tepkili köpük taban ve nefes alan örgü yüzeyli hafif koşu ayakkabısı." },
+      "rating": 4.6, "reviewCount": 198, "badge": null, "createdDaysAgo": 18,
+      "offers": [
+        { "seller": "sport-world", "price": 3499, "oldPrice": 4399, "stock": 25, "shipping": 0, "daysMin": 1, "daysMax": 2 }
+      ],
+      "specs": [
+        { "label": { "en": "Weight", "tr": "Ağırlık" }, "value": { "en": "240 g", "tr": "240 g" } },
+        { "label": { "en": "Drop", "tr": "Topuk Farkı" }, "value": { "en": "8 mm", "tr": "8 mm" } }
+      ],
+      "reviews": [
+        { "author": "Hakan V.", "rating": 5, "daysAgo": 6, "comment": { "en": "Very light and comfortable.", "tr": "Çok hafif ve rahat." } },
+        { "author": "Irem F.", "rating": 4, "daysAgo": 20, "comment": { "en": "Runs a bit small.", "tr": "Biraz dar kalıp." } }
+      ]
+    },
+    {
+      "slug": "sony-wh-1000xm5-travel-case-set", "brand": "Sony", "category": "accessories", "picture": "prod-sony-case-set.jpg",
+      "name": { "en": "Sony WH-1000XM5 Travel Case Set", "tr": "Sony WH-1000XM5 Taşıma Kılıflı Set" },
+      "description": { "en": "Hard shell travel case with cable pouch, made for the WH-1000XM5.", "tr": "WH-1000XM5 için kablo cepli sert taşıma kılıfı seti." },
+      "rating": 4.7, "reviewCount": 74, "badge": "FastDelivery", "createdDaysAgo": 3,
+      "offers": [
+        { "seller": "teknovizyon", "price": 1290, "oldPrice": 1490, "stock": 30, "shipping": 0, "daysMin": 1, "daysMax": 1 },
+        { "seller": "marmara-audio", "price": 1190, "oldPrice": null, "stock": 5, "shipping": 59, "daysMin": 2, "daysMax": 3 }
+      ],
+      "specs": [
+        { "label": { "en": "Material", "tr": "Malzeme" }, "value": { "en": "EVA hard shell", "tr": "EVA sert kabuk" } }
+      ],
+      "reviews": [
+        { "author": "Yusuf A.", "rating": 5, "daysAgo": 4, "comment": { "en": "Fits perfectly.", "tr": "Tam oturuyor." } }
+      ]
+    }
+  ],
+  "campaigns": [
+    {
+      "slug": "season-essentials", "hero": "campaign-season-essentials.jpg", "maxDiscountPercent": 25, "endsInDays": 30,
+      "title": { "en": "Season Essentials", "tr": "Sezonun Temel Parçaları" },
+      "description": { "en": "The most loved timeless designs of the season from selected fashion, home and accessory sellers, with special deals.", "tr": "Seçili moda, ev & yaşam ve aksesuar satıcılarında sezonun en sevilen zamansız tasarımları özel fırsatlarla." },
+      "badge": { "en": "Up to 25% off", "tr": "%25'e Varan İndirim" },
+      "products": [ "minimal-leather-backpack", "wool-blend-coat", "modern-ceramic-coffee-set", "aerorun-pro-running-shoes" ]
+    },
+    {
+      "slug": "workspace-refresh", "hero": "hero-electronics.jpg", "maxDiscountPercent": 18, "endsInDays": 21,
+      "title": { "en": "Refresh Your Workspace", "tr": "Çalışma Alanını Yenile" },
+      "description": { "en": "Wireless keyboards, noise cancelling headphones and minimalist desk accessories.", "tr": "Kablosuz klavyeler, gürültü engelleyici kulaklıklar ve minimalist masa aksesuarları." },
+      "badge": { "en": "Free shipping on selected items", "tr": "Seçili Ürünlerde Ücretsiz Kargo" },
+      "products": [ "keycraft-mechanical-keyboard-75", "sony-wh-1000xm5", "audiolab-studio-pro-bundle", "sony-wh-1000xm5-travel-case-set" ]
+    }
+  ]
+}

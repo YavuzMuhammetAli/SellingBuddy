@@ -1,10 +1,9 @@
+using CatalogService.Api.Core.Application;
 using CatalogService.Api.Core.Application.ViewModels;
 using CatalogService.Api.Core.Domain;
-using CatalogService.Api.Infrastructure;
 using CatalogService.Api.Infrastructure.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace CatalogService.Api.Controllers
@@ -14,189 +13,162 @@ namespace CatalogService.Api.Controllers
     public class CatalogController : ControllerBase
     {
         private readonly CatalogContext _catalogContext;
-        private readonly CatalogSettings _settings;
+        private readonly CatalogQueryService _queries;
         private readonly IWebHostEnvironment _environment;
 
-        public CatalogController(CatalogContext catalogContext, IOptionsSnapshot<CatalogSettings> settings, IWebHostEnvironment environment)
+        public CatalogController(CatalogContext catalogContext, CatalogQueryService queries, IWebHostEnvironment environment)
         {
             _catalogContext = catalogContext;
-            _settings = settings.Value;
+            _queries = queries;
             _environment = environment;
-
-            //read only queries, no tracking needed
-            _catalogContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-        //GET api/catalog/items?pageSize=10&pageIndex=0 or ?ids=1,2,3
+        //GET api/catalog/items?category=electronics&brands=1,2&sort=price_asc&pageIndex=0&pageSize=12
         [HttpGet("items")]
-        [ProducesResponseType(typeof(PaginatedItemsViewModel<CatalogItem>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(IEnumerable<CatalogItem>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> ItemsAsync([FromQuery] int pageSize = 10, [FromQuery] int pageIndex = 0, string ids = null)
+        [ProducesResponseType(typeof(PaginatedItemsViewModel<ProductSummaryViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<PaginatedItemsViewModel<ProductSummaryViewModel>>> ItemsAsync([FromQuery] CatalogItemQuery query, CancellationToken cancellationToken)
         {
-            if (!string.IsNullOrEmpty(ids))
-            {
-                var items = await GetItemsByIdsAsync(ids);
-
-                if (!items.Any())
-                    return BadRequest("ids value invalid. Must be comma-separated list of numbers");
-
-                return Ok(items);
-            }
-
-            var query = _catalogContext.CatalogItems
-                .Include(ci => ci.CatalogBrand)
-                .Include(ci => ci.CatalogType);
-
-            return Ok(await PaginateAsync(query, pageIndex, pageSize));
+            return await _queries.GetItemsAsync(query, cancellationToken);
         }
 
+        //GET api/catalog/items/facets?category=electronics&q=sony
+        [HttpGet("items/facets")]
+        [ProducesResponseType(typeof(FacetsViewModel), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<FacetsViewModel>> FacetsAsync([FromQuery] CatalogItemQuery query, CancellationToken cancellationToken)
+        {
+            return await _queries.GetFacetsAsync(query, cancellationToken);
+        }
+
+        //GET api/catalog/items/bulk?ids=1,2,3 for wishlist and basket lookups
+        [HttpGet("items/bulk")]
+        [ProducesResponseType(typeof(List<ProductSummaryViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<List<ProductSummaryViewModel>>> ItemsByIdsAsync([FromQuery] string ids, CancellationToken cancellationToken)
+        {
+            var query = new CatalogItemQuery { Ids = ids };
+
+            if (!query.ItemIds.Any())
+                return new List<ProductSummaryViewModel>();
+
+            return await _queries.GetItemsByIdsAsync(query.ItemIds, cancellationToken);
+        }
+
+        //detail with offers, also used by the gateway aggregator
         [HttpGet("items/{id:int}")]
-        [ProducesResponseType(typeof(CatalogItem), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ProductDetailViewModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<CatalogItem>> ItemByIdAsync(int id)
+        public async Task<ActionResult<ProductDetailViewModel>> ItemByIdAsync(int id, CancellationToken cancellationToken)
         {
-            if (id <= 0)
-                return BadRequest();
-
-            var item = await _catalogContext.CatalogItems
-                .Include(ci => ci.CatalogBrand)
-                .Include(ci => ci.CatalogType)
-                .SingleOrDefaultAsync(ci => ci.Id == id);
-
-            if (item == null)
-                return NotFound();
-
-            ChangeUriPlaceholder(new[] { item });
-
-            return item;
+            var item = await _queries.GetDetailAsync(id, null, cancellationToken);
+            return item == null ? NotFound() : item;
         }
 
-        //GET api/catalog/items/withname/samplename?pageSize=3&pageIndex=0
-        [HttpGet("items/withname/{name:minlength(1)}")]
-        [ProducesResponseType(typeof(PaginatedItemsViewModel<CatalogItem>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsWithNameAsync(string name, [FromQuery] int pageSize = 10, [FromQuery] int pageIndex = 0)
+        [HttpGet("items/slug/{slug}")]
+        [ProducesResponseType(typeof(ProductDetailViewModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<ProductDetailViewModel>> ItemBySlugAsync(string slug, CancellationToken cancellationToken)
         {
-            var query = _catalogContext.CatalogItems
-                .Include(ci => ci.CatalogBrand)
-                .Include(ci => ci.CatalogType)
-                .Where(ci => ci.Name.StartsWith(name));
-
-            return await PaginateAsync(query, pageIndex, pageSize);
+            var item = await _queries.GetDetailAsync(null, slug.ToLowerInvariant(), cancellationToken);
+            return item == null ? NotFound() : item;
         }
 
-        //GET api/catalog/items/type/1/brand/2
-        [HttpGet("items/type/{catalogTypeId:int}/brand/{catalogBrandId:int?}")]
-        [ProducesResponseType(typeof(PaginatedItemsViewModel<CatalogItem>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsByTypeIdAndBrandIdAsync(int catalogTypeId, int? catalogBrandId, [FromQuery] int pageSize = 10, [FromQuery] int pageIndex = 0)
+        [HttpGet("items/{id:int}/reviews")]
+        [ProducesResponseType(typeof(List<ReviewViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<List<ReviewViewModel>>> ReviewsAsync(int id, CancellationToken cancellationToken)
         {
-            var query = _catalogContext.CatalogItems
-                .Include(ci => ci.CatalogBrand)
-                .Include(ci => ci.CatalogType)
-                .Where(ci => ci.CatalogTypeId == catalogTypeId);
-
-            if (catalogBrandId.HasValue)
-                query = query.Where(ci => ci.CatalogBrandId == catalogBrandId);
-
-            return await PaginateAsync(query, pageIndex, pageSize);
-        }
-
-        //GET api/catalog/items/type/all/brand/2
-        [HttpGet("items/type/all/brand/{catalogBrandId:int?}")]
-        [ProducesResponseType(typeof(PaginatedItemsViewModel<CatalogItem>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsByBrandIdAsync(int? catalogBrandId, [FromQuery] int pageSize = 10, [FromQuery] int pageIndex = 0)
-        {
-            IQueryable<CatalogItem> query = _catalogContext.CatalogItems
-                .Include(ci => ci.CatalogBrand)
-                .Include(ci => ci.CatalogType);
-
-            if (catalogBrandId.HasValue)
-                query = query.Where(ci => ci.CatalogBrandId == catalogBrandId);
-
-            return await PaginateAsync(query, pageIndex, pageSize);
-        }
-
-        [HttpGet("catalogtypes")]
-        [ProducesResponseType(typeof(List<CatalogType>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<List<CatalogType>>> CatalogTypesAsync()
-        {
-            return await _catalogContext.CatalogTypes.ToListAsync();
-        }
-
-        [HttpGet("catalogbrands")]
-        [ProducesResponseType(typeof(List<CatalogBrand>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<List<CatalogBrand>>> CatalogBrandsAsync()
-        {
-            return await _catalogContext.CatalogBrands.ToListAsync();
+            return await _queries.GetReviewsAsync(id, cancellationToken);
         }
 
         //GET api/catalog/items/1/pic
         [HttpGet("items/{catalogItemId:int}/pic")]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetImageAsync(int catalogItemId)
+        public async Task<IActionResult> GetImageAsync(int catalogItemId, CancellationToken cancellationToken)
         {
-            if (catalogItemId <= 0)
-                return BadRequest();
+            var fileName = await _catalogContext.CatalogItems.AsNoTracking()
+                .Where(ci => ci.Id == catalogItemId)
+                .Select(ci => ci.PictureFileName)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            var item = await _catalogContext.CatalogItems.SingleOrDefaultAsync(ci => ci.Id == catalogItemId);
+            return await PictureFileAsync(fileName);
+        }
 
-            if (item == null || string.IsNullOrEmpty(item.PictureFileName))
+        //GET api/catalog/pics/electronics.jpg for categories, sellers and campaigns
+        [HttpGet("pics/{fileName}")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public Task<IActionResult> GetFileAsync(string fileName)
+        {
+            return PictureFileAsync(fileName);
+        }
+
+        private async Task<IActionResult> PictureFileAsync(string fileName)
+        {
+            //only plain file names, no paths
+            if (string.IsNullOrEmpty(fileName) || fileName != Path.GetFileName(fileName))
                 return NotFound();
 
-            var path = Path.Combine(_environment.WebRootPath, "pics", item.PictureFileName);
+            var path = Path.Combine(_environment.WebRootPath, "pics", fileName);
 
             if (!System.IO.File.Exists(path))
                 return NotFound();
 
-            var buffer = await System.IO.File.ReadAllBytesAsync(path);
+            Response.Headers.CacheControl = "public,max-age=86400";
 
-            return File(buffer, GetImageMimeType(Path.GetExtension(item.PictureFileName)));
+            return File(await System.IO.File.ReadAllBytesAsync(path), GetImageMimeType(Path.GetExtension(fileName)));
         }
 
-        [HttpPost("items")]
-        [ProducesResponseType((int)HttpStatusCode.Created)]
-        public async Task<ActionResult> CreateProductAsync([FromBody] CatalogItem product)
+        [HttpGet("catalogtypes")]
+        [HttpGet("categories")]
+        [ProducesResponseType(typeof(List<CategoryViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<List<CategoryViewModel>>> CategoriesAsync(CancellationToken cancellationToken)
         {
-            var item = new CatalogItem
-            {
-                CatalogBrandId = product.CatalogBrandId,
-                CatalogTypeId = product.CatalogTypeId,
-                Description = product.Description,
-                Name = product.Name,
-                PictureFileName = product.PictureFileName,
-                Price = product.Price,
-                AvailableStock = product.AvailableStock
-            };
-
-            _catalogContext.CatalogItems.Add(item);
-            await _catalogContext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(ItemByIdAsync), new { id = item.Id }, null);
+            return await _queries.GetCategoriesAsync(cancellationToken);
         }
 
-        [HttpPut("items")]
+        [HttpGet("categories/{slug}")]
+        [ProducesResponseType(typeof(CategoryViewModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.Created)]
-        public async Task<ActionResult> UpdateProductAsync([FromBody] CatalogItem productToUpdate)
+        public async Task<ActionResult<CategoryViewModel>> CategoryAsync(string slug, CancellationToken cancellationToken)
         {
-            var catalogItem = await _catalogContext.CatalogItems.AsTracking().SingleOrDefaultAsync(i => i.Id == productToUpdate.Id);
+            var category = await _queries.GetCategoryAsync(slug, cancellationToken);
+            return category == null ? NotFound() : category;
+        }
 
-            if (catalogItem == null)
-                return NotFound(new { Message = $"Item with id {productToUpdate.Id} not found." });
+        [HttpGet("catalogbrands")]
+        [ProducesResponseType(typeof(List<BrandViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<List<BrandViewModel>>> BrandsAsync(CancellationToken cancellationToken)
+        {
+            return await _queries.GetBrandsAsync(cancellationToken);
+        }
 
-            catalogItem.Name = productToUpdate.Name;
-            catalogItem.Description = productToUpdate.Description;
-            catalogItem.Price = productToUpdate.Price;
-            catalogItem.AvailableStock = productToUpdate.AvailableStock;
-            catalogItem.CatalogBrandId = productToUpdate.CatalogBrandId;
-            catalogItem.CatalogTypeId = productToUpdate.CatalogTypeId;
-            catalogItem.PictureFileName = productToUpdate.PictureFileName;
+        [HttpGet("sellers")]
+        [ProducesResponseType(typeof(List<SellerViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<List<SellerViewModel>>> SellersAsync(CancellationToken cancellationToken)
+        {
+            return await _queries.GetSellersAsync(cancellationToken);
+        }
 
-            await _catalogContext.SaveChangesAsync();
+        [HttpGet("sellers/{slug}")]
+        [ProducesResponseType(typeof(SellerViewModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<SellerViewModel>> SellerAsync(string slug, CancellationToken cancellationToken)
+        {
+            var seller = await _queries.GetSellerAsync(slug.ToLowerInvariant(), cancellationToken);
+            return seller == null ? NotFound() : seller;
+        }
 
-            return CreatedAtAction(nameof(ItemByIdAsync), new { id = catalogItem.Id }, null);
+        [HttpGet("campaigns")]
+        [ProducesResponseType(typeof(List<CampaignViewModel>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<List<CampaignViewModel>>> CampaignsAsync(CancellationToken cancellationToken)
+        {
+            return await _queries.GetCampaignsAsync(cancellationToken);
+        }
+
+        [HttpGet("campaigns/{slug}")]
+        [ProducesResponseType(typeof(CampaignViewModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<CampaignViewModel>> CampaignAsync(string slug, CancellationToken cancellationToken)
+        {
+            var campaign = await _queries.GetCampaignAsync(slug.ToLowerInvariant(), cancellationToken);
+            return campaign == null ? NotFound() : campaign;
         }
 
         [HttpDelete("{id:int}")]
@@ -204,7 +176,7 @@ namespace CatalogService.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult> DeleteProductAsync(int id)
         {
-            var product = await _catalogContext.CatalogItems.AsTracking().SingleOrDefaultAsync(x => x.Id == id);
+            var product = await _catalogContext.CatalogItems.SingleOrDefaultAsync(x => x.Id == id);
 
             if (product == null)
                 return NotFound();
@@ -213,48 +185,6 @@ namespace CatalogService.Api.Controllers
             await _catalogContext.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private async Task<List<CatalogItem>> GetItemsByIdsAsync(string ids)
-        {
-            var numIds = ids.Split(',').Select(id => (Ok: int.TryParse(id, out int x), Value: x)).ToList();
-
-            if (!numIds.All(nid => nid.Ok))
-                return new List<CatalogItem>();
-
-            var idsToSelect = numIds.Select(id => id.Value).ToList();
-
-            var items = await _catalogContext.CatalogItems
-                .Include(ci => ci.CatalogBrand)
-                .Include(ci => ci.CatalogType)
-                .Where(ci => idsToSelect.Contains(ci.Id))
-                .ToListAsync();
-
-            ChangeUriPlaceholder(items);
-
-            return items;
-        }
-
-        private async Task<PaginatedItemsViewModel<CatalogItem>> PaginateAsync(IQueryable<CatalogItem> query, int pageIndex, int pageSize)
-        {
-            var totalItems = await query.LongCountAsync();
-
-            var itemsOnPage = await query
-                .OrderBy(c => c.Name)
-                .Skip(pageSize * pageIndex)
-                .Take(pageSize)
-                .ToListAsync();
-
-            ChangeUriPlaceholder(itemsOnPage);
-
-            return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
-        }
-
-        //picture uri filled from settings
-        private void ChangeUriPlaceholder(IEnumerable<CatalogItem> items)
-        {
-            foreach (var item in items)
-                item.PictureUri = _settings.PicBaseUrl.Replace("[0]", item.Id.ToString());
         }
 
         private static string GetImageMimeType(string extension) => extension.ToLowerInvariant() switch

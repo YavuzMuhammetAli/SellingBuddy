@@ -17,9 +17,19 @@ namespace CatalogService.Api.Infrastructure.EntityConfigurations
                 .UseHiLo("catalog_type_hilo")
                 .IsRequired();
 
-            builder.Property(ct => ct.Type)
-                .IsRequired()
-                .HasMaxLength(100);
+            builder.Property(ct => ct.Slug).HasMaxLength(100).IsRequired();
+            builder.HasIndex(ct => ct.Slug).IsUnique();
+
+            builder.HasLocalizedText(ct => ct.Name, 100);
+            builder.HasLocalizedText(ct => ct.Description, 500);
+
+            builder.Property(ct => ct.ImageFileName).HasMaxLength(200);
+
+            //subcategories point to their parent
+            builder.HasOne(ct => ct.ParentCatalogType)
+                .WithMany(ct => ct.Children)
+                .HasForeignKey(ct => ct.ParentCatalogTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
