@@ -1,0 +1,116 @@
+@using System.Globalization
+
+<div class="flex items-center justify-between">
+    @if (!Compact)
+    {
+        <h2 class="t-title-md">@L["Filter.Title"]</h2>
+    }
+    <button type="button" class="btn-link" @onclick="OnClear">@L["Filter.Clear"]</button>
+</div>
+
+@if (ShowCategories && Facets.Categories.Count > 1)
+{
+    <div class="filter-group">
+        <h3>@L["Filter.Subcategories"]</h3>
+        @foreach (var category in Facets.Categories)
+        {
+            <label class="checkbox">
+                <input type="checkbox" checked="@(Query.Category == category.Key)" @onchange="e => ToggleCategory(category.Key, (bool)e.Value)" />
+                @category.Name <span class="muted">(@category.Count)</span>
+            </label>
+        }
+    </div>
+}
+
+<div class="filter-group">
+    <h3>@L["Filter.PriceRange"]</h3>
+    <div class="price-range">
+        <input type="number" class="input" min="0" inputmode="numeric" placeholder="@Fmt.Price(Math.Floor(Facets.MinPrice))" aria-label="@L["Filter.MinPrice"]"
+               value="@Query.MinPrice?.ToString(CultureInfo.InvariantCulture)" @onchange="e => SetPrice(e, true)" />
+        <input type="number" class="input" min="0" inputmode="numeric" placeholder="@Fmt.Price(Math.Ceiling(Facets.MaxPrice))" aria-label="@L["Filter.MaxPrice"]"
+               value="@Query.MaxPrice?.ToString(CultureInfo.InvariantCulture)" @onchange="e => SetPrice(e, false)" />
+    </div>
+</div>
+
+@if (Facets.Brands.Any())
+{
+    <div class="filter-group">
+        <h3>@L["Filter.Brand"]</h3>
+        @foreach (var brand in Facets.Brands)
+        {
+            var id = int.Parse(brand.Key, CultureInfo.InvariantCulture);
+            <label class="checkbox">
+                <input type="checkbox" checked="@Query.Brands.Contains(id)" @onchange="e => Toggle(Query.Brands, id, (bool)e.Value)" />
+                @brand.Name <span class="muted">(@brand.Count)</span>
+            </label>
+        }
+    </div>
+}
+
+@if (Facets.Sellers.Any())
+{
+    <div class="filter-group">
+        <h3>@L["Filter.Seller"]</h3>
+        @foreach (var seller in Facets.Sellers)
+        {
+            <label class="checkbox">
+                <input type="checkbox" checked="@Query.Sellers.Contains(seller.Key)" @onchange="e => Toggle(Query.Sellers, seller.Key, (bool)e.Value)" />
+                @seller.Name <span class="muted">(@seller.Count)</span>
+            </label>
+        }
+    </div>
+}
+
+<div class="filter-group">
+    <h3>@L["Filter.RatingStatus"]</h3>
+    <label class="checkbox"><input type="checkbox" checked="@Query.MinRating.HasValue" @onchange="e => SetFlag(() => Query.MinRating = (bool)e.Value ? 4 : null)" /> @L["Filter.FourStars"]</label>
+    <label class="checkbox"><input type="checkbox" checked="@Query.InStock" @onchange="e => SetFlag(() => Query.InStock = (bool)e.Value)" /> @L["Filter.InStock"]</label>
+    <label class="checkbox"><input type="checkbox" checked="@Query.OnSale" @onchange="e => SetFlag(() => Query.OnSale = (bool)e.Value)" /> @L["Filter.OnSale"]</label>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public CatalogQuery Query { get; set; }
+    [Parameter, EditorRequired] public Facets Facets { get; set; }
+    [Parameter] public bool ShowCategories { get; set; } = true;
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    private string rootCategory;
+
+    protected override void OnParametersSet() => rootCategory ??= Query.Category;
+
+    private Task ToggleCategory(string slug, bool on)
+    {
+        Query.Category = on ? slug : rootCategory;
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task Toggle<T>(List<T> list, T value, bool on)
+    {
+        if (on && !list.Contains(value))
+            list.Add(value);
+        else if (!on)
+            list.Remove(value);
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task SetFlag(Action set)
+    {
+        set();
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task SetPrice(ChangeEventArgs e, bool min)
+    {
+        decimal? value = decimal.TryParse(e.Value?.ToString(), NumberStyles.Number, CultureInfo.InvariantCulture, out var parsed) && parsed >= 0 ? parsed : null;
+
+        if (min)
+            Query.MinPrice = value;
+        else
+            Query.MaxPrice = value;
+
+        return OnChanged.InvokeAsync();
+    }
+}

@@ -1,0 +1,45 @@
+@page "/categories"
+@inject StorefrontState State
+
+<PageTitle>@L["Nav.AllCategories"] · SellingBudy</PageTitle>
+
+<div class="page page-tight">
+    <Breadcrumb Items='new[] { new Breadcrumb.Crumb(L["Nav.AllCategories"]) }' />
+    <h1 class="t-headline-lg">@L["Nav.AllCategories"]</h1>
+
+    @if (!State.Categories.Any())
+    {
+        <SkeletonGrid Count="6" />
+    }
+    else
+    {
+        <div class="col gap-2xl">
+            @foreach (var category in State.Categories)
+            {
+                <section class="card card-pad-xl">
+                    <div class="flex items-center gap-lg">
+                        <img src="@category.ImageUri" alt="" style="width:72px;height:72px;border-radius:var(--r-lg);object-fit:cover;background:var(--c-surface-secondary)" />
+                        <div class="flex-1">
+                            <h2 class="t-headline-sm"><a href="@($"categories/{category.Slug}")">@category.Name</a></h2>
+                            <p class="t-body-sm muted">@string.Format(L["Category.ProductCount"], Fmt.Count(category.ProductCount))</p>
+                        </div>
+                        <a href="@($"categories/{category.Slug}")" class="btn btn-outline btn-sm hide-mobile">@L["Common.SeeAll"] <AppIcon Name="arrow_forward" /></a>
+                    </div>
+                    @if (category.Children.Any())
+                    {
+                        <div class="flex wrap gap-sm mt-lg">
+                            @foreach (var child in category.Children)
+                            {
+                                <a href="@($"categories/{child.Slug}")" class="chip">@child.Name <span class="muted">(@child.ProductCount)</span></a>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    protected override Task OnInitializedAsync() => State.EnsureLoadedAsync();
+}

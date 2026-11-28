@@ -1,0 +1,54 @@
+@page "/search"
+@inject NavigationManager Navigation
+
+<PageTitle>@(string.IsNullOrWhiteSpace(Q) ? L["Search.AllProducts"] : string.Format(L["Search.Title"], Q)) · SellingBudy</PageTitle>
+
+<div class="page page-tight">
+    <div class="col gap-sm" style="padding-bottom: var(--s-lg); border-bottom: 1px solid var(--c-outline)">
+        <h1 class="t-headline-md">@(string.IsNullOrWhiteSpace(Q) ? L["Search.AllProducts"] : string.Format(L["Search.Title"], Q))</h1>
+        <p class="t-body-md muted">
+            @string.Format(L["Search.Found"], Fmt.Count(total))
+            @if (facets?.Categories.Any() == true)
+            {
+                <span> · @L["Search.RelatedCategories"] </span>
+                @foreach (var category in facets.Categories.Take(3))
+                {
+                    <a href="@($"categories/{category.Key}")" class="text-primary">@category.Name</a>
+                    @(category == facets.Categories.Take(3).Last() ? null : ", ")
+                }
+            }
+        </p>
+    </div>
+
+    @if (facets?.Brands.Count > 1)
+    {
+        <div class="flex items-center gap-sm wrap">
+            <span class="t-label-md muted">@L["Search.Brands"]</span>
+            @foreach (var brand in facets.Brands)
+            {
+                <a href="@($"search?q={Uri.EscapeDataString(brand.Name)}")" class="chip @(string.Equals(Q, brand.Name, StringComparison.OrdinalIgnoreCase) ? "active" : null)">@brand.Name</a>
+            }
+        </div>
+    }
+
+    <ProductListing Q="@Q" InitialSort="@Sort" ShowSidebar="false" ShowViewToggle="false" GridClass="product-grid" PageSize="16"
+                    Variant="ProductCard.CardVariant.Search" OnTotalChanged="t => total = t" OnFacetsLoaded="f => facets = f">
+        <EmptyContent>
+            <EmptyState Icon="search_off" Title="@L["Search.EmptyTitle"]" Text="@L["Search.EmptyText"]">
+                <a href="@($"search?q={Uri.EscapeDataString("Sony")}")" class="btn btn-primary">Sony</a>
+                <a href="categories/smart-watches" class="btn btn-outline">@L["Search.SuggestWatches"]</a>
+            </EmptyState>
+        </EmptyContent>
+    </ProductListing>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string Q { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string Sort { get; set; }
+
+    private long total;
+    private Facets facets;
+}

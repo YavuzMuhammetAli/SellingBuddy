@@ -1,0 +1,58 @@
+@page "/campaigns/{Slug}"
+@inject ICatalogService CatalogService
+
+<PageTitle>@(campaign?.Title ?? L["Nav.Campaigns"]) · SellingBudy</PageTitle>
+
+<div class="page page-tight">
+    @if (notFound)
+    {
+        <EmptyState Icon="auto_awesome" Title="@L["Campaign.NotFound"]">
+            <a href="" class="btn btn-primary">@L["Nav.Home"]</a>
+        </EmptyState>
+    }
+    else if (campaign == null)
+    {
+        <div class="skeleton" style="height: 340px"></div>
+    }
+    else
+    {
+        <section class="hero hero-md">
+            <img src="@campaign.HeroUri" alt="" />
+            <div class="hero-content">
+                <div class="flex items-center gap-sm wrap">
+                    <span class="badge badge-error badge-lg">@campaign.BadgeText</span>
+                    <span class="badge badge-accent badge-lg">@string.Format(L["Campaign.ValidUntil"], Fmt.Date(campaign.EndsAt))</span>
+                </div>
+                <h1 class="t-display">@campaign.Title</h1>
+                <p class="t-body-lg muted">@campaign.Description</p>
+            </div>
+        </section>
+
+        <ProductListing Campaign="@campaign.Slug" ShowSidebar="false" ShowViewToggle="false" GridClass="product-grid" Variant="ProductCard.CardVariant.Minimal"
+                        CategoryPills="campaign.Categories" SortOptions='new[] { "recommended", "discount", "price_asc" }' />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Slug { get; set; }
+
+    private Campaign campaign;
+    private bool notFound;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (campaign?.Slug == Slug)
+            return;
+
+        try
+        {
+            campaign = await CatalogService.GetCampaignAsync(Slug);
+            notFound = campaign == null;
+        }
+        catch (HttpRequestException)
+        {
+            notFound = true;
+        }
+    }
+}

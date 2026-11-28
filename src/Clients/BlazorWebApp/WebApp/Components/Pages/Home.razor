@@ -1,0 +1,184 @@
+@page "/"
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+
+<PageTitle>SellingBudy · @L["Home.Title"]</PageTitle>
+
+<div class="page">
+    <section class="hero">
+        <img src="img/hero-home.jpg" alt="@L["Home.HeroAlt"]" />
+        <div class="hero-content">
+            <span class="badge badge-accent">@L["Home.HeroEyebrow"]</span>
+            <h1 class="t-display">@L["Home.HeroTitle"]</h1>
+            <p class="t-body-lg muted">@L["Home.HeroText"]</p>
+            <div class="flex gap-md wrap actions">
+                <a href="#trending" class="btn btn-primary btn-lg">@L["Home.StartShopping"]</a>
+                @if (campaigns.Any())
+                {
+                    <a href="@($"campaigns/{campaigns[0].Slug}")" class="btn btn-outline btn-lg">@L["Home.ExploreCollections"]</a>
+                }
+            </div>
+        </div>
+    </section>
+
+    @if (error)
+    {
+        <Notice Kind="error">@L["Error.CatalogUnavailable"]</Notice>
+    }
+
+    <section aria-labelledby="featured-categories">
+        <div class="section-head">
+            <div>
+                <h2 id="featured-categories" class="t-headline-md">@L["Home.FeaturedCategories"]</h2>
+                <p class="muted mt-xs hide-mobile">@L["Home.FeaturedCategoriesText"]</p>
+            </div>
+            <a href="categories" class="btn-link">@L["Common.SeeAll"] <AppIcon Name="arrow_forward" /></a>
+        </div>
+        <div class="cat-grid">
+            @foreach (var category in State.Categories)
+            {
+                <a href="@($"categories/{category.Slug}")" class="ccard">
+                    <div class="ccard-media"><img src="@category.ImageUri" alt="@category.Name" loading="lazy" /></div>
+                    <span class="ccard-label">@category.Name <AppIcon Name="arrow_forward" Class="muted" /></span>
+                </a>
+            }
+        </div>
+    </section>
+
+    @if (campaigns.Any())
+    {
+        <section aria-labelledby="campaigns-title" class="hide-mobile">
+            <div class="section-head">
+                <h2 id="campaigns-title" class="t-headline-md">@L["Home.FeaturedCampaigns"]</h2>
+            </div>
+            <div class="campaign-grid">
+                @foreach (var campaign in campaigns.Take(2))
+                {
+                    <article class="campaign">
+                        <img src="@campaign.HeroUri" alt="@campaign.Title" loading="lazy" />
+                        <div class="campaign-body">
+                            <span class="badge badge-accent">@campaign.BadgeText</span>
+                            <h3 class="t-headline-sm">@campaign.Title</h3>
+                            <p class="muted t-body-md" style="max-width: 420px">@campaign.Description</p>
+                            <a href="@($"campaigns/{campaign.Slug}")" class="btn-link mt-xs">@L["Home.ViewCampaign"] <AppIcon Name="arrow_forward" /></a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    <section id="trending" aria-labelledby="trending-title">
+        <div class="section-head">
+            <div>
+                <h2 id="trending-title" class="t-headline-md">@L["Home.Trending"]</h2>
+                <p class="muted mt-xs hide-mobile">@L["Home.TrendingText"]</p>
+            </div>
+            <a href="search?sort=bestsellers" class="btn-link">@L["Home.AllTrends"] <AppIcon Name="arrow_forward" /></a>
+        </div>
+        @if (trending == null)
+        {
+            <SkeletonGrid Count="4" />
+        }
+        else
+        {
+            <div class="product-grid">
+                @foreach (var product in trending)
+                {
+                    <ProductCard Product="product" @key="product.Id" />
+                }
+            </div>
+        }
+    </section>
+
+    @if (sellers.Any())
+    {
+        <section aria-labelledby="sellers-title" class="hide-mobile">
+            <div class="section-head">
+                <div>
+                    <h2 id="sellers-title" class="t-headline-md">@L["Home.FeaturedSellers"]</h2>
+                    <p class="muted mt-xs">@L["Home.FeaturedSellersText"]</p>
+                </div>
+            </div>
+            <div class="seller-grid">
+                @foreach (var seller in sellers.Take(4))
+                {
+                    <article class="scard">
+                        <header class="flex items-center gap-md">
+                            <span class="avatar-initials">@seller.Initials</span>
+                            <div class="col">
+                                <h3 class="t-title-md flex items-center gap-xs">
+                                    @seller.Name
+                                    @if (seller.IsVerified)
+                                    {
+                                        <span class="verified" title="@L["Seller.Verified"]"><AppIcon Name="verified" Filled="true" /></span>
+                                    }
+                                </h3>
+                                <span class="t-body-sm muted">@string.Format(L["Seller.RatingProducts"], Fmt.Rating(seller.Rating), seller.ProductCount)</span>
+                            </div>
+                        </header>
+                        <a href="@($"sellers/{seller.Slug}")" class="btn btn-outline btn-sm">@L["Seller.ViewStore"]</a>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    <section class="card-muted trust-grid" aria-label="@L["Home.Trust"]">
+        <div class="trust-item"><AppIcon Name="verified_user" /><div><h3 class="t-title-md">@L["Trust.SecurePayment"]</h3><p class="t-body-sm muted">@L["Trust.SecurePaymentText"]</p></div></div>
+        <div class="trust-item"><AppIcon Name="store" /><div><h3 class="t-title-md">@L["Trust.VerifiedSellers"]</h3><p class="t-body-sm muted">@L["Trust.VerifiedSellersText"]</p></div></div>
+        <div class="trust-item"><AppIcon Name="local_shipping" /><div><h3 class="t-title-md">@L["Trust.Delivery"]</h3><p class="t-body-sm muted">@L["Trust.DeliveryText"]</p></div></div>
+        <div class="trust-item"><AppIcon Name="autorenew" /><div><h3 class="t-title-md">@L["Trust.Returns"]</h3><p class="t-body-sm muted">@L["Trust.ReturnsText"]</p></div></div>
+    </section>
+
+    <section class="card newsletter" aria-labelledby="newsletter-title">
+        <div>
+            <h2 id="newsletter-title" class="t-headline-md">@L["Newsletter.Title"]</h2>
+            <p class="muted mt-sm">@L["Newsletter.Text"]</p>
+        </div>
+        <div class="col gap-sm">
+            <form @onsubmit="Subscribe">
+                <input type="email" class="input" placeholder="@L["Newsletter.Placeholder"]" aria-label="@L["Newsletter.Placeholder"]" @bind="newsletterEmail" />
+                <button type="submit" class="btn btn-primary">@L["Newsletter.Subscribe"]</button>
+            </form>
+            @if (newsletterInfo)
+            {
+                <Notice>@L["Common.ComingSoon"]</Notice>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private List<ProductSummary> trending;
+    private List<Campaign> campaigns = new();
+    private List<Seller> sellers = new();
+    private bool error;
+    private string newsletterEmail;
+    private bool newsletterInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await State.EnsureLoadedAsync();
+
+        try
+        {
+            //independent calls run together
+            var trendingTask = CatalogService.GetItemsAsync(new CatalogQuery { Sort = "bestsellers", PageSize = 8 });
+            var campaignTask = CatalogService.GetCampaignsAsync();
+            var sellerTask = CatalogService.GetSellersAsync();
+
+            trending = (await trendingTask).Data;
+            campaigns = await campaignTask;
+            sellers = await sellerTask;
+        }
+        catch (HttpRequestException)
+        {
+            error = true;
+            trending = new List<ProductSummary>();
+        }
+    }
+
+    //newsletter has no backend yet, nothing is stored
+    private void Subscribe() => newsletterInfo = true;
+}

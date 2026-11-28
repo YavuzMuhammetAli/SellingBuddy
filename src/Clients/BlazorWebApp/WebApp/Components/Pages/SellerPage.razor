@@ -1,0 +1,76 @@
+@page "/sellers/{Slug}"
+@inject ICatalogService CatalogService
+
+<PageTitle>@(seller?.Name ?? L["Seller.Store"]) · SellingBudy</PageTitle>
+
+<div class="page page-tight">
+    @if (notFound)
+    {
+        <EmptyState Icon="store" Title="@L["Seller.NotFound"]">
+            <a href="" class="btn btn-primary">@L["Nav.Home"]</a>
+        </EmptyState>
+    }
+    else if (seller == null)
+    {
+        <div class="skeleton" style="height: 300px"></div>
+    }
+    else
+    {
+        <section class="store-banner">
+            <div class="store-cover"><img src="@seller.BannerUri" alt="" /></div>
+            <div class="store-id">
+                <span class="store-logo">@seller.Initials</span>
+                <div class="col gap-xs flex-1">
+                    <h1 class="t-headline-md flex items-center gap-xs">
+                        @seller.Name
+                        @if (seller.IsVerified)
+                        {
+                            <span class="verified" title="@L["Seller.Verified"]" aria-label="@L["Seller.Verified"]"><AppIcon Name="verified" Filled="true" /></span>
+                        }
+                    </h1>
+                    <p class="t-body-md muted">@seller.Tagline · @seller.City</p>
+                    <div class="flex items-center gap-lg wrap t-body-sm mt-xs">
+                        <RatingDisplay Value="seller.Rating" />
+                        <span class="muted">@string.Format(L["Seller.RatingReviews"], Fmt.Count(seller.ReviewCount))</span>
+                        <span class="muted">@string.Format(L["Seller.Products"], seller.ProductCount)</span>
+                        <span class="text-success">@string.Format(L["Seller.OnTime"], Fmt.Percent(seller.OnTimeShippingRate))</span>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline" @onclick="() => followInfo = true">@L["Seller.Follow"]</button>
+            </div>
+        </section>
+
+        @if (followInfo)
+        {
+            <Notice>@L["Common.ComingSoon"]</Notice>
+        }
+
+        <ProductListing Seller="@seller.Slug" ShowSidebar="false" ShowViewToggle="false" GridClass="product-grid" Variant="ProductCard.CardVariant.Minimal"
+                        CategoryPills="seller.Categories" SortOptions='new[] { "recommended", "bestsellers", "price_asc" }' />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Slug { get; set; }
+
+    private Seller seller;
+    private bool notFound;
+    private bool followInfo;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (seller?.Slug == Slug)
+            return;
+
+        try
+        {
+            seller = await CatalogService.GetSellerAsync(Slug);
+            notFound = seller == null;
+        }
+        catch (HttpRequestException)
+        {
+            notFound = true;
+        }
+    }
+}

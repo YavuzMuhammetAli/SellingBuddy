@@ -1,0 +1,73 @@
+@page "/categories/{Slug}"
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+
+<PageTitle>@(category?.Name ?? L["Nav.Categories"]) · SellingBudy</PageTitle>
+
+<div class="page page-tight">
+    @if (notFound)
+    {
+        <EmptyState Icon="search_off" Title="@L["Category.NotFound"]" Text="@L["Category.NotFoundText"]">
+            <a href="categories" class="btn btn-primary">@L["Nav.AllCategories"]</a>
+        </EmptyState>
+    }
+    else if (category != null)
+    {
+        <Breadcrumb Items="Crumbs()" />
+
+        <section class="hero hero-sm">
+            <img src="@category.ImageUri" alt="" />
+            <div class="hero-content">
+                <div class="flex items-center gap-md wrap">
+                    <h1 class="t-headline-lg">@category.Name</h1>
+                    <span class="chip num">@string.Format(L["Category.ProductCount"], Fmt.Count(total ?? category.ProductCount))</span>
+                </div>
+                @if (!string.IsNullOrEmpty(category.Description))
+                {
+                    <p class="t-body-md muted hide-mobile" style="max-width: 576px">@category.Description</p>
+                }
+            </div>
+        </section>
+
+        <ProductListing Category="@Slug" OnTotalChanged="t => total = t" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Slug { get; set; }
+
+    private Category category;
+    private bool notFound;
+    private long? total;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await State.EnsureLoadedAsync();
+
+        if (category?.Slug == Slug)
+            return;
+
+        total = null;
+
+        try
+        {
+            category = await CatalogService.GetCategoryAsync(Slug);
+            notFound = category == null;
+        }
+        catch (HttpRequestException)
+        {
+            notFound = true;
+        }
+    }
+
+    private IEnumerable<Breadcrumb.Crumb> Crumbs()
+    {
+        var parent = State.Categories.FirstOrDefault(c => c.Slug == category.ParentSlug);
+
+        if (parent != null)
+            yield return new Breadcrumb.Crumb(parent.Name, $"categories/{parent.Slug}");
+
+        yield return new Breadcrumb.Crumb(category.Name);
+    }
+}

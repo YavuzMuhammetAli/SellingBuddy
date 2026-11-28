@@ -1,0 +1,295 @@
+@page "/products/{Slug}"
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<PageTitle>@(product?.Name ?? L["Product.Title"]) · SellingBudy</PageTitle>
+
+<div class="page">
+    @if (notFound)
+    {
+        <EmptyState Icon="search_off" Title="@L["Product.NotFound"]" Text="@L["Product.NotFoundText"]">
+            <a href="" class="btn btn-primary">@L["Nav.Home"]</a>
+        </EmptyState>
+    }
+    else if (product == null)
+    {
+        <div class="pdp">
+            <div class="skeleton" style="aspect-ratio: 4 / 5"></div>
+            <div class="col gap-lg">
+                <div class="skeleton" style="height: 40px"></div>
+                <div class="skeleton" style="height: 120px"></div>
+                <div class="skeleton" style="height: 180px"></div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col gap-xl">
+            <Breadcrumb Items="Crumbs()" />
+
+            <section class="pdp">
+                <div>
+                    <div class="gallery-main">
+                        <img src="@product.PictureUri" alt="@product.Name" />
+                        @if (product.DiscountPercent > 0)
+                        {
+                            <span class="badge badge-error badge-lg pcard-badge num">@string.Format(L["Product.DiscountBadge"], Fmt.Discount(product.DiscountPercent))</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="buybox">
+                    <div class="buybox-title">
+                        <div class="flex items-center justify-between gap-md">
+                            <span class="t-label-md text-primary upper">@product.BrandName</span>
+                            @if (product.AvailableStock > 0)
+                            {
+                                <span class="badge badge-success"><AppIcon Name="check_circle" /> @L["Product.InStock"]</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">@L["Product.OutOfStock"]</span>
+                            }
+                        </div>
+                        <h1 class="t-headline-lg">@product.Name</h1>
+                        <div class="meta-row">
+                            <RatingDisplay Value="product.Rating" />
+                            <span>@string.Format(L["Product.Reviews"], Fmt.Count(product.ReviewCount))</span>
+                            @if (product.OfferCount > 1)
+                            {
+                                <span aria-hidden="true">|</span>
+                                <a href="#offers" class="text-primary">@string.Format(L["Product.SellerCount"], product.OfferCount)</a>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-md wrap">
+                        <span class="t-headline-lg num">@Fmt.Price(Selected.Price)</span>
+                        @if (Selected.OldPrice > Selected.Price)
+                        {
+                            <span class="price-old t-body-lg">@Fmt.Price(Selected.OldPrice.Value)</span>
+                            <span class="badge badge-error num">@Fmt.Discount((int)Math.Round((Selected.OldPrice.Value - Selected.Price) / Selected.OldPrice.Value * 100))</span>
+                        }
+                    </div>
+
+                    <div class="flex items-center gap-md wrap hide-mobile">
+                        <QuantityStepper @bind-Value="quantity" Max="Math.Max(1, Math.Min(10, Selected.Stock))" Disabled="Selected.Stock <= 0" />
+                        <button type="button" class="btn btn-primary btn-lg flex-1" disabled="@(busy || Selected.Stock <= 0)" @onclick="() => AddAsync(Selected, false)">
+                            <AppIcon Name="shopping_bag" /> @L["Product.AddToCart"]
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-lg" disabled="@(busy || Selected.Stock <= 0)" @onclick="() => AddAsync(Selected, true)">@L["Product.BuyNow"]</button>
+                        <WishlistButton ProductId="product.Id" Square="true" />
+                    </div>
+
+                    <div class="seller-box">
+                        <div class="flex items-center gap-md">
+                            <span class="avatar-initials">@Selected.SellerInitials</span>
+                            <div class="col flex-1">
+                                <span class="t-title-md flex items-center gap-xs">
+                                    @Selected.SellerName
+                                    @if (Selected.SellerVerified)
+                                    {
+                                        <span class="verified" title="@L["Seller.Verified"]" aria-label="@L["Seller.Verified"]"><AppIcon Name="verified" Filled="true" /></span>
+                                    }
+                                </span>
+                                <span class="t-body-sm muted">@string.Format(L["Product.SellerScore"], Fmt.Rating(Selected.SellerRating), Fmt.Count(Selected.SellerSalesCount))</span>
+                            </div>
+                            <a href="@($"sellers/{Selected.SellerSlug}")" class="btn-link">@L["Seller.ViewStore"]</a>
+                        </div>
+                        <div class="seller-box-foot">
+                            <span class="@(Selected.FreeShipping ? "text-success" : null)"><AppIcon Name="local_shipping" /> @(Selected.FreeShipping ? L["Product.FreeShipping"] : string.Format(L["Product.ShippingFee"], Fmt.Price(Selected.ShippingFee)))</span>
+                            <span><AppIcon Name="schedule" Class="text-primary" /> @DeliveryText(Selected)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @if (product.Offers.Count > 1)
+            {
+                <section id="offers" class="card card-pad" aria-labelledby="offers-title">
+                    <h2 id="offers-title" class="t-headline-sm">@string.Format(L["Product.OtherOffers"], product.Offers.Count)</h2>
+                    <p class="t-body-md muted mt-xs">@L["Product.OtherOffersText"]</p>
+                    <div class="mt-lg">
+                        @foreach (var offer in product.Offers)
+                        {
+                            <div class="offer-row">
+                                <div class="flex items-center gap-md">
+                                    <span class="avatar-initials">@offer.SellerInitials</span>
+                                    <div class="col">
+                                        <span class="t-title-md flex items-center gap-xs wrap">
+                                            <a href="@($"sellers/{offer.SellerSlug}")">@offer.SellerName</a>
+                                            @if (offer.SellerVerified)
+                                            {
+                                                <span class="verified"><AppIcon Name="verified" Filled="true" /></span>
+                                            }
+                                            @if (offer.IsBestOffer)
+                                            {
+                                                <span class="badge badge-accent">@L["Product.BestOffer"]</span>
+                                            }
+                                        </span>
+                                        <span class="t-body-sm muted">@string.Format(L["Product.OfferMeta"], Fmt.Rating(offer.SellerRating), offer.Condition)</span>
+                                    </div>
+                                </div>
+                                <div class="col offer-ship">
+                                    <span class="t-label-lg @(offer.FreeShipping ? "text-success" : null)">@(offer.FreeShipping ? L["Product.FreeShipping"] : string.Format(L["Product.ShippingFee"], Fmt.Price(offer.ShippingFee)))</span>
+                                    <span class="t-body-sm muted">@DeliveryText(offer)</span>
+                                </div>
+                                <span class="t-label-lg offer-stock @(offer.Stock > 0 ? "text-success" : "text-error")">@(offer.Stock > 0 ? string.Format(L["Product.StockCount"], offer.Stock) : L["Product.OutOfStock"])</span>
+                                <div class="offer-price">
+                                    <span class="price">@Fmt.Price(offer.Price)</span>
+                                    <button type="button" class="btn btn-sm @(offer.IsBestOffer ? "btn-primary" : "btn-outline")" disabled="@(busy || offer.Stock <= 0)" @onclick="() => AddAsync(offer, false)">@L["Product.AddToCart"]</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <section class="details-grid">
+                <div class="card card-pad">
+                    <h2 class="t-headline-sm">@L["Product.DescriptionSpecs"]</h2>
+                    <p class="t-body-md muted mt-md">@product.Description</p>
+                    @if (product.Specs.Any())
+                    {
+                        <dl class="specs">
+                            @foreach (var spec in product.Specs)
+                            {
+                                <div><dt>@spec.Label</dt><dd>@spec.Value</dd></div>
+                            }
+                        </dl>
+                    }
+                </div>
+
+                <div class="card card-pad">
+                    <div class="flex items-center justify-between">
+                        <h2 class="t-headline-sm">@L["Product.CustomerReviews"]</h2>
+                        <span class="t-title-lg num">@Fmt.Rating(product.Rating) / 5</span>
+                    </div>
+                    <div class="col gap-sm mt-lg">
+                        @foreach (var star in new[] { 5, 4, 3, 2, 1 })
+                        {
+                            var count = product.RatingDistribution.GetValueOrDefault(star);
+                            var percent = product.ReviewCount == 0 ? 0 : count * 100.0 / product.ReviewCount;
+                            <div class="flex items-center gap-md t-body-sm">
+                                <span class="num" style="width: 12px">@star</span>
+                                <div class="bar"><span style="width:@(percent.ToString("0", System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                <span class="muted num" style="width: 40px; text-align: right">@Fmt.Count(count)</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="mt-xl">
+                        @foreach (var review in product.Reviews.Take(3))
+                        {
+                            <article class="review">
+                                <div class="flex items-center justify-between">
+                                    <span class="t-label-lg">@review.AuthorName</span>
+                                    <span class="t-body-sm muted">@Ago(review.CreatedAt)</span>
+                                </div>
+                                <div class="mt-xs"><RatingDisplay Value="review.Rating" /></div>
+                                <p class="t-body-md muted mt-xs">@review.Comment</p>
+                            </article>
+                        }
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        @* mobile buy dock *@
+        <div class="buy-dock">
+            <div class="col flex-1">
+                <span class="t-body-sm muted">@Selected.SellerName</span>
+                <span class="price">@Fmt.Price(Selected.Price)</span>
+            </div>
+            <WishlistButton ProductId="product.Id" Square="true" />
+            <button type="button" class="btn btn-primary flex-1" disabled="@(busy || Selected.Stock <= 0)" @onclick="() => AddAsync(Selected, false)">@L["Product.AddToCart"]</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Slug { get; set; }
+
+    private ProductDetail product;
+    private bool notFound;
+    private bool busy;
+    private int quantity = 1;
+
+    //buy box shows the best offer
+    private Offer Selected => product.Offers.FirstOrDefault(o => o.IsBestOffer) ?? product.Offers.FirstOrDefault() ?? new Offer();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (product?.Slug == Slug)
+            return;
+
+        product = null;
+        notFound = false;
+        quantity = 1;
+
+        try
+        {
+            product = await CatalogService.GetProductAsync(Slug);
+            notFound = product == null;
+        }
+        catch (HttpRequestException)
+        {
+            notFound = true;
+        }
+    }
+
+    private IEnumerable<Breadcrumb.Crumb> Crumbs()
+    {
+        foreach (var item in product.Breadcrumb)
+            yield return new Breadcrumb.Crumb(item.Name, $"categories/{item.Slug}");
+
+        yield return new Breadcrumb.Crumb(product.Name);
+    }
+
+    private string DeliveryText(Offer offer)
+    {
+        if (offer.DeliveryDaysMax <= 1)
+            return L["Product.DeliveryTomorrow"];
+
+        var days = offer.DeliveryDaysMin == offer.DeliveryDaysMax ? $"{offer.DeliveryDaysMax}" : $"{offer.DeliveryDaysMin}-{offer.DeliveryDaysMax}";
+        return string.Format(L["Product.DeliveryDays"], days);
+    }
+
+    private string Ago(DateTime date)
+    {
+        var days = Math.Max(0, (int)(DateTime.UtcNow - date).TotalDays);
+        return days == 0 ? L["Common.Today"] : string.Format(L["Common.DaysAgo"], days);
+    }
+
+    private async Task AddAsync(Offer offer, bool buyNow)
+    {
+        busy = true;
+
+        try
+        {
+            //guests are sent to login and come back here
+            if (!await State.AddToCartAsync(product.Id, offer.Id, offer == Selected ? quantity : 1))
+            {
+                Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString($"products/{product.Slug}")}");
+                return;
+            }
+
+            if (buyNow)
+            {
+                Navigation.NavigateTo("checkout");
+                return;
+            }
+
+            State.ShowToast(L["Toast.AddedToCart"]);
+        }
+        catch (HttpRequestException)
+        {
+            State.ShowToast(L["Error.Generic"], true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

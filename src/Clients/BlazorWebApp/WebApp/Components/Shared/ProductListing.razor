@@ -1,0 +1,321 @@
+@implements IDisposable
+@inject ICatalogService CatalogService
+@using System.Globalization
+
+@* shared listing for category, search, seller and campaign pages *@
+<div class="@(ShowSidebar ? "listing" : null)">
+    @if (ShowSidebar)
+    {
+        <aside class="filters" aria-label="@L["Filter.Title"]">
+            <FilterPanelBody Query="query" Facets="facets" ShowCategories="ShowCategoryFacet" OnChanged="ApplyAsync" OnClear="ClearAsync" />
+        </aside>
+    }
+
+    <div>
+        @if (CategoryPills != null && CategoryPills.Any())
+        {
+            <div class="toolbar">
+                <div class="scroll-x">
+                    <button type="button" class="pill @(query.Category == null ? "active" : null)" @onclick="() => SelectPillAsync(null)">@string.Format(L["Listing.AllCount"], PillTotal)</button>
+                    @foreach (var pill in CategoryPills)
+                    {
+                        <button type="button" class="pill @(query.Category == pill.Key ? "active" : null)" @onclick="() => SelectPillAsync(pill.Key)">@pill.Name</button>
+                    }
+                </div>
+                <SortSelect Value="@query.Sort" Options="SortOptions" ValueChanged="SortAsync" />
+            </div>
+        }
+        else
+        {
+            <div class="mobile-filterbar mt-sm" style="margin-bottom: var(--s-md)">
+                @if (ShowSidebar)
+                {
+                    <button type="button" class="btn btn-outline btn-sm" @onclick="() => sheetOpen = true"><AppIcon Name="tune" /> @string.Format(L["Filter.MobileButton"], query.ActiveFilterCount)</button>
+                }
+                <SortSelect Value="@query.Sort" Options="SortOptions" ValueChanged="SortAsync" Block="true" />
+            </div>
+
+            <div class="toolbar hide-mobile">
+                <div class="flex items-center gap-md wrap">
+                    <span class="t-body-sm muted">@ResultText</span>
+                    @foreach (var chip in ActiveChips())
+                    {
+                        <button type="button" class="chip" @onclick="chip.Remove" aria-label="@string.Format(L["Filter.RemoveChip"], chip.Text)">@chip.Text <AppIcon Name="close" Size="14" /></button>
+                    }
+                </div>
+                <div class="flex items-center gap-md">
+                    <SortSelect Value="@query.Sort" Options="SortOptions" ValueChanged="SortAsync" />
+                    @if (ShowViewToggle)
+                    {
+                        <div class="view-toggle" role="group">
+                            <button type="button" class="@(listView ? null : "active")" aria-label="@L["Listing.GridView"]" @onclick="() => listView = false"><AppIcon Name="grid_view" /></button>
+                            <button type="button" class="@(listView ? "active" : null)" aria-label="@L["Listing.ListView"]" @onclick="() => listView = true"><AppIcon Name="view_list" /></button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (ActiveChips().Any())
+            {
+                <div class="scroll-x only-mobile" style="margin-bottom: var(--s-md)">
+                    @foreach (var chip in ActiveChips())
+                    {
+                        <button type="button" class="chip active" @onclick="chip.Remove">@chip.Text <AppIcon Name="close" Size="14" /></button>
+                    }
+                </div>
+            }
+        }
+
+        @if (error)
+        {
+            <Notice Kind="error">@L["Error.CatalogUnavailable"]</Notice>
+        }
+        else if (loading && !items.Any())
+        {
+            <SkeletonGrid Count="@Math.Min(PageSize, 8)" Class="@GridClass" />
+        }
+        else if (!items.Any())
+        {
+            @if (EmptyContent != null)
+            {
+                @EmptyContent
+            }
+            else
+            {
+                <EmptyState Icon="search_off" Title="@L["Listing.EmptyTitle"]" Text="@L["Listing.EmptyText"]">
+                    @if (query.ActiveFilterCount > 0)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="ClearAsync">@L["Filter.Clear"]</button>
+                    }
+                </EmptyState>
+            }
+        }
+        else
+        {
+            <div class="@(listView ? "product-list" : GridClass)" aria-busy="@loading">
+                @foreach (var product in items)
+                {
+                    <ProductCard Product="product" Variant="Variant" @key="product.Id" />
+                }
+            </div>
+
+            <div class="hide-mobile">
+                <Pagination PageIndex="query.PageIndex" TotalPages="totalPages" OnPageChanged="GoToPageAsync" />
+            </div>
+
+            @if (items.Count < total)
+            {
+                <button type="button" class="btn btn-outline btn-block mt-xl only-mobile" disabled="@loading" @onclick="LoadMoreAsync">@L["Listing.LoadMore"]</button>
+            }
+        }
+    </div>
+</div>
+
+@if (sheetOpen)
+{
+    <div class="sheet-backdrop" @onclick="() => sheetOpen = false">
+        <div class="sheet" role="dialog" aria-modal="true" aria-label="@L["Filter.Title"]" @onclick:stopPropagation="true">
+            <div class="flex items-center justify-between">
+                <h2 class="t-headline-sm">@L["Filter.Title"]</h2>
+                <button type="button" class="btn btn-ghost btn-icon" aria-label="@L["Common.Close"]" @onclick="() => sheetOpen = false"><AppIcon Name="close" /></button>
+            </div>
+            <FilterPanelBody Query="query" Facets="facets" ShowCategories="ShowCategoryFacet" OnChanged="ApplyAsync" OnClear="ClearAsync" Compact="true" />
+            <button type="button" class="btn btn-primary btn-block" @onclick="() => sheetOpen = false">@string.Format(L["Filter.ApplyResults"], Fmt.Count(total))</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Category { get; set; }
+    [Parameter] public string Q { get; set; }
+    [Parameter] public string Seller { get; set; }
+    [Parameter] public string Campaign { get; set; }
+    [Parameter] public string InitialSort { get; set; }
+    [Parameter] public bool ShowSidebar { get; set; } = true;
+    [Parameter] public bool ShowViewToggle { get; set; } = true;
+    [Parameter] public bool ShowCategoryFacet { get; set; } = true;
+    [Parameter] public int PageSize { get; set; } = 12;
+    [Parameter] public string GridClass { get; set; } = "product-grid cols-3";
+    [Parameter] public ProductCard.CardVariant Variant { get; set; } = ProductCard.CardVariant.Full;
+    [Parameter] public string[] SortOptions { get; set; } = { "recommended", "bestsellers", "newest", "price_asc", "price_desc", "rating" };
+    [Parameter] public List<FacetValue> CategoryPills { get; set; }
+    [Parameter] public RenderFragment EmptyContent { get; set; }
+    [Parameter] public EventCallback<long> OnTotalChanged { get; set; }
+    [Parameter] public EventCallback<Facets> OnFacetsLoaded { get; set; }
+
+    private CatalogQuery query = new();
+    private List<ProductSummary> items = new();
+    private Facets facets = new();
+    private long total;
+    private int totalPages;
+    private bool loading = true;
+    private bool error;
+    private bool listView;
+    private bool sheetOpen;
+    private string scopeKey;
+    private CancellationTokenSource cts;
+
+    private string ResultText => total == 0
+        ? L["Listing.NoResults"]
+        : string.Format(L["Listing.Showing"], Fmt.Count(total), query.PageIndex * query.PageSize + 1, Math.Min(total, (query.PageIndex + 1) * query.PageSize));
+
+    private long PillTotal => CategoryPills?.Sum(p => p.Count) ?? total;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        //a new category, search or seller resets every filter
+        var key = $"{Category}|{Q}|{Seller}|{Campaign}";
+
+        if (key == scopeKey)
+            return;
+
+        scopeKey = key;
+        query = new CatalogQuery
+        {
+            Category = Category,
+            Q = Q,
+            Campaign = Campaign,
+            Sellers = string.IsNullOrEmpty(Seller) ? new List<string>() : new List<string> { Seller },
+            Sort = InitialSort ?? SortOptions.First(),
+            PageSize = PageSize
+        };
+
+        await Task.WhenAll(LoadAsync(append: false), LoadFacetsAsync());
+    }
+
+    private async Task LoadAsync(bool append)
+    {
+        cts?.Cancel();
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        loading = true;
+        error = false;
+
+        try
+        {
+            var result = await CatalogService.GetItemsAsync(query, token);
+
+            items = append ? items.Concat(result.Data).ToList() : result.Data;
+            total = result.Count;
+            totalPages = result.TotalPages;
+            await OnTotalChanged.InvokeAsync(total);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (HttpRequestException)
+        {
+            error = true;
+        }
+        finally
+        {
+            if (!token.IsCancellationRequested)
+                loading = false;
+        }
+    }
+
+    private async Task LoadFacetsAsync()
+    {
+        if (!ShowSidebar && !OnFacetsLoaded.HasDelegate)
+            return;
+
+        try
+        {
+            facets = await CatalogService.GetFacetsAsync(new CatalogQuery { Category = Category, Q = Q, Campaign = Campaign });
+            await OnFacetsLoaded.InvokeAsync(facets);
+        }
+        catch (HttpRequestException)
+        {
+            facets = new Facets();
+        }
+    }
+
+    private Task ApplyAsync()
+    {
+        query.PageIndex = 0;
+        return LoadAsync(append: false);
+    }
+
+    private Task ClearAsync()
+    {
+        query.Brands.Clear();
+        query.MinPrice = null;
+        query.MaxPrice = null;
+        query.MinRating = null;
+        query.InStock = false;
+        query.OnSale = false;
+        query.Category = Category;
+        query.Sellers = string.IsNullOrEmpty(Seller) ? new List<string>() : new List<string> { Seller };
+        return ApplyAsync();
+    }
+
+    private Task SortAsync(string sort)
+    {
+        query.Sort = sort;
+        return ApplyAsync();
+    }
+
+    private Task SelectPillAsync(string category)
+    {
+        query.Category = category;
+        return ApplyAsync();
+    }
+
+    private async Task GoToPageAsync(int page)
+    {
+        query.PageIndex = page;
+        await LoadAsync(append: false);
+    }
+
+    private Task LoadMoreAsync()
+    {
+        query.PageIndex++;
+        return LoadAsync(append: true);
+    }
+
+    private record Chip(string Text, Func<Task> Remove);
+
+    private IEnumerable<Chip> ActiveChips()
+    {
+        foreach (var brandId in query.Brands.ToList())
+        {
+            var name = facets.Brands.FirstOrDefault(b => b.Key == brandId.ToString(CultureInfo.InvariantCulture))?.Name ?? brandId.ToString();
+            yield return new Chip(name, () => { query.Brands.Remove(brandId); return ApplyAsync(); });
+        }
+
+        foreach (var seller in query.Sellers.Where(s => s != Seller).ToList())
+        {
+            var name = facets.Sellers.FirstOrDefault(s => s.Key == seller)?.Name ?? seller;
+            yield return new Chip(name, () => { query.Sellers.Remove(seller); return ApplyAsync(); });
+        }
+
+        if (query.Category != Category && query.Category != null && CategoryPills == null)
+        {
+            var name = facets.Categories.FirstOrDefault(c => c.Key == query.Category)?.Name ?? query.Category;
+            yield return new Chip(name, () => { query.Category = Category; return ApplyAsync(); });
+        }
+
+        if (query.MinRating.HasValue)
+            yield return new Chip(L["Filter.RatingChip"], () => { query.MinRating = null; return ApplyAsync(); });
+
+        if (query.InStock)
+            yield return new Chip(L["Filter.InStock"], () => { query.InStock = false; return ApplyAsync(); });
+
+        if (query.OnSale)
+            yield return new Chip(L["Filter.OnSale"], () => { query.OnSale = false; return ApplyAsync(); });
+
+        if (query.MinPrice.HasValue || query.MaxPrice.HasValue)
+        {
+            var text = $"{(query.MinPrice.HasValue ? Fmt.Price(query.MinPrice.Value) : "0")} – {(query.MaxPrice.HasValue ? Fmt.Price(query.MaxPrice.Value) : "∞")}";
+            yield return new Chip(text, () => { query.MinPrice = null; query.MaxPrice = null; return ApplyAsync(); });
+        }
+    }
+
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+    }
+}
