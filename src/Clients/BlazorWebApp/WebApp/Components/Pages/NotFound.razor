@@ -1,5 +1,11 @@
 ﻿@page "/not-found"
 @layout MainLayout
 
-<h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<PageTitle>@L["NotFound.Title"] · SellingBudy</PageTitle>
+
+<div class="page">
+    <EmptyState Icon="sentiment_dissatisfied" Title="@L["NotFound.Title"]" Text="@L["NotFound.Text"]">
+        <a href="" class="btn btn-primary">@L["Nav.Home"]</a>
+        <a href="categories" class="btn btn-outline">@L["Nav.AllCategories"]</a>
+    </EmptyState>
+</div>

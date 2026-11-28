@@ -1,0 +1,165 @@
+@implements IDisposable
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<div class="search" @onfocusout="OnFocusOut" @onfocusin="() => open = true">
+    <form class="search-form" role="search" @onsubmit="Submit">
+        <AppIcon Name="search" />
+        <input type="search" value="@query" @oninput="OnInput" @onkeydown="OnKeyDown" placeholder="@L["Header.SearchPlaceholder"]"
+               aria-label="@L["Header.SearchPlaceholder"]" autocomplete="off" aria-autocomplete="list" aria-expanded="@ShowPanel" />
+        @if (ShowButton)
+        {
+            <button type="submit" class="btn btn-primary">@L["Header.Search"]</button>
+        }
+    </form>
+
+    @if (ShowPanel)
+    {
+        <div class="suggest" role="listbox">
+            @if (suggestions.Any())
+            {
+                <div class="suggest-title t-label-sm muted upper">@L["Search.Products"]</div>
+                @for (var i = 0; i < suggestions.Count; i++)
+                {
+                    var item = suggestions[i];
+                    <a href="@($"products/{item.Slug}")" class="@(i == active ? "active" : null)" role="option" @onmousedown:preventDefault="true" @onclick="Close">
+                        <img src="@item.PictureUri" alt="" />
+                        <span class="col">
+                            <span class="t-label-lg">@item.Name</span>
+                            <span class="t-body-sm muted">@item.BrandName · @Fmt.Price(item.Price)</span>
+                        </span>
+                    </a>
+                }
+            }
+            else if (string.IsNullOrWhiteSpace(query))
+            {
+                <div class="suggest-title t-label-sm muted upper">@L["Search.Popular"]</div>
+                @foreach (var term in PopularTerms)
+                {
+                    <a href="@($"search?q={Uri.EscapeDataString(term)}")" @onmousedown:preventDefault="true" @onclick="Close">
+                        <AppIcon Name="trending_up" Class="muted" /> <span>@term</span>
+                    </a>
+                }
+                @foreach (var category in State.Categories.Take(3))
+                {
+                    <a href="@($"categories/{category.Slug}")" @onmousedown:preventDefault="true" @onclick="Close">
+                        <AppIcon Name="category" Class="muted" /> <span>@category.Name</span>
+                    </a>
+                }
+            }
+            else if (!loading)
+            {
+                <div class="suggest-title t-body-sm muted">@L["Search.NoSuggestions"]</div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool ShowButton { get; set; } = true;
+
+    [Parameter]
+    public string InitialQuery { get; set; }
+
+    private string query;
+    private bool open;
+    private bool loading;
+    private int active = -1;
+    private List<ProductSummary> suggestions = new();
+    private CancellationTokenSource debounce;
+
+    private bool ShowPanel => open && (suggestions.Any() || string.IsNullOrWhiteSpace(query) || query.Trim().Length >= 2);
+
+    private static readonly string[] PopularTerms = { "Sony", "Apple Watch", "KeyCraft" };
+
+    protected override void OnParametersSet()
+    {
+        if (InitialQuery != null && query == null)
+            query = InitialQuery;
+    }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        query = e.Value?.ToString();
+        active = -1;
+
+        //wait for a short pause before calling the api
+        debounce?.Cancel();
+        debounce = new CancellationTokenSource();
+        var token = debounce.Token;
+
+        if (string.IsNullOrWhiteSpace(query) || query.Trim().Length < 2)
+        {
+            suggestions.Clear();
+            return;
+        }
+
+        try
+        {
+            await Task.Delay(250, token);
+            loading = true;
+
+            var result = await CatalogService.GetItemsAsync(new CatalogQuery { Q = query.Trim(), PageSize = 5 }, token);
+            suggestions = result.Data;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (HttpRequestException)
+        {
+            suggestions.Clear();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (!suggestions.Any())
+            return;
+
+        if (e.Key == "ArrowDown")
+            active = (active + 1) % suggestions.Count;
+        else if (e.Key == "ArrowUp")
+            active = active <= 0 ? suggestions.Count - 1 : active - 1;
+        else if (e.Key == "Escape")
+            Close();
+    }
+
+    private void Submit()
+    {
+        if (active >= 0 && active < suggestions.Count)
+        {
+            Navigation.NavigateTo($"products/{suggestions[active].Slug}");
+        }
+        else if (!string.IsNullOrWhiteSpace(query))
+        {
+            Navigation.NavigateTo($"search?q={Uri.EscapeDataString(query.Trim())}");
+        }
+
+        Close();
+    }
+
+    private void Close()
+    {
+        open = false;
+        active = -1;
+    }
+
+    private async Task OnFocusOut()
+    {
+        //delay so a click on a suggestion still lands
+        await Task.Delay(150);
+        open = false;
+    }
+
+    public void Dispose()
+    {
+        debounce?.Cancel();
+        debounce?.Dispose();
+    }
+}

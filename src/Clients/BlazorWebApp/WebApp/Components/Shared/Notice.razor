@@ -1,0 +1,13 @@
+<div class="notice notice-@Kind" role="@(Kind == "error" ? "alert" : "status")">
+    <AppIcon Name="@(Kind == "error" ? "error" : Kind == "success" ? "check_circle" : "info")" />
+    <div>@ChildContent</div>
+</div>
+
+@code {
+    //info, error or success
+    [Parameter]
+    public string Kind { get; set; } = "info";
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

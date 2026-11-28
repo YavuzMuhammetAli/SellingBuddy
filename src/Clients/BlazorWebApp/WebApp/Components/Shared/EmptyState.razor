@@ -1,0 +1,26 @@
+<div class="empty">
+    <span class="empty-icon"><AppIcon Name="@Icon" /></span>
+    <h2 class="t-headline-sm">@Title</h2>
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        <p class="muted t-body-md" style="max-width: 448px">@Text</p>
+    }
+    @if (ChildContent != null)
+    {
+        <div class="flex gap-sm wrap justify-center mt-sm">@ChildContent</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Icon { get; set; } = "info";
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

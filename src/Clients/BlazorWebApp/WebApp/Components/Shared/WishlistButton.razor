@@ -1,0 +1,54 @@
+@implements IDisposable
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<button type="button" class="@(Square ? "btn btn-outline btn-square" : "fav-btn") @(IsOn ? "on" : null)" aria-pressed="@IsOn"
+        aria-label="@(IsOn ? L["Wishlist.Remove"] : L["Wishlist.Add"])" title="@(IsOn ? L["Wishlist.Remove"] : L["Wishlist.Add"])"
+        disabled="@busy" @onclick="ToggleAsync" @onclick:stopPropagation="true" @onclick:preventDefault="true">
+    <AppIcon Name="favorite" Filled="IsOn" Class="@(IsOn ? "text-error" : null)" />
+</button>
+
+@code {
+    [Parameter, EditorRequired]
+    public int ProductId { get; set; }
+
+    [Parameter]
+    public bool Square { get; set; }
+
+    private bool busy;
+
+    private bool IsOn => State.WishlistIds.Contains(ProductId);
+
+    protected override void OnInitialized() => State.Changed += OnChanged;
+
+    private async Task ToggleAsync()
+    {
+        busy = true;
+
+        try
+        {
+            var wasOn = IsOn;
+
+            //guests are sent to login first
+            if (!await State.ToggleWishlistAsync(ProductId))
+            {
+                Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri))}");
+                return;
+            }
+
+            State.ShowToast(wasOn ? L["Toast.WishlistRemoved"] : L["Toast.WishlistAdded"]);
+        }
+        catch (HttpRequestException)
+        {
+            State.ShowToast(L["Error.Generic"], true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.Changed -= OnChanged;
+}

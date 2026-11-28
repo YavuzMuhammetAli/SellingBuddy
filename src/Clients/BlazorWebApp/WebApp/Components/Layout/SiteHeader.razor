@@ -1,0 +1,127 @@
+@implements IDisposable
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+@if (!State.AnnouncementClosed && ShowAnnouncement)
+{
+    <div class="announce">
+        <div class="container">
+            <span class="t-label-md">@L["Header.Announcement"]</span>
+            <button type="button" class="announce-close" aria-label="@L["Header.CloseAnnouncement"]" @onclick="CloseAnnouncement"><AppIcon Name="close" /></button>
+        </div>
+    </div>
+}
+
+<header class="site-header">
+    <div class="container header-row">
+        <a href="" class="brand" aria-label="SellingBudy"><span>Selling<b>Budy</b></span><span class="brand-dot"></span></a>
+        <SearchBar />
+        <div class="header-actions">
+            <LanguageToggle />
+            <a href="@(State.IsAuthenticated ? "account" : "login")" class="hbtn @(IsActive("account") ? "active" : null)">
+                <AppIcon Name="person" /><span class="hbtn-text">@L["Nav.Account"]</span>
+            </a>
+            <a href="wishlist" class="hbtn square @(IsActive("wishlist") ? "active" : null)" aria-label="@L["Nav.Wishlist"]">
+                <AppIcon Name="favorite" />
+                @if (State.WishlistIds.Count > 0)
+                {
+                    <span class="count">@State.WishlistIds.Count</span>
+                }
+            </a>
+            <a href="cart" class="hbtn boxed @(IsActive("cart") ? "active" : null)" aria-label="@L["Nav.Cart"]">
+                <AppIcon Name="shopping_bag" /><span class="hbtn-text">@L["Nav.Cart"]</span>
+                @if (State.CartCount > 0)
+                {
+                    <span class="count">@State.CartCount</span>
+                }
+            </a>
+        </div>
+    </div>
+
+    @* mobile header *@
+    <div class="m-header">
+        <div class="m-header-row">
+            <a href="" class="brand" aria-label="SellingBudy"><span>Selling<b>Budy</b></span><span class="brand-dot"></span></a>
+            <div class="flex items-center gap-sm">
+                <LanguageToggle />
+                <a href="cart" class="hbtn square" aria-label="@L["Nav.Cart"]">
+                    <AppIcon Name="shopping_bag" />
+                    @if (State.CartCount > 0)
+                    {
+                        <span class="count">@State.CartCount</span>
+                    }
+                </a>
+            </div>
+        </div>
+        <SearchBar ShowButton="false" />
+    </div>
+
+    @if (ShowCategoryNav)
+    {
+        <nav class="catnav" aria-label="@L["Nav.MainCategories"]">
+            <div class="container">
+                <div class="catnav-links">
+                    @foreach (var category in State.Categories)
+                    {
+                        <a href="@($"categories/{category.Slug}")" class="@(IsActive($"categories/{category.Slug}") ? "active" : null)">@category.Name</a>
+                    }
+                    <a href="categories" class="dim @(Navigation.ToBaseRelativePath(Navigation.Uri) == "categories" ? "active" : null)">@L["Nav.AllCategories"]</a>
+                </div>
+                @if (FirstCampaign != null)
+                {
+                    <a href="@($"campaigns/{FirstCampaign}")" class="campaign-pill"><AppIcon Name="auto_awesome" /> @L["Nav.Campaigns"]</a>
+                }
+            </div>
+        </nav>
+        <div class="m-pills only-mobile">
+            <div class="scroll-x">
+                @if (FirstCampaign != null)
+                {
+                    <a href="@($"campaigns/{FirstCampaign}")" class="campaign-pill">@L["Nav.Campaigns"]</a>
+                }
+                @foreach (var category in State.Categories)
+                {
+                    <a href="@($"categories/{category.Slug}")" class="pill @(IsActive($"categories/{category.Slug}") ? "active" : null)">@category.Name</a>
+                }
+            </div>
+        </div>
+    }
+</header>
+
+@code {
+    [Parameter]
+    public bool ShowAnnouncement { get; set; } = true;
+
+    [Parameter]
+    public bool ShowCategoryNav { get; set; } = true;
+
+    [Parameter]
+    public string FirstCampaign { get; set; }
+
+    protected override void OnInitialized()
+    {
+        State.Changed += OnChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private bool IsActive(string path)
+    {
+        var current = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0];
+        return current == path || current.StartsWith(path + "/");
+    }
+
+    private void CloseAnnouncement()
+    {
+        State.AnnouncementClosed = true;
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        State.Changed -= OnChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}

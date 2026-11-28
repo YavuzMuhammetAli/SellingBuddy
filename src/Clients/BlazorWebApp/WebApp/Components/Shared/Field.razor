@@ -1,0 +1,14 @@
+<label class="field">
+    <span class="label">@Label</span>
+    @ChildContent
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <span class="field-error" role="alert">@Error</span>
+    }
+</label>
+
+@code {
+    [Parameter] public string Label { get; set; }
+    [Parameter] public string Error { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}

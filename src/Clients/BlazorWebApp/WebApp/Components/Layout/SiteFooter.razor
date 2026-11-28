@@ -1,0 +1,52 @@
+@inject StorefrontState State
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <a href="" class="brand"><span>Selling<b>Budy</b></span><span class="brand-dot"></span></a>
+                <p class="t-body-sm muted mt-md" style="max-width: 320px">@L["Footer.About"]</p>
+                <div class="social" aria-hidden="true">
+                    <span><AppIcon Name="photo_camera" /></span>
+                    <span><AppIcon Name="alternate_email" /></span>
+                    <span><AppIcon Name="play_circle" /></span>
+                </div>
+            </div>
+            <div>
+                <h3>@L["Footer.CustomerService"]</h3>
+                <ul>
+                    <li><a>@L["Footer.Contact"]</a></li>
+                    <li><a>@L["Footer.Faq"]</a></li>
+                    <li><a>@L["Footer.Shipping"]</a></li>
+                    <li><a>@L["Footer.Returns"]</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>@L["Footer.AboutTitle"]</h3>
+                <ul>
+                    <li><a>@L["Footer.AboutUs"]</a></li>
+                    <li><a>@L["Footer.BecomeSeller"]</a></li>
+                    <li><a>@L["Footer.Careers"]</a></li>
+                    <li><a>@L["Footer.Terms"]</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>@L["Nav.Account"]</h3>
+                <ul>
+                    <li><a href="@(State.IsAuthenticated ? "account" : "login")">@L["Nav.Account"]</a></li>
+                    <li><a href="account/orders">@L["Nav.Orders"]</a></li>
+                    <li><a href="wishlist">@L["Nav.Wishlist"]</a></li>
+                    <li><a href="account/orders">@L["Footer.OrderTracking"]</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span class="t-body-sm muted">@L["Footer.Copyright"]</span>
+            <div class="flex items-center gap-lg t-body-sm">
+                <a>@L["Footer.Privacy"]</a>
+                <a>@L["Footer.Cookies"]</a>
+            </div>
+            <div class="pay-marks" aria-hidden="true"><span>VISA</span><span>MASTERCARD</span><span>TROY</span></div>
+        </div>
+    </div>
+</footer>

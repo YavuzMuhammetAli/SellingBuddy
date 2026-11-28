@@ -1,0 +1,47 @@
+@* steps are derived from the order status, the order service has no tracking history yet *@
+<ol class="timeline">
+    @foreach (var step in Steps())
+    {
+        <li class="tl-step @step.State">
+            <span class="tl-dot"><AppIcon Name="@step.Icon" /></span>
+            <div class="col gap-xs">
+                <span class="tl-label">@step.Label</span>
+                @if (!string.IsNullOrEmpty(step.Note))
+                {
+                    <span class="t-body-sm muted">@step.Note</span>
+                }
+            </div>
+        </li>
+    }
+</ol>
+
+@code {
+    private record Step(string Label, string Icon, string State, string Note);
+
+    [Parameter, EditorRequired]
+    public string Status { get; set; }
+
+    [Parameter]
+    public DateTime Date { get; set; }
+
+    private IEnumerable<Step> Steps()
+    {
+        var status = Status?.ToLowerInvariant();
+        var paid = OrderStatusMap.IsPaid(status);
+        var shipped = status == "shipped";
+        var cancelled = status == "cancelled";
+
+        yield return new Step(L["Timeline.Received"], "check", "done", Fmt.ShortDateTime(Date));
+
+        if (cancelled)
+        {
+            yield return new Step(L["Timeline.Cancelled"], "close", "failed", L["Timeline.PaymentFailed"]);
+            yield break;
+        }
+
+        yield return new Step(L["Timeline.Confirmed"], paid ? "check" : "schedule", paid ? "done" : "current", null);
+        yield return new Step(L["Timeline.Preparing"], shipped ? "check" : "inventory_2", shipped ? "done" : paid ? "current" : "pending", null);
+        yield return new Step(L["Timeline.Shipped"], "local_shipping", shipped ? "current" : "pending", null);
+        yield return new Step(L["Timeline.Delivered"], "home", "pending", L["Timeline.EstimatedSoon"]);
+    }
+}

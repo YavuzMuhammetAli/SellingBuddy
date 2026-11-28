@@ -1,0 +1,19 @@
+@{
+    var stage = OrderStatusMap.ToStage(Status);
+    var css = stage switch
+    {
+        OrderStage.Shipped => "badge-primary",
+        OrderStage.Delivered => "badge-success",
+        OrderStage.Cancelled => "badge-danger",
+        _ => "badge-accent"
+    };
+}
+<span class="badge @css @(Large ? "badge-lg" : null)">@L[$"OrderStatus.{stage}"]</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Status { get; set; }
+
+    [Parameter]
+    public bool Large { get; set; }
+}

@@ -1,0 +1,17 @@
+@using System.Globalization
+@inject NavigationManager Navigation
+
+<div class="lang-toggle" role="group" aria-label="@L["Header.Language"]">
+    <a href="@Url("tr-TR")" class="@(IsTurkish ? "active" : null)" aria-current="@(IsTurkish ? "true" : null)" @onclick='() => Switch("tr-TR")' @onclick:preventDefault="true">TR</a>
+    <a href="@Url("en-US")" class="@(!IsTurkish ? "active" : null)" aria-current="@(!IsTurkish ? "true" : null)" @onclick='() => Switch("en-US")' @onclick:preventDefault="true">EN</a>
+</div>
+
+@code {
+    private static bool IsTurkish => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "tr";
+
+    private string Url(string culture) =>
+        $"culture/set?culture={culture}&redirectUri={Uri.EscapeDataString("/" + Navigation.ToBaseRelativePath(Navigation.Uri))}";
+
+    //full reload so the new culture cookie starts a new circuit
+    private void Switch(string culture) => Navigation.NavigateTo(Url(culture), forceLoad: true);
+}

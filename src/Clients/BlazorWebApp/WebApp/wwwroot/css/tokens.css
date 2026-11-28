@@ -1,0 +1,55 @@
+/* design tokens from the stitch design system */
+:root {
+    --c-primary: #243B53;
+    --c-on-primary: #FFFFFF;
+    --c-primary-hover: #1A324A;
+    --c-primary-container: #E9F1FF;
+    --c-on-primary-container: #021D33;
+    --c-accent: #C49A63;
+    --c-on-accent: #17191D;
+    --c-accent-container: #FFEEDD;
+    --c-on-accent-container: #2A1800;
+    --c-surface: #FFFFFF;
+    --c-on-surface: #17191D;
+    --c-surface-secondary: #F7F8FA;
+    --c-surface-container: #EEF1F8;
+    --c-on-surface-muted: #595F6A;
+    --c-outline: #E8EAED;
+    --c-outline-strong: #C3C6CD;
+    --c-success: #27845B;
+    --c-on-success: #FFFFFF;
+    --c-success-container: #E6F4ED;
+    --c-on-success-container: #12452E;
+    --c-error: #D94C4C;
+    --c-on-error: #FFFFFF;
+    --c-error-container: #FFEDEA;
+    --c-on-error-container: #410002;
+
+    --r-sm: 4px;
+    --r: 8px;
+    --r-md: 10px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-2xl: 32px;
+    --s-3xl: 48px;
+    --s-4xl: 64px;
+
+    --f-display: "Manrope", system-ui, sans-serif;
+    --f-body: "Instrument Sans", system-ui, sans-serif;
+    --f-mono: "Red Hat Mono", ui-monospace, monospace;
+
+    --ease: cubic-bezier(0.2, 0, 0, 1);
+    --t-state: 150ms;
+    --t-surface: 200ms;
+    --t-zoom: 300ms;
+
+    --container: 1280px;
+    --shadow-float: 0 1px 2px rgba(23, 25, 29, .06), 0 4px 12px rgba(23, 25, 29, .06);
+}

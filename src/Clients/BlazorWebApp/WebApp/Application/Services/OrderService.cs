@@ -1,3 +1,4 @@
+using System.Net;
 using WebApp.Application.Services.Interfaces;
 using WebApp.Domain.Models;
 using WebApp.Infrastructure;
@@ -20,11 +21,18 @@ namespace WebApp.Application.Services
             return await client.GetFromJsonAsync<List<OrderSummary>>("order") ?? new List<OrderSummary>();
         }
 
-        public async Task<OrderDetail> GetOrderDetailAsync(string orderNumber)
+        public async Task<OrderDetail> GetOrderAsync(string orderNumber)
         {
             var client = await _gateway.AuthorizedAsync();
 
-            return await client.GetFromJsonAsync<OrderDetail>($"order/{orderNumber}");
+            using var response = await client.GetAsync($"order/{Uri.EscapeDataString(orderNumber)}");
+
+            //order is created async after checkout, it can be missing for a moment
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return null;
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<OrderDetail>();
         }
     }
 }

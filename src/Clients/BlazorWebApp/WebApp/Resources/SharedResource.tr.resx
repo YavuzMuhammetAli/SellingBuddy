@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Account.ActiveOrders" xml:space="preserve"><value>Aktif Sipariş</value></data>
+  <data name="Account.Addresses" xml:space="preserve"><value>Adreslerim</value></data>
+  <data name="Account.AllOrders" xml:space="preserve"><value>Tüm Siparişler</value></data>
+  <data name="Account.CompletedOrders" xml:space="preserve"><value>Tamamlanan Sipariş</value></data>
+  <data name="Account.DefaultAddress" xml:space="preserve"><value>Varsayılan Teslimat Adresi</value></data>
+  <data name="Account.EditDetails" xml:space="preserve"><value>Bilgileri Düzenle</value></data>
+  <data name="Account.LastUsedAddress" xml:space="preserve"><value>Son kullanılan</value></data>
+  <data name="Account.LatestOrder" xml:space="preserve"><value>Son Siparişiniz</value></data>
+  <data name="Account.Logout" xml:space="preserve"><value>Çıkış Yap</value></data>
+  <data name="Account.Overview" xml:space="preserve"><value>Genel Bakış</value></data>
+  <data name="Account.PaymentMethods" xml:space="preserve"><value>Ödeme Yöntemlerim</value></data>
+  <data name="Account.PersonalInfo" xml:space="preserve"><value>Kişisel Bilgilerim</value></data>
+  <data name="Account.SavedAddresses" xml:space="preserve"><value>Kayıtlı Adres</value></data>
+  <data name="Account.Security" xml:space="preserve"><value>Güvenlik</value></data>
+  <data name="Account.ViewDetails" xml:space="preserve"><value>Detayı Gör</value></data>
+  <data name="Account.Welcome" xml:space="preserve"><value>Hoş Geldiniz, {0}</value></data>
+  <data name="Account.WelcomeText" xml:space="preserve"><value>Son siparişlerinizi, kayıtlı adreslerinizi ve favori ürünlerinizi buradan yönetebilirsiniz.</value></data>
+  <data name="Auth.AcceptTerms" xml:space="preserve"><value>Kullanım Koşulları ve Gizlilik Politikası'nı kabul ediyorum.</value></data>
+  <data name="Auth.BackToLogin" xml:space="preserve"><value>Giriş Sayfasına Dön</value></data>
+  <data name="Auth.CreateAccount" xml:space="preserve"><value>Hesap Oluştur</value></data>
+  <data name="Auth.DemoUsers" xml:space="preserve"><value>Demo hesaplar: demo@sellingbuddy.dev / demo123, admin@sellingbuddy.dev / admin123</value></data>
+  <data name="Auth.Email" xml:space="preserve"><value>E-posta</value></data>
+  <data name="Auth.EmailPlaceholder" xml:space="preserve"><value>adiniz@eposta.com</value></data>
+  <data name="Auth.FillBoth" xml:space="preserve"><value>E-posta ve şifrenizi girin.</value></data>
+  <data name="Auth.FirstName" xml:space="preserve"><value>Ad</value></data>
+  <data name="Auth.ForgotPassword" xml:space="preserve"><value>Şifremi Unuttum</value></data>
+  <data name="Auth.ForgotSubtitle" xml:space="preserve"><value>Kayıtlı e-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.</value></data>
+  <data name="Auth.HaveAccount" xml:space="preserve"><value>Zaten hesabınız var mı?</value></data>
+  <data name="Auth.LastName" xml:space="preserve"><value>Soyad</value></data>
+  <data name="Auth.LoginSubtitle" xml:space="preserve"><value>SellingBudy hesabınızla devam edin.</value></data>
+  <data name="Auth.LoginTagline" xml:space="preserve"><value>Güvenilir satıcılar, zamansız tasarımlar.</value></data>
+  <data name="Auth.LoginTaglineText" xml:space="preserve"><value>Siparişlerinizi takip etmek ve favorilerinize erişmek için hesabınıza giriş yapın.</value></data>
+  <data name="Auth.LoginTitle" xml:space="preserve"><value>Giriş Yap</value></data>
+  <data name="Auth.NewPassword" xml:space="preserve"><value>Yeni Şifre</value></data>
+  <data name="Auth.NewPasswordRepeat" xml:space="preserve"><value>Yeni Şifre Tekrarı</value></data>
+  <data name="Auth.NoAccount" xml:space="preserve"><value>Hesabınız yok mu?</value></data>
+  <data name="Auth.Password" xml:space="preserve"><value>Şifre</value></data>
+  <data name="Auth.PasswordHint" xml:space="preserve"><value>En az 8 karakter</value></data>
+  <data name="Auth.PasswordRepeat" xml:space="preserve"><value>Şifre Tekrarı</value></data>
+  <data name="Auth.PasswordRepeatHint" xml:space="preserve"><value>Şifrenizi doğrulayın</value></data>
+  <data name="Auth.RegisterButton" xml:space="preserve"><value>Kayıt Ol</value></data>
+  <data name="Auth.RegisterNotAvailable" xml:space="preserve"><value>Kayıt henüz aktif değil. Bilgileriniz gönderilmedi. Şimdilik demo hesaplardan birini kullanabilirsiniz.</value></data>
+  <data name="Auth.RegisterSubtitle" xml:space="preserve"><value>Hızlı alışveriş ve sipariş takibi için üye olun.</value></data>
+  <data name="Auth.RegisterTaglineText" xml:space="preserve"><value>Onaylı satıcıların seçkin koleksiyonlarına ve özel kampanyalara katılın.</value></data>
+  <data name="Auth.RegisterTitle" xml:space="preserve"><value>Hesap Oluştur</value></data>
+  <data name="Auth.RememberMe" xml:space="preserve"><value>Beni Hatırla</value></data>
+  <data name="Auth.ResetNotAvailable" xml:space="preserve"><value>Şifre sıfırlama henüz aktif değil. E-posta gönderilmedi.</value></data>
+  <data name="Auth.ResetSubtitle" xml:space="preserve"><value>Hesabınız için güçlü ve yeni bir şifre oluşturun.</value></data>
+  <data name="Auth.ResetTitle" xml:space="preserve"><value>Yeni Şifre Belirle</value></data>
+  <data name="Auth.SendResetLink" xml:space="preserve"><value>Sıfırlama Bağlantısı Gönder</value></data>
+  <data name="Auth.UpdatePassword" xml:space="preserve"><value>Şifreyi Güncelle</value></data>
+  <data name="Auth.WrongCredentials" xml:space="preserve"><value>E-posta veya şifre hatalı.</value></data>
+  <data name="Badge.BestSeller" xml:space="preserve"><value>Çok Satan</value></data>
+  <data name="Badge.FastDelivery" xml:space="preserve"><value>Hızlı Teslimat</value></data>
+  <data name="Badge.FreeShipping" xml:space="preserve"><value>Ücretsiz Kargo</value></data>
+  <data name="Breadcrumb.Label" xml:space="preserve"><value>İçerik Haritası</value></data>
+  <data name="Campaign.NotFound" xml:space="preserve"><value>Kampanya bulunamadı</value></data>
+  <data name="Campaign.ValidUntil" xml:space="preserve"><value>{0} tarihine kadar geçerli</value></data>
+  <data name="Cart.Apply" xml:space="preserve"><value>Uygula</value></data>
+  <data name="Cart.BackToShopping" xml:space="preserve"><value>Alışverişe Dön</value></data>
+  <data name="Cart.Checkout" xml:space="preserve"><value>Ödemeye Geç</value></data>
+  <data name="Cart.ContinueShopping" xml:space="preserve"><value>Alışverişe Devam Et</value></data>
+  <data name="Cart.Coupon" xml:space="preserve"><value>Kupon kodu</value></data>
+  <data name="Cart.CouponNotAvailable" xml:space="preserve"><value>Kupon kodları henüz aktif değil.</value></data>
+  <data name="Cart.CouponPlaceholder" xml:space="preserve"><value>Kupon kodu girin</value></data>
+  <data name="Cart.Discounts" xml:space="preserve"><value>İndirimler</value></data>
+  <data name="Cart.EmptyText" xml:space="preserve"><value>Onaylı satıcılardan özenle seçilmiş ürünleri keşfetmeye hemen başlayabilirsiniz.</value></data>
+  <data name="Cart.EmptyTitle" xml:space="preserve"><value>Sepetiniz şu anda boş</value></data>
+  <data name="Cart.GrandTotal" xml:space="preserve"><value>Genel Toplam</value></data>
+  <data name="Cart.Remove" xml:space="preserve"><value>Kaldır</value></data>
+  <data name="Cart.SaveForLater" xml:space="preserve"><value>Sonraya Kaydet</value></data>
+  <data name="Cart.SecurePayment" xml:space="preserve"><value>256-bit SSL Güvenli Ödeme</value></data>
+  <data name="Cart.ShippingFee" xml:space="preserve"><value>Kargo Ücreti</value></data>
+  <data name="Cart.ShipsInDays" xml:space="preserve"><value>{0} iş gününde kargoda</value></data>
+  <data name="Cart.ShipsTomorrow" xml:space="preserve"><value>Yarın kargoda</value></data>
+  <data name="Cart.Subtitle" xml:space="preserve"><value>Sepetinizde {1} farklı satıcıdan {0} ürün bulunuyor.</value></data>
+  <data name="Cart.Subtotal" xml:space="preserve"><value>Ara Toplam</value></data>
+  <data name="Cart.Summary" xml:space="preserve"><value>Sipariş Özeti</value></data>
+  <data name="Cart.Vat" xml:space="preserve"><value>KDV</value></data>
+  <data name="Cart.VatIncluded" xml:space="preserve"><value>Fiyatlara dahil</value></data>
+  <data name="Category.NotFound" xml:space="preserve"><value>Kategori bulunamadı</value></data>
+  <data name="Category.NotFoundText" xml:space="preserve"><value>Bu kategori kaldırılmış ya da adı değişmiş olabilir.</value></data>
+  <data name="Category.ProductCount" xml:space="preserve"><value>{0} ürün</value></data>
+  <data name="Checkout.Address" xml:space="preserve"><value>Adres</value></data>
+  <data name="Checkout.BillingNotAvailable" xml:space="preserve"><value>Ayrı fatura adresi henüz desteklenmiyor, teslimat adresi kullanılacak.</value></data>
+  <data name="Checkout.BillingSame" xml:space="preserve"><value>Fatura adresim teslimat adresimle aynı</value></data>
+  <data name="Checkout.CardNumber" xml:space="preserve"><value>Kart Numarası</value></data>
+  <data name="Checkout.City" xml:space="preserve"><value>Şehir</value></data>
+  <data name="Checkout.CityDistrict" xml:space="preserve"><value>Şehir / İlçe</value></data>
+  <data name="Checkout.Confirm" xml:space="preserve"><value>Siparişi Onayla ve Öde</value></data>
+  <data name="Checkout.ConfirmMobile" xml:space="preserve"><value>Siparişi Onayla — {0}</value></data>
+  <data name="Checkout.Country" xml:space="preserve"><value>Ülke</value></data>
+  <data name="Checkout.CountryTurkey" xml:space="preserve"><value>Türkiye</value></data>
+  <data name="Checkout.District" xml:space="preserve"><value>İlçe</value></data>
+  <data name="Checkout.Expiry" xml:space="preserve"><value>Son Kullanma Tarihi</value></data>
+  <data name="Checkout.Failed" xml:space="preserve"><value>Siparişiniz oluşturulamadı. Lütfen sepetinizi kontrol edip tekrar deneyin.</value></data>
+  <data name="Checkout.FullName" xml:space="preserve"><value>Ad Soyad</value></data>
+  <data name="Checkout.PaymentMethod" xml:space="preserve"><value>Ödeme Yöntemi</value></data>
+  <data name="Checkout.Phone" xml:space="preserve"><value>Telefon</value></data>
+  <data name="Checkout.SameDay" xml:space="preserve"><value>Aynı Gün Kurye (İstanbul)</value></data>
+  <data name="Checkout.SameDayEta" xml:space="preserve"><value>Bugün 18:00 - 22:00 arası teslim</value></data>
+  <data name="Checkout.SecurePayment" xml:space="preserve"><value>Güvenli Ödeme</value></data>
+  <data name="Checkout.SellerQty" xml:space="preserve"><value>{0} · {1} adet</value></data>
+  <data name="Checkout.ShippingOption" xml:space="preserve"><value>Kargo Seçeneği</value></data>
+  <data name="Checkout.Standard" xml:space="preserve"><value>Standart Kargo</value></data>
+  <data name="Checkout.StandardEta" xml:space="preserve"><value>Tahmini Teslimat: 1-2 İş Günü</value></data>
+  <data name="Checkout.StepAddress" xml:space="preserve"><value>Teslimat Adresi</value></data>
+  <data name="Checkout.StepConfirm" xml:space="preserve"><value>Sipariş Onayı</value></data>
+  <data name="Checkout.StepPayment" xml:space="preserve"><value>Ödeme</value></data>
+  <data name="Checkout.StepShipping" xml:space="preserve"><value>Kargo</value></data>
+  <data name="Checkout.Steps" xml:space="preserve"><value>Ödeme adımları</value></data>
+  <data name="Checkout.SuccessText" xml:space="preserve"><value>Sipariş numaranız: {0}. Satıcılarınız ürünlerinizi hazırlamaya başladı.</value></data>
+  <data name="Checkout.SuccessTitle" xml:space="preserve"><value>Siparişiniz Başarıyla Alındı</value></data>
+  <data name="Checkout.Title" xml:space="preserve"><value>Ödeme</value></data>
+  <data name="Checkout.Total" xml:space="preserve"><value>Toplam</value></data>
+  <data name="Checkout.TrackOrder" xml:space="preserve"><value>Siparişimi Takip Et</value></data>
+  <data name="Checkout.ZipCode" xml:space="preserve"><value>Posta Kodu</value></data>
+  <data name="Common.Close" xml:space="preserve"><value>Kapat</value></data>
+  <data name="Common.ComingSoon" xml:space="preserve"><value>Bu özellik yakında aktif olacak. Hiçbir bilgi kaydedilmedi.</value></data>
+  <data name="Common.DaysAgo" xml:space="preserve"><value>{0} gün önce</value></data>
+  <data name="Common.Free" xml:space="preserve"><value>Ücretsiz</value></data>
+  <data name="Common.Loading" xml:space="preserve"><value>Yükleniyor</value></data>
+  <data name="Common.SeeAll" xml:space="preserve"><value>Tümünü Gör</value></data>
+  <data name="Common.Seller" xml:space="preserve"><value>Satıcı:</value></data>
+  <data name="Common.SellerLabel" xml:space="preserve"><value>Satıcı: {0}</value></data>
+  <data name="Common.SkipToContent" xml:space="preserve"><value>İçeriğe geç</value></data>
+  <data name="Common.Soon" xml:space="preserve"><value>Yakında</value></data>
+  <data name="Common.Today" xml:space="preserve"><value>Bugün</value></data>
+  <data name="Error.BasketUnavailable" xml:space="preserve"><value>Sepetiniz şu anda yüklenemiyor.</value></data>
+  <data name="Error.CatalogUnavailable" xml:space="preserve"><value>Ürünler şu anda yüklenemiyor. Lütfen birazdan tekrar deneyin.</value></data>
+  <data name="Error.Generic" xml:space="preserve"><value>Bir sorun oluştu. Lütfen tekrar deneyin.</value></data>
+  <data name="Error.IdentityUnavailable" xml:space="preserve"><value>Giriş şu anda yapılamıyor.</value></data>
+  <data name="Error.OrdersUnavailable" xml:space="preserve"><value>Siparişleriniz şu anda yüklenemiyor.</value></data>
+  <data name="Error.Reload" xml:space="preserve"><value>Yenile</value></data>
+  <data name="Error.Unhandled" xml:space="preserve"><value>Beklenmeyen bir hata oluştu.</value></data>
+  <data name="Filter.ApplyResults" xml:space="preserve"><value>Sonuçları Uygula ({0})</value></data>
+  <data name="Filter.Brand" xml:space="preserve"><value>Marka</value></data>
+  <data name="Filter.Clear" xml:space="preserve"><value>Temizle</value></data>
+  <data name="Filter.FourStars" xml:space="preserve"><value>4 Yıldız ve Üzeri</value></data>
+  <data name="Filter.InStock" xml:space="preserve"><value>Stokta Mevcut</value></data>
+  <data name="Filter.MaxPrice" xml:space="preserve"><value>En çok fiyat</value></data>
+  <data name="Filter.MinPrice" xml:space="preserve"><value>En az fiyat</value></data>
+  <data name="Filter.MobileButton" xml:space="preserve"><value>Filtrele ({0})</value></data>
+  <data name="Filter.OnSale" xml:space="preserve"><value>İndirimli Ürünler</value></data>
+  <data name="Filter.PriceRange" xml:space="preserve"><value>Fiyat Aralığı</value></data>
+  <data name="Filter.RatingChip" xml:space="preserve"><value>4+ Puan</value></data>
+  <data name="Filter.RatingStatus" xml:space="preserve"><value>Müşteri Puanı &amp; Durum</value></data>
+  <data name="Filter.RemoveChip" xml:space="preserve"><value>{0} filtresini kaldır</value></data>
+  <data name="Filter.Seller" xml:space="preserve"><value>Satıcı</value></data>
+  <data name="Filter.Subcategories" xml:space="preserve"><value>Alt Kategoriler</value></data>
+  <data name="Filter.Title" xml:space="preserve"><value>Filtreler</value></data>
+  <data name="Footer.About" xml:space="preserve"><value>Seçkin markaları ve güvenilir bağımsız satıcıları tek bir modern alışveriş deneyiminde buluşturan çevrimiçi pazar yeri.</value></data>
+  <data name="Footer.AboutTitle" xml:space="preserve"><value>SellingBudy Hakkında</value></data>
+  <data name="Footer.AboutUs" xml:space="preserve"><value>Hakkımızda</value></data>
+  <data name="Footer.BecomeSeller" xml:space="preserve"><value>Satıcı Olun</value></data>
+  <data name="Footer.Careers" xml:space="preserve"><value>Kariyer</value></data>
+  <data name="Footer.Contact" xml:space="preserve"><value>Bize Ulaşın</value></data>
+  <data name="Footer.Cookies" xml:space="preserve"><value>Çerez Politikası</value></data>
+  <data name="Footer.Copyright" xml:space="preserve"><value>© 2026 SellingBudy. Tüm hakları saklıdır.</value></data>
+  <data name="Footer.CustomerService" xml:space="preserve"><value>Müşteri Hizmetleri</value></data>
+  <data name="Footer.Faq" xml:space="preserve"><value>Sıkça Sorulan Sorular</value></data>
+  <data name="Footer.OrderTracking" xml:space="preserve"><value>Sipariş Takibi</value></data>
+  <data name="Footer.Privacy" xml:space="preserve"><value>Gizlilik Politikası</value></data>
+  <data name="Footer.Returns" xml:space="preserve"><value>İade ve Geri Ödeme</value></data>
+  <data name="Footer.Shipping" xml:space="preserve"><value>Kargo Bilgileri</value></data>
+  <data name="Footer.Terms" xml:space="preserve"><value>Kullanım Koşulları</value></data>
+  <data name="Header.Announcement" xml:space="preserve"><value>Seçili siparişlerde özel fırsatları ve ücretsiz kargo avantajını keşfedin.</value></data>
+  <data name="Header.CloseAnnouncement" xml:space="preserve"><value>Duyuruyu kapat</value></data>
+  <data name="Header.Language" xml:space="preserve"><value>Dil</value></data>
+  <data name="Header.Search" xml:space="preserve"><value>Ara</value></data>
+  <data name="Header.SearchPlaceholder" xml:space="preserve"><value>Ürün, marka veya kategori ara...</value></data>
+  <data name="Home.AllTrends" xml:space="preserve"><value>Tüm Trendler</value></data>
+  <data name="Home.ExploreCollections" xml:space="preserve"><value>Koleksiyonları Keşfet</value></data>
+  <data name="Home.FeaturedCampaigns" xml:space="preserve"><value>Öne Çıkan Kampanyalar</value></data>
+  <data name="Home.FeaturedCategories" xml:space="preserve"><value>Öne Çıkan Kategoriler</value></data>
+  <data name="Home.FeaturedCategoriesText" xml:space="preserve"><value>İhtiyacınız olan her şey doğrulanmış satıcı güvencesiyle.</value></data>
+  <data name="Home.FeaturedSellers" xml:space="preserve"><value>Öne Çıkan Satıcılar</value></data>
+  <data name="Home.FeaturedSellersText" xml:space="preserve"><value>Yüksek müşteri memnuniyetine sahip onaylı mağazaları keşfedin.</value></data>
+  <data name="Home.HeroAlt" xml:space="preserve"><value>Özenle seçilmiş modern yaşam, teknoloji ve aksesuar ürünleri</value></data>
+  <data name="Home.HeroEyebrow" xml:space="preserve"><value>Yeni Sezon Seçkisi</value></data>
+  <data name="Home.HeroText" xml:space="preserve"><value>Güvenilir satıcılardan özenle seçilmiş ürünleri keşfedin. Teknoloji, moda ve yaşam alanını tek bir yerde bulun.</value></data>
+  <data name="Home.HeroTitle" xml:space="preserve"><value>Sıra Dışı Olanı Keşfet</value></data>
+  <data name="Home.StartShopping" xml:space="preserve"><value>Alışverişe Başla</value></data>
+  <data name="Home.Title" xml:space="preserve"><value>Çevrimiçi Pazar Yeri</value></data>
+  <data name="Home.Trending" xml:space="preserve"><value>Trend Ürünler</value></data>
+  <data name="Home.TrendingText" xml:space="preserve"><value>Bu hafta en çok incelenen ve beğenilen seçimler.</value></data>
+  <data name="Home.Trust" xml:space="preserve"><value>Neden SellingBudy</value></data>
+  <data name="Home.ViewCampaign" xml:space="preserve"><value>Kampanyayı İncele</value></data>
+  <data name="Listing.AllCount" xml:space="preserve"><value>Tümü ({0})</value></data>
+  <data name="Listing.EmptyText" xml:space="preserve"><value>Bazı filtreleri kaldırmayı ya da başka bir kategoriye göz atmayı deneyin.</value></data>
+  <data name="Listing.EmptyTitle" xml:space="preserve"><value>Bu filtrelerle eşleşen ürün yok</value></data>
+  <data name="Listing.GridView" xml:space="preserve"><value>Izgara görünümü</value></data>
+  <data name="Listing.ListView" xml:space="preserve"><value>Liste görünümü</value></data>
+  <data name="Listing.LoadMore" xml:space="preserve"><value>Daha Fazla Ürün Göster</value></data>
+  <data name="Listing.NoResults" xml:space="preserve"><value>Ürün yok</value></data>
+  <data name="Listing.Showing" xml:space="preserve"><value>{0} üründen {1}–{2} arası gösteriliyor</value></data>
+  <data name="Nav.Account" xml:space="preserve"><value>Hesabım</value></data>
+  <data name="Nav.AllCategories" xml:space="preserve"><value>Tüm Kategoriler</value></data>
+  <data name="Nav.BottomMenu" xml:space="preserve"><value>Alt Menü</value></data>
+  <data name="Nav.Campaigns" xml:space="preserve"><value>Kampanyalar</value></data>
+  <data name="Nav.Cart" xml:space="preserve"><value>Sepetim</value></data>
+  <data name="Nav.CartShort" xml:space="preserve"><value>Sepet</value></data>
+  <data name="Nav.Categories" xml:space="preserve"><value>Kategoriler</value></data>
+  <data name="Nav.Favorites" xml:space="preserve"><value>Favoriler</value></data>
+  <data name="Nav.Home" xml:space="preserve"><value>Ana Sayfa</value></data>
+  <data name="Nav.MainCategories" xml:space="preserve"><value>Ana Kategoriler</value></data>
+  <data name="Nav.Orders" xml:space="preserve"><value>Siparişlerim</value></data>
+  <data name="Nav.Wishlist" xml:space="preserve"><value>Favorilerim</value></data>
+  <data name="Newsletter.Placeholder" xml:space="preserve"><value>E-posta adresiniz</value></data>
+  <data name="Newsletter.Subscribe" xml:space="preserve"><value>Abone Ol</value></data>
+  <data name="Newsletter.Text" xml:space="preserve"><value>Yeni koleksiyonlar, özel teklifler ve seçili kampanyalar hakkında güncel kalın.</value></data>
+  <data name="Newsletter.Title" xml:space="preserve"><value>Yeniliklerden İlk Sen Haberdar Ol</value></data>
+  <data name="NotFound.Text" xml:space="preserve"><value>Aradığınız sayfa bulunamadı ya da taşınmış olabilir.</value></data>
+  <data name="NotFound.Title" xml:space="preserve"><value>Sayfa bulunamadı</value></data>
+  <data name="Order.Back" xml:space="preserve"><value>Siparişlerime Dön</value></data>
+  <data name="Order.Card" xml:space="preserve"><value>Kart</value></data>
+  <data name="Order.Items" xml:space="preserve"><value>Sipariş Edilen Ürünler</value></data>
+  <data name="Order.NotFound" xml:space="preserve"><value>Sipariş bulunamadı</value></data>
+  <data name="Order.NotFoundText" xml:space="preserve"><value>Bu sipariş yok ya da hesabınıza ait değil.</value></data>
+  <data name="Order.PaymentSummary" xml:space="preserve"><value>Ödeme Özeti</value></data>
+  <data name="Order.Processing" xml:space="preserve"><value>Siparişiniz oluşturuluyor, bu birkaç saniye sürebilir.</value></data>
+  <data name="Order.Qty" xml:space="preserve"><value>Adet: {0}</value></data>
+  <data name="Order.ShippingAddress" xml:space="preserve"><value>Teslimat Adresi</value></data>
+  <data name="Order.Title" xml:space="preserve"><value>Sipariş Detayı</value></data>
+  <data name="Order.Tracking" xml:space="preserve"><value>Teslimat Takibi</value></data>
+  <data name="OrderStatus.Cancelled" xml:space="preserve"><value>İptal Edildi</value></data>
+  <data name="OrderStatus.Delivered" xml:space="preserve"><value>Teslim Edildi</value></data>
+  <data name="OrderStatus.Preparing" xml:space="preserve"><value>Hazırlanıyor</value></data>
+  <data name="OrderStatus.Shipped" xml:space="preserve"><value>Kargoya Verildi</value></data>
+  <data name="Orders.Date" xml:space="preserve"><value>Tarih:</value></data>
+  <data name="Orders.Details" xml:space="preserve"><value>Sipariş Detayı</value></data>
+  <data name="Orders.EmptyText" xml:space="preserve"><value>İlk alışverişinizden sonra siparişleriniz burada görünecek.</value></data>
+  <data name="Orders.EmptyTitle" xml:space="preserve"><value>Henüz siparişiniz yok</value></data>
+  <data name="Orders.FilterActive" xml:space="preserve"><value>Devam Edenler ({0})</value></data>
+  <data name="Orders.FilterAll" xml:space="preserve"><value>Tümü ({0})</value></data>
+  <data name="Orders.FilterDelivered" xml:space="preserve"><value>Teslim Edilenler ({0})</value></data>
+  <data name="Orders.MoreItems" xml:space="preserve"><value>+{0} ürün daha</value></data>
+  <data name="Orders.OrderNo" xml:space="preserve"><value>Sipariş No:</value></data>
+  <data name="Orders.Subtitle" xml:space="preserve"><value>Tüm aktif ve geçmiş siparişlerinizi takip edin.</value></data>
+  <data name="Orders.Units" xml:space="preserve"><value>{0} adet</value></data>
+  <data name="Pagination.Label" xml:space="preserve"><value>Sayfalama</value></data>
+  <data name="Pagination.Next" xml:space="preserve"><value>Sonraki sayfa</value></data>
+  <data name="Pagination.Previous" xml:space="preserve"><value>Önceki sayfa</value></data>
+  <data name="Product.AddToCart" xml:space="preserve"><value>Sepete Ekle</value></data>
+  <data name="Product.BestOffer" xml:space="preserve"><value>En İyi Teklif</value></data>
+  <data name="Product.BuyNow" xml:space="preserve"><value>Hemen Al</value></data>
+  <data name="Product.CustomerReviews" xml:space="preserve"><value>Müşteri Değerlendirmeleri</value></data>
+  <data name="Product.DeliveryDays" xml:space="preserve"><value>Tahmini Teslimat: {0} iş günü</value></data>
+  <data name="Product.DeliveryTomorrow" xml:space="preserve"><value>Tahmini Teslimat: Yarın Kapıda</value></data>
+  <data name="Product.DescriptionSpecs" xml:space="preserve"><value>Ürün Açıklaması ve Teknik Özellikler</value></data>
+  <data name="Product.DiscountBadge" xml:space="preserve"><value>{0} İndirim</value></data>
+  <data name="Product.FreeShipping" xml:space="preserve"><value>Ücretsiz Kargo</value></data>
+  <data name="Product.InStock" xml:space="preserve"><value>Stokta Mevcut</value></data>
+  <data name="Product.NotFound" xml:space="preserve"><value>Ürün bulunamadı</value></data>
+  <data name="Product.NotFoundText" xml:space="preserve"><value>Bu ürün katalogdan kaldırılmış olabilir.</value></data>
+  <data name="Product.OfferMeta" xml:space="preserve"><value>{0} Puan · {1}</value></data>
+  <data name="Product.OtherOffers" xml:space="preserve"><value>Diğer Satıcı Teklifleri ({0})</value></data>
+  <data name="Product.OtherOffersText" xml:space="preserve"><value>Aynı ürünü sunan onaylı satıcıları fiyat ve teslimat süresine göre karşılaştırın.</value></data>
+  <data name="Product.OutOfStock" xml:space="preserve"><value>Stokta Yok</value></data>
+  <data name="Product.Reviews" xml:space="preserve"><value>{0} değerlendirme</value></data>
+  <data name="Product.SellerCount" xml:space="preserve"><value>{0} farklı satıcı</value></data>
+  <data name="Product.SellerScore" xml:space="preserve"><value>Satıcı Puanı: {0} ({1} satış)</value></data>
+  <data name="Product.ShippingFee" xml:space="preserve"><value>Kargo: {0}</value></data>
+  <data name="Product.StockCount" xml:space="preserve"><value>Stokta ({0} adet)</value></data>
+  <data name="Product.Title" xml:space="preserve"><value>Ürün</value></data>
+  <data name="Qty.Decrease" xml:space="preserve"><value>Azalt</value></data>
+  <data name="Qty.Increase" xml:space="preserve"><value>Artır</value></data>
+  <data name="Qty.Label" xml:space="preserve"><value>Adet</value></data>
+  <data name="Search.AllProducts" xml:space="preserve"><value>Tüm Ürünler</value></data>
+  <data name="Search.Brands" xml:space="preserve"><value>Markalar:</value></data>
+  <data name="Search.EmptyText" xml:space="preserve"><value>Yazım hatası olmadığından emin olun veya aşağıdaki popüler aramalardan birini deneyin.</value></data>
+  <data name="Search.EmptyTitle" xml:space="preserve"><value>Aramanızla eşleşen ürün bulunamadı</value></data>
+  <data name="Search.Found" xml:space="preserve"><value>{0} ürün bulundu</value></data>
+  <data name="Search.NoSuggestions" xml:space="preserve"><value>Eşleşen ürün yok</value></data>
+  <data name="Search.Popular" xml:space="preserve"><value>Popüler Aramalar</value></data>
+  <data name="Search.Products" xml:space="preserve"><value>Ürünler</value></data>
+  <data name="Search.RelatedCategories" xml:space="preserve"><value>İlgili Kategoriler:</value></data>
+  <data name="Search.SuggestWatches" xml:space="preserve"><value>Akıllı Saat</value></data>
+  <data name="Search.Title" xml:space="preserve"><value>“{0}” için arama sonuçları</value></data>
+  <data name="Seller.Follow" xml:space="preserve"><value>Mağazayı Takip Et</value></data>
+  <data name="Seller.NotFound" xml:space="preserve"><value>Mağaza bulunamadı</value></data>
+  <data name="Seller.OnTime" xml:space="preserve"><value>{0} zamanında kargo</value></data>
+  <data name="Seller.Products" xml:space="preserve"><value>{0} ürün</value></data>
+  <data name="Seller.RatingProducts" xml:space="preserve"><value>{0} Puan · {1} Ürün</value></data>
+  <data name="Seller.RatingReviews" xml:space="preserve"><value>Satıcı puanı ({0} değerlendirme)</value></data>
+  <data name="Seller.Store" xml:space="preserve"><value>Mağaza</value></data>
+  <data name="Seller.Verified" xml:space="preserve"><value>Onaylı Satıcı</value></data>
+  <data name="Seller.ViewStore" xml:space="preserve"><value>Mağazayı Gör</value></data>
+  <data name="Sort.Label" xml:space="preserve"><value>Sıralama</value></data>
+  <data name="Sort.bestsellers" xml:space="preserve"><value>En Çok Satanlar</value></data>
+  <data name="Sort.discount" xml:space="preserve"><value>En Yüksek İndirim</value></data>
+  <data name="Sort.newest" xml:space="preserve"><value>En Yeniler</value></data>
+  <data name="Sort.price_asc" xml:space="preserve"><value>Fiyat: Artan</value></data>
+  <data name="Sort.price_desc" xml:space="preserve"><value>Fiyat: Azalan</value></data>
+  <data name="Sort.rating" xml:space="preserve"><value>En Yüksek Puan</value></data>
+  <data name="Sort.recommended" xml:space="preserve"><value>Önerilen</value></data>
+  <data name="Timeline.Cancelled" xml:space="preserve"><value>İptal Edildi</value></data>
+  <data name="Timeline.Confirmed" xml:space="preserve"><value>Sipariş Onaylandı</value></data>
+  <data name="Timeline.Delivered" xml:space="preserve"><value>Teslim Edildi</value></data>
+  <data name="Timeline.EstimatedSoon" xml:space="preserve"><value>Tahmini: birkaç gün içinde</value></data>
+  <data name="Timeline.PaymentFailed" xml:space="preserve"><value>Ödeme tamamlanamadı</value></data>
+  <data name="Timeline.Preparing" xml:space="preserve"><value>Hazırlanıyor</value></data>
+  <data name="Timeline.Received" xml:space="preserve"><value>Sipariş Alındı</value></data>
+  <data name="Timeline.Shipped" xml:space="preserve"><value>Kargoya Verildi</value></data>
+  <data name="Toast.AddedToCart" xml:space="preserve"><value>Ürün sepetinize eklendi.</value></data>
+  <data name="Toast.RemovedFromCart" xml:space="preserve"><value>Ürün sepetinizden çıkarıldı.</value></data>
+  <data name="Toast.SavedForLater" xml:space="preserve"><value>Ürün favorilerinize taşındı.</value></data>
+  <data name="Toast.WishlistAdded" xml:space="preserve"><value>Favorilerinize eklendi.</value></data>
+  <data name="Toast.WishlistRemoved" xml:space="preserve"><value>Favorilerinizden çıkarıldı.</value></data>
+  <data name="Trust.Delivery" xml:space="preserve"><value>Güvenilir Teslimat</value></data>
+  <data name="Trust.DeliveryText" xml:space="preserve"><value>Anlaşmalı kargo ile takipli gönderim.</value></data>
+  <data name="Trust.Returns" xml:space="preserve"><value>Kolay İade</value></data>
+  <data name="Trust.ReturnsText" xml:space="preserve"><value>14 gün içinde koşulsuz iade hakkı.</value></data>
+  <data name="Trust.SecurePayment" xml:space="preserve"><value>Güvenli Ödeme</value></data>
+  <data name="Trust.SecurePaymentText" xml:space="preserve"><value>256-bit SSL korumalı ödeme altyapısı.</value></data>
+  <data name="Trust.VerifiedSellers" xml:space="preserve"><value>Onaylı Satıcılar</value></data>
+  <data name="Trust.VerifiedSellersText" xml:space="preserve"><value>Kalite kontrolünden geçmiş mağazalar.</value></data>
+  <data name="Validation.CardNumber" xml:space="preserve"><value>Geçerli bir kart numarası girin.</value></data>
+  <data name="Validation.Cvv" xml:space="preserve"><value>3 veya 4 haneli kodu girin.</value></data>
+  <data name="Validation.Email" xml:space="preserve"><value>Geçerli bir e-posta adresi girin.</value></data>
+  <data name="Validation.Expiry" xml:space="preserve"><value>İleri bir tarihi AA/YY biçiminde girin.</value></data>
+  <data name="Validation.PasswordLength" xml:space="preserve"><value>Şifre en az 8 karakter olmalı.</value></data>
+  <data name="Validation.PasswordMatch" xml:space="preserve"><value>Şifreler eşleşmiyor.</value></data>
+  <data name="Validation.Phone" xml:space="preserve"><value>Geçerli bir telefon numarası girin.</value></data>
+  <data name="Validation.Required" xml:space="preserve"><value>Bu alan zorunludur.</value></data>
+  <data name="Validation.Terms" xml:space="preserve"><value>Koşulları kabul etmeniz gerekiyor.</value></data>
+  <data name="Wishlist.Add" xml:space="preserve"><value>Favorilere ekle</value></data>
+  <data name="Wishlist.EmptyText" xml:space="preserve"><value>Beğendiğiniz ürünleri kalp ikonuna tıklayarak kaydedin.</value></data>
+  <data name="Wishlist.EmptyTitle" xml:space="preserve"><value>Favori listeniz henüz boş</value></data>
+  <data name="Wishlist.Explore" xml:space="preserve"><value>Ürünleri Keşfet</value></data>
+  <data name="Wishlist.Remove" xml:space="preserve"><value>Favorilerden çıkar</value></data>
+  <data name="Wishlist.Saved" xml:space="preserve"><value>Kaydedilen {0} ürün</value></data>
+</root>

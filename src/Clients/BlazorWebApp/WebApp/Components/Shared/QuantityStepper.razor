@@ -1,0 +1,27 @@
+<div class="qty @(Small ? "sm" : null)" role="group" aria-label="@L["Qty.Label"]">
+    <button type="button" aria-label="@L["Qty.Decrease"]" disabled="@(Disabled || Value <= Min)" @onclick="() => ChangeAsync(-1)"><AppIcon Name="remove" /></button>
+    <span aria-live="polite">@Value</span>
+    <button type="button" aria-label="@L["Qty.Increase"]" disabled="@(Disabled || Value >= Max)" @onclick="() => ChangeAsync(1)"><AppIcon Name="add" /></button>
+</div>
+
+@code {
+    [Parameter]
+    public int Value { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<int> ValueChanged { get; set; }
+
+    [Parameter]
+    public int Min { get; set; } = 1;
+
+    [Parameter]
+    public int Max { get; set; } = 99;
+
+    [Parameter]
+    public bool Small { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    private Task ChangeAsync(int delta) => ValueChanged.InvokeAsync(Math.Clamp(Value + delta, Min, Max));
+}

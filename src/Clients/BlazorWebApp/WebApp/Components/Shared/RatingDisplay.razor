@@ -1,0 +1,16 @@
+<span class="rating num">
+    <AppIcon Name="star" Filled="true" />
+    @Fmt.Rating(Value)
+    @if (Count.HasValue)
+    {
+        <small>(@Fmt.Count(Count.Value))</small>
+    }
+</span>
+
+@code {
+    [Parameter]
+    public double Value { get; set; }
+
+    [Parameter]
+    public int? Count { get; set; }
+}

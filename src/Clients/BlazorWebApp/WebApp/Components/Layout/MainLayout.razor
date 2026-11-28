@@ -1,23 +1,40 @@
 ﻿@inherits LayoutComponentBase
+@inject StorefrontState State
+@inject ICatalogService CatalogService
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<a class="sr-only" href="#main">@L["Common.SkipToContent"]</a>
 
-    <main>
-        <div class="top-row px-4">
-            <LoginDisplay />
-        </div>
+<SiteHeader FirstCampaign="@firstCampaign" />
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<main id="main" class="container">
+    @Body
+</main>
+
+<SiteFooter />
+<BottomNav />
+<ToastHost />
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
+    @L["Error.Unhandled"]
+    <a href="." class="reload">@L["Error.Reload"]</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private string firstCampaign;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await State.EnsureLoadedAsync();
+
+        try
+        {
+            //campaign pill links to the first running campaign
+            firstCampaign = (await CatalogService.GetCampaignsAsync()).FirstOrDefault()?.Slug;
+        }
+        catch (HttpRequestException)
+        {
+            firstCampaign = null;
+        }
+    }
+}

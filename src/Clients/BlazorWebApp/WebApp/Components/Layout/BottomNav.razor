@@ -1,0 +1,37 @@
+@implements IDisposable
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<nav class="bottom-nav" aria-label="@L["Nav.BottomMenu"]">
+    <a href="" class="@(Current == "" ? "active" : null)"><AppIcon Name="home" Filled="@(Current == "")" /><span>@L["Nav.Home"]</span></a>
+    <a href="categories" class="@(Current.StartsWith("categories") ? "active" : null)"><AppIcon Name="grid_view" Filled="@(Current.StartsWith("categories"))" /><span>@L["Nav.Categories"]</span></a>
+    <a href="wishlist" class="@(Current.StartsWith("wishlist") ? "active" : null)"><AppIcon Name="favorite" Filled="@(Current.StartsWith("wishlist"))" /><span>@L["Nav.Favorites"]</span></a>
+    <a href="@(State.IsAuthenticated ? "account" : "login")" class="@(Current.StartsWith("account") || Current.StartsWith("login") ? "active" : null)"><AppIcon Name="person" Filled="@(Current.StartsWith("account"))" /><span>@L["Nav.Account"]</span></a>
+    <a href="cart" class="@(Current.StartsWith("cart") ? "active" : null)">
+        <AppIcon Name="shopping_bag" Filled="@(Current.StartsWith("cart"))" /><span>@L["Nav.CartShort"]</span>
+        @if (State.CartCount > 0)
+        {
+            <span class="count">@State.CartCount</span>
+        }
+    </a>
+</nav>
+
+@code {
+    private string Current => Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0];
+
+    protected override void OnInitialized()
+    {
+        State.Changed += OnChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e) => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        State.Changed -= OnChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}

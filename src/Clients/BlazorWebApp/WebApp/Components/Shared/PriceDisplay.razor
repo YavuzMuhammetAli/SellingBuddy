@@ -1,0 +1,21 @@
+<span class="price-line">
+    <span class="price @PriceClass">@Fmt.Price(Price)</span>
+    @if (ShowOldPrice && OldPrice.HasValue && OldPrice > Price)
+    {
+        <span class="price-old">@Fmt.Price(OldPrice.Value)</span>
+    }
+</span>
+
+@code {
+    [Parameter]
+    public decimal Price { get; set; }
+
+    [Parameter]
+    public decimal? OldPrice { get; set; }
+
+    [Parameter]
+    public bool ShowOldPrice { get; set; } = true;
+
+    [Parameter]
+    public string PriceClass { get; set; }
+}

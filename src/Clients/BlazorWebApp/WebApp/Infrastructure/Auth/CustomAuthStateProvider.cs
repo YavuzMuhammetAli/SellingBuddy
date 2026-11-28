@@ -1,27 +1,30 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Security.Claims;
+using WebApp.Domain.Models;
 
 namespace WebApp.Infrastructure.Auth
 {
     public class CustomAuthStateProvider : AuthenticationStateProvider
     {
-        private const string TokenKey = "authToken";
-        private const string UserNameKey = "userName";
+        private const string SessionKey = "userSession";
 
         private static readonly AuthenticationState Anonymous = new(new ClaimsPrincipal(new ClaimsIdentity()));
 
         private readonly ProtectedLocalStorage _localStorage;
+        private readonly ProtectedSessionStorage _sessionStorage;
         private readonly ILogger<CustomAuthStateProvider> _logger;
 
         private AuthenticationState _cachedState;
-        private string _token;
 
-        public CustomAuthStateProvider(ProtectedLocalStorage localStorage, ILogger<CustomAuthStateProvider> logger)
+        public CustomAuthStateProvider(ProtectedLocalStorage localStorage, ProtectedSessionStorage sessionStorage, ILogger<CustomAuthStateProvider> logger)
         {
             _localStorage = localStorage;
+            _sessionStorage = sessionStorage;
             _logger = logger;
         }
+
+        public UserSession Session { get; private set; }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
@@ -30,21 +33,23 @@ namespace WebApp.Infrastructure.Auth
 
             try
             {
-                //token kept in browser storage between visits
-                var token = await _localStorage.GetAsync<string>(TokenKey);
-                var userName = await _localStorage.GetAsync<string>(UserNameKey);
+                //remember me uses local storage, otherwise the tab session
+                var stored = await _localStorage.GetAsync<UserSession>(SessionKey);
 
-                if (token.Success && userName.Success && !string.IsNullOrEmpty(token.Value))
+                if (!stored.Success || stored.Value == null)
+                    stored = await _sessionStorage.GetAsync<UserSession>(SessionKey);
+
+                if (stored.Success && stored.Value != null && stored.Value.Expiration > DateTime.UtcNow)
                 {
-                    _token = token.Value;
-                    _cachedState = BuildState(userName.Value);
+                    Session = stored.Value;
+                    _cachedState = BuildState(Session);
                     return _cachedState;
                 }
             }
             catch (Exception ex)
             {
                 //storage is not reachable before the circuit is ready
-                _logger.LogDebug(ex, "Auth state could not be read from local storage");
+                _logger.LogDebug(ex, "Auth state could not be read from browser storage");
                 return Anonymous;
             }
 
@@ -54,37 +59,45 @@ namespace WebApp.Infrastructure.Auth
 
         public async Task<string> GetTokenAsync()
         {
-            if (_token == null)
+            if (_cachedState == null)
                 await GetAuthenticationStateAsync();
 
-            return _token;
+            return Session?.Token;
         }
 
-        public async Task SignInAsync(string userName, string token)
+        public async Task SignInAsync(UserSession session, bool rememberMe)
         {
-            await _localStorage.SetAsync(TokenKey, token);
-            await _localStorage.SetAsync(UserNameKey, userName);
+            if (rememberMe)
+                await _localStorage.SetAsync(SessionKey, session);
+            else
+                await _sessionStorage.SetAsync(SessionKey, session);
 
-            _token = token;
-            _cachedState = BuildState(userName);
+            Session = session;
+            _cachedState = BuildState(session);
 
             NotifyAuthenticationStateChanged(Task.FromResult(_cachedState));
         }
 
         public async Task SignOutAsync()
         {
-            await _localStorage.DeleteAsync(TokenKey);
-            await _localStorage.DeleteAsync(UserNameKey);
+            await _localStorage.DeleteAsync(SessionKey);
+            await _sessionStorage.DeleteAsync(SessionKey);
 
-            _token = null;
+            Session = null;
             _cachedState = Anonymous;
 
             NotifyAuthenticationStateChanged(Task.FromResult(_cachedState));
         }
 
-        private static AuthenticationState BuildState(string userName)
+        private static AuthenticationState BuildState(UserSession session)
         {
-            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, userName) }, "jwt");
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, session.UserName ?? string.Empty),
+                new Claim(ClaimTypes.Email, session.Email ?? string.Empty),
+                new Claim(ClaimTypes.GivenName, session.FirstName ?? string.Empty),
+                new Claim(ClaimTypes.Surname, session.LastName ?? string.Empty)
+            }, "jwt");
 
             return new AuthenticationState(new ClaimsPrincipal(identity));
         }

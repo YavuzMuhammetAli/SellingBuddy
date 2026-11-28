@@ -18,27 +18,32 @@ namespace WebApp.Application.Services
             _logger = logger;
         }
 
-        public async Task<bool> LoginAsync(string userName, string password)
+        public async Task<bool> LoginAsync(string userName, string password, bool rememberMe)
         {
             var response = await _gateway.Anonymous.PostAsJsonAsync("auth", new LoginRequest { UserName = userName, Password = password });
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Login failed for {UserName} with status {StatusCode}", userName, response.StatusCode);
+                _logger.LogInformation("Login failed with status {StatusCode}", response.StatusCode);
                 return false;
             }
 
-            var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            var login = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-            //token stored so other services can use it
-            await _authStateProvider.SignInAsync(loginResponse.UserName, loginResponse.UserToken);
+            //token and profile kept so other services can use them
+            await _authStateProvider.SignInAsync(new UserSession
+            {
+                Token = login.UserToken,
+                UserName = login.UserName,
+                Email = login.Email,
+                FirstName = login.FirstName,
+                LastName = login.LastName,
+                Expiration = login.Expiration
+            }, rememberMe);
 
             return true;
         }
 
-        public Task LogoutAsync()
-        {
-            return _authStateProvider.SignOutAsync();
-        }
+        public Task LogoutAsync() => _authStateProvider.SignOutAsync();
     }
 }

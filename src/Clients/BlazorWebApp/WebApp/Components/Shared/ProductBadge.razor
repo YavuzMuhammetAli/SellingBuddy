@@ -1,0 +1,24 @@
+@if (Product.DiscountPercent > 0)
+{
+    <span class="badge badge-error num @Class">@Fmt.Discount(Product.DiscountPercent)</span>
+}
+else if (Product.Badge == "BestSeller")
+{
+    <span class="badge badge-accent @Class">@L["Badge.BestSeller"]</span>
+}
+else if (Product.Badge == "FreeShipping")
+{
+    <span class="badge badge-success @Class">@L["Badge.FreeShipping"]</span>
+}
+else if (Product.Badge == "FastDelivery")
+{
+    <span class="badge badge-success @Class">@L["Badge.FastDelivery"]</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public ProductSummary Product { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
+}

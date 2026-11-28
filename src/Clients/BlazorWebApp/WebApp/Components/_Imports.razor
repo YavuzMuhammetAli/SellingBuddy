@@ -6,10 +6,14 @@
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.Extensions.Localization
 @using Microsoft.JSInterop
 @using WebApp
+@using WebApp.Application
 @using WebApp.Application.Services.Interfaces
 @using WebApp.Components
 @using WebApp.Components.Layout
 @using WebApp.Components.Shared
 @using WebApp.Domain.Models
+@using WebApp.Infrastructure
+@inject IStringLocalizer<SharedResource> L

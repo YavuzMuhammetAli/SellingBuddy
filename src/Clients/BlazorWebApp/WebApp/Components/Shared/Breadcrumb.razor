@@ -1,0 +1,22 @@
+<nav class="breadcrumb" aria-label="@L["Breadcrumb.Label"]">
+    <a href="">@L["Nav.Home"]</a>
+    @foreach (var item in Items)
+    {
+        <AppIcon Name="chevron_right" Size="14" />
+        @if (string.IsNullOrEmpty(item.Href))
+        {
+            <span class="current" aria-current="page">@item.Text</span>
+        }
+        else
+        {
+            <a href="@item.Href">@item.Text</a>
+        }
+    }
+</nav>
+
+@code {
+    public record Crumb(string Text, string Href = null);
+
+    [Parameter]
+    public IEnumerable<Crumb> Items { get; set; } = Enumerable.Empty<Crumb>();
+}

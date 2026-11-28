@@ -1,0 +1,20 @@
+@implements IDisposable
+@inject StorefrontState State
+
+<div class="toasts" role="status" aria-live="polite">
+    @foreach (var toast in State.Toasts.ToList())
+    {
+        <div class="toast @(toast.IsError ? "error" : null)" @key="toast.Id">
+            <AppIcon Name="@(toast.IsError ? "error" : "check_circle")" />
+            <span>@toast.Text</span>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized() => State.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.Changed -= OnChanged;
+}

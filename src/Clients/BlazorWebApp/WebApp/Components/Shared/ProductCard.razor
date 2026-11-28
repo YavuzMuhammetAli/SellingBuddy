@@ -1,0 +1,83 @@
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<article class="pcard @(Variant == CardVariant.Minimal ? "minimal" : null)">
+    <a class="pcard-media" href="@($"products/{Product.Slug}")" aria-label="@Product.Name">
+        <img src="@Product.PictureUri" alt="@Product.Name" loading="lazy" />
+        <ProductBadge Product="Product" Class="pcard-badge" />
+    </a>
+
+    @if (Variant != CardVariant.Search)
+    {
+        <div class="pcard-fav"><WishlistButton ProductId="Product.Id" /></div>
+    }
+
+    @if (Variant == CardVariant.Full && Product.AvailableStock > 0)
+    {
+        <div class="pcard-quick">
+            <button type="button" class="btn btn-primary btn-block btn-sm" disabled="@adding" @onclick="AddAsync">
+                <AppIcon Name="shopping_bag" /> @L["Product.AddToCart"]
+            </button>
+        </div>
+    }
+
+    <div class="pcard-body">
+        <span class="pcard-brand">@Product.BrandName</span>
+        <a href="@($"products/{Product.Slug}")" class="pcard-title clamp-2">@Product.Name</a>
+
+        @if (Variant != CardVariant.Minimal && Product.ReviewCount > 0)
+        {
+            <RatingDisplay Value="Product.Rating" Count="Product.ReviewCount" />
+        }
+
+        <div class="pcard-foot">
+            <PriceDisplay Price="Product.Price" OldPrice="Product.OldPrice" ShowOldPrice="Variant == CardVariant.Full" />
+            @if (Variant != CardVariant.Minimal && !string.IsNullOrEmpty(Product.SellerName))
+            {
+                <span class="seller-line">
+                    @if (Variant == CardVariant.Full)
+                    {
+                        <AppIcon Name="storefront" Size="14" />
+                    }
+                    @Product.SellerName
+                </span>
+            }
+        </div>
+    </div>
+</article>
+
+@code {
+    public enum CardVariant { Full, Search, Minimal }
+
+    [Parameter, EditorRequired]
+    public ProductSummary Product { get; set; }
+
+    [Parameter]
+    public CardVariant Variant { get; set; } = CardVariant.Full;
+
+    private bool adding;
+
+    private async Task AddAsync()
+    {
+        adding = true;
+
+        try
+        {
+            if (!await State.AddToCartAsync(Product.Id, Product.OfferId))
+            {
+                Navigation.NavigateTo($"login?returnUrl={Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri))}");
+                return;
+            }
+
+            State.ShowToast(L["Toast.AddedToCart"]);
+        }
+        catch (HttpRequestException)
+        {
+            State.ShowToast(L["Error.Generic"], true);
+        }
+        finally
+        {
+            adding = false;
+        }
+    }
+}
