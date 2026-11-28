@@ -1,0 +1,75 @@
+@page "/login"
+@layout AuthLayout
+@inject IIdentityService IdentityService
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Auth.LoginTitle"] · SellingBudy</PageTitle>
+
+<AuthShell Title="@L["Auth.LoginTitle"]" Subtitle="@L["Auth.LoginSubtitle"]" Tagline="@L["Auth.LoginTagline"]" TaglineText="@L["Auth.LoginTaglineText"]">
+    @if (error != null)
+    {
+        <Notice Kind="error">@error</Notice>
+    }
+
+    <form class="col gap-lg" @onsubmit="LoginAsync" novalidate>
+        <Field Label="@L["Auth.Email"]">
+            <input class="input" type="text" autocomplete="username" placeholder="@L["Auth.EmailPlaceholder"]" @bind="userName" />
+        </Field>
+        <Field Label="@L["Auth.Password"]">
+            <input class="input" type="password" autocomplete="current-password" placeholder="••••••••" @bind="password" />
+        </Field>
+        <div class="flex items-center justify-between">
+            <label class="checkbox"><input type="checkbox" @bind="rememberMe" /> @L["Auth.RememberMe"]</label>
+            <a href="forgot-password" class="btn-link">@L["Auth.ForgotPassword"]</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" disabled="@busy">@L["Auth.LoginTitle"]</button>
+    </form>
+
+    <p class="t-body-md muted center">@L["Auth.NoAccount"] <a href="register" class="text-primary" style="font-weight:600">@L["Auth.CreateAccount"]</a></p>
+    <Notice>@L["Auth.DemoUsers"]</Notice>
+</AuthShell>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string ReturnUrl { get; set; }
+
+    private string userName;
+    private string password;
+    private bool rememberMe = true;
+    private bool busy;
+    private string error;
+
+    private async Task LoginAsync()
+    {
+        error = null;
+
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+        {
+            error = L["Auth.FillBoth"];
+            return;
+        }
+
+        busy = true;
+
+        try
+        {
+            if (!await IdentityService.LoginAsync(userName.Trim(), password, rememberMe))
+            {
+                error = L["Auth.WrongCredentials"];
+                return;
+            }
+
+            //only local return urls
+            var target = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl.Contains("://") || ReturnUrl.StartsWith("//") ? "" : ReturnUrl.TrimStart('/');
+            Navigation.NavigateTo(target);
+        }
+        catch (HttpRequestException)
+        {
+            error = L["Error.IdentityUnavailable"];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

@@ -1,0 +1,56 @@
+@page "/register"
+@layout AuthLayout
+
+<PageTitle>@L["Auth.RegisterTitle"] · SellingBudy</PageTitle>
+
+<AuthShell Title="@L["Auth.RegisterTitle"]" Subtitle="@L["Auth.RegisterSubtitle"]" Tagline="@L["Auth.LoginTagline"]" TaglineText="@L["Auth.RegisterTaglineText"]">
+    @if (submitted)
+    {
+        <Notice>@L["Auth.RegisterNotAvailable"]</Notice>
+    }
+
+    <form class="col gap-lg" @onsubmit="Submit" novalidate>
+        <div class="form-grid">
+            <Field Label="@L["Auth.FirstName"]" Error="@Err("first")"><input class="input @Bad("first")" autocomplete="given-name" @bind="firstName" /></Field>
+            <Field Label="@L["Auth.LastName"]" Error="@Err("last")"><input class="input @Bad("last")" autocomplete="family-name" @bind="lastName" /></Field>
+        </div>
+        <Field Label="@L["Auth.Email"]" Error="@Err("email")"><input class="input @Bad("email")" type="email" autocomplete="email" placeholder="@L["Auth.EmailPlaceholder"]" @bind="email" /></Field>
+        <Field Label="@L["Auth.Password"]" Error="@Err("password")"><input class="input @Bad("password")" type="password" autocomplete="new-password" placeholder="@L["Auth.PasswordHint"]" @bind="password" /></Field>
+        <Field Label="@L["Auth.PasswordRepeat"]" Error="@Err("repeat")"><input class="input @Bad("repeat")" type="password" autocomplete="new-password" placeholder="@L["Auth.PasswordRepeatHint"]" @bind="repeat" /></Field>
+        <label class="checkbox"><input type="checkbox" @bind="terms" /> @L["Auth.AcceptTerms"]</label>
+        @if (Err("terms") != null)
+        {
+            <span class="field-error">@Err("terms")</span>
+        }
+        <button type="submit" class="btn btn-primary btn-block">@L["Auth.RegisterButton"]</button>
+    </form>
+
+    <p class="t-body-md muted center">@L["Auth.HaveAccount"] <a href="login" class="text-primary" style="font-weight:600">@L["Auth.LoginTitle"]</a></p>
+</AuthShell>
+
+@code {
+    private string firstName, lastName, email, password, repeat;
+    private bool terms;
+    private bool submitted;
+    private Dictionary<string, string> errors = new();
+
+    private string Err(string key) => errors.GetValueOrDefault(key);
+
+    private string Bad(string key) => errors.ContainsKey(key) ? "invalid" : null;
+
+    //form is validated, but identity has no user store yet so nothing is sent
+    private void Submit()
+    {
+        errors = new Dictionary<string, string>();
+        var required = L["Validation.Required"].Value;
+
+        if (string.IsNullOrWhiteSpace(firstName)) errors["first"] = required;
+        if (string.IsNullOrWhiteSpace(lastName)) errors["last"] = required;
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@')) errors["email"] = L["Validation.Email"];
+        if (string.IsNullOrEmpty(password) || password.Length < 8) errors["password"] = L["Validation.PasswordLength"];
+        if (password != repeat) errors["repeat"] = L["Validation.PasswordMatch"];
+        if (!terms) errors["terms"] = L["Validation.Terms"];
+
+        submitted = !errors.Any();
+    }
+}

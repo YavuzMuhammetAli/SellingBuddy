@@ -1,0 +1,113 @@
+@page "/account"
+@inject IOrderService OrderService
+@inject StorefrontState State
+
+<PageTitle>@L["Nav.Account"] · SellingBudy</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page">
+            <div class="account-layout">
+                <div class="hide-mobile"><AccountNav Active="overview" /></div>
+
+                <div class="col gap-xl">
+                    <section class="card-muted card-pad flex items-center justify-between gap-lg wrap">
+                        <div class="flex items-center gap-lg">
+                            <span class="avatar-initials lg solid">@State.Session?.Initials</span>
+                            <div>
+                                <h1 class="t-headline-md">@string.Format(L["Account.Welcome"], State.Session?.FirstName ?? State.Session?.UserName)</h1>
+                                <p class="t-body-md muted mt-xs">@L["Account.WelcomeText"]</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" disabled title="@L["Common.ComingSoon"]">@L["Account.EditDetails"]</button>
+                    </section>
+
+                    @if (orders == null)
+                    {
+                        <div class="skeleton" style="height: 220px"></div>
+                    }
+                    else
+                    {
+                        <div class="stat-grid">
+                            <div class="stat"><div class="t-label-md muted">@L["Account.ActiveOrders"]</div><div class="t-headline-md text-primary num mt-xs">@orders.Count(o => OrderStatusMap.ToStage(o.Status) is OrderStage.Preparing or OrderStage.Shipped)</div></div>
+                            <div class="stat"><div class="t-label-md muted">@L["Account.CompletedOrders"]</div><div class="t-headline-md num mt-xs">@orders.Count(o => OrderStatusMap.ToStage(o.Status) == OrderStage.Delivered)</div></div>
+                            <div class="stat"><div class="t-label-md muted">@L["Account.SavedAddresses"]</div><div class="t-headline-md num mt-xs">@orders.Select(o => o.Street + o.City).Distinct().Count()</div></div>
+                        </div>
+
+                        <section class="col gap-md">
+                            <div class="flex items-center justify-between">
+                                <h2 class="t-headline-sm">@L["Account.LatestOrder"]</h2>
+                                <a href="account/orders" class="btn-link">@L["Account.AllOrders"] <AppIcon Name="arrow_forward" /></a>
+                            </div>
+                            @if (latest == null)
+                            {
+                                <EmptyState Icon="package_2" Title="@L["Orders.EmptyTitle"]" Text="@L["Orders.EmptyText"]">
+                                    <a href="" class="btn btn-primary">@L["Home.StartShopping"]</a>
+                                </EmptyState>
+                            }
+                            else
+                            {
+                                <div class="card-muted card-pad-lg flex items-center gap-lg wrap">
+                                    <img class="order-thumb" onerror="this.removeAttribute('src')" src="@latest.Items.FirstOrDefault()?.PictureUrl" alt="" />
+                                    <div class="col flex-1 gap-xs">
+                                        <span class="t-body-sm muted"><span class="t-mono">@Fmt.OrderNumber(latest.OrderNumber, latest.Date)</span> · @Fmt.Date(latest.Date)</span>
+                                        <span class="t-title-md">@latest.Items.FirstOrDefault()?.ProductName</span>
+                                        <span class="t-body-sm muted">@string.Format(L["Common.SellerLabel"], string.Join(", ", latest.Items.Select(i => i.SellerName).Distinct()))</span>
+                                    </div>
+                                    <OrderStatusBadge Status="@latest.Status" />
+                                    <a href="@($"account/orders/{latest.OrderNumber}")" class="btn btn-outline btn-sm">@L["Account.ViewDetails"]</a>
+                                </div>
+                            }
+                        </section>
+
+                        @if (latest != null)
+                        {
+                            <section class="col gap-md">
+                                <h2 class="t-headline-sm">@L["Account.DefaultAddress"]</h2>
+                                <div class="card card-pad-lg flex items-center gap-md wrap">
+                                    <AppIcon Name="location_on" Class="text-primary" />
+                                    <span class="flex-1">@latest.Street, @latest.City</span>
+                                    <span class="badge badge-accent">@L["Account.LastUsedAddress"]</span>
+                                </div>
+                            </section>
+                        }
+                    }
+
+                    <div class="only-mobile"><AccountNav Active="overview" /></div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private List<OrderSummary> orders;
+    private OrderSummary latest;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        if (state.User.Identity?.IsAuthenticated != true)
+            return;
+
+        await State.EnsureLoadedAsync();
+
+        try
+        {
+            orders = await OrderService.GetMyOrdersAsync();
+            latest = orders.FirstOrDefault();
+        }
+        catch (HttpRequestException)
+        {
+            orders = new List<OrderSummary>();
+            State.ShowToast(L["Error.OrdersUnavailable"], true);
+        }
+    }
+}

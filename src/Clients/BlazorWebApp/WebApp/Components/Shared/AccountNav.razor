@@ -1,0 +1,30 @@
+@inject StorefrontState State
+@inject IIdentityService IdentityService
+@inject NavigationManager Navigation
+
+<nav class="account-nav" aria-label="@L["Nav.Account"]">
+    <div class="user">
+        <div class="t-title-md">@State.Session?.DisplayName</div>
+        <div class="t-body-sm muted">@State.Session?.Email</div>
+    </div>
+    <a href="account" class="@(Active == "overview" ? "active" : null)"><AppIcon Name="dashboard" /> @L["Account.Overview"]</a>
+    <a href="account/orders" class="@(Active == "orders" ? "active" : null)"><AppIcon Name="package_2" /> @L["Nav.Orders"]</a>
+    <a href="wishlist"><AppIcon Name="favorite" /> @L["Nav.Wishlist"]</a>
+    @* these pages have no backend yet *@
+    <button type="button" disabled><AppIcon Name="location_on" /> @L["Account.Addresses"] <span class="badge badge-outline soon">@L["Common.Soon"]</span></button>
+    <button type="button" disabled><AppIcon Name="credit_card" /> @L["Account.PaymentMethods"] <span class="badge badge-outline soon">@L["Common.Soon"]</span></button>
+    <button type="button" disabled><AppIcon Name="person" /> @L["Account.PersonalInfo"] <span class="badge badge-outline soon">@L["Common.Soon"]</span></button>
+    <button type="button" disabled><AppIcon Name="shield" /> @L["Account.Security"] <span class="badge badge-outline soon">@L["Common.Soon"]</span></button>
+    <button type="button" class="logout" @onclick="LogoutAsync"><AppIcon Name="logout" /> @L["Account.Logout"]</button>
+</nav>
+
+@code {
+    [Parameter]
+    public string Active { get; set; }
+
+    private async Task LogoutAsync()
+    {
+        await IdentityService.LogoutAsync();
+        Navigation.NavigateTo("");
+    }
+}

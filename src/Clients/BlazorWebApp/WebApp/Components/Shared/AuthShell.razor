@@ -1,0 +1,40 @@
+@* split screen used by every auth page *@
+<div class="auth">
+    <div class="auth-media" aria-hidden="true">
+        <img src="img/auth-lifestyle.jpg" alt="" />
+        <div class="auth-media-content">
+            <a href="" class="brand"><span>Selling<b>Budy</b></span><span class="brand-dot"></span></a>
+            @if (!string.IsNullOrEmpty(Tagline))
+            {
+                <div class="col gap-sm" style="max-width: 440px">
+                    <p class="t-headline-md">@Tagline</p>
+                    @if (!string.IsNullOrEmpty(TaglineText))
+                    {
+                        <p class="t-body-md muted">@TaglineText</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="auth-form">
+            <a href="" class="brand only-mobile"><span>Selling<b>Budy</b></span><span class="brand-dot"></span></a>
+            <div>
+                <h1 class="t-headline-lg">@Title</h1>
+                @if (!string.IsNullOrEmpty(Subtitle))
+                {
+                    <p class="t-body-md muted mt-xs">@Subtitle</p>
+                }
+            </div>
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Subtitle { get; set; }
+    [Parameter] public string Tagline { get; set; }
+    [Parameter] public string TaglineText { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}

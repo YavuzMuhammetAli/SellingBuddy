@@ -1,0 +1,154 @@
+@page "/account/orders/{OrderNumber}"
+@implements IDisposable
+@inject IOrderService OrderService
+
+<PageTitle>@L["Order.Title"] · SellingBudy</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page page-tight">
+            <a href="account/orders" class="btn-link"><AppIcon Name="arrow_back" /> @L["Order.Back"]</a>
+
+            @if (error)
+            {
+                <Notice Kind="error">@L["Error.OrdersUnavailable"]</Notice>
+            }
+            else if (order == null)
+            {
+                @if (attempts >= MaxAttempts)
+                {
+                    <EmptyState Icon="package_2" Title="@L["Order.NotFound"]" Text="@L["Order.NotFoundText"]">
+                        <a href="account/orders" class="btn btn-primary">@L["Nav.Orders"]</a>
+                    </EmptyState>
+                }
+                else
+                {
+                    @* the order is written async after checkout, a few retries are expected *@
+                    <Notice>@L["Order.Processing"]</Notice>
+                    <div class="skeleton" style="height: 320px"></div>
+                }
+            }
+            else
+            {
+                <div class="flex items-start justify-between gap-lg wrap">
+                    <div>
+                        <h1 class="t-headline-lg">@L["Order.Title"]</h1>
+                        <p class="muted mt-xs">@L["Orders.OrderNo"] <span class="t-mono">@Fmt.OrderNumber(order.OrderNumber, order.Date)</span> · @Fmt.Date(order.Date)</p>
+                    </div>
+                    <OrderStatusBadge Status="@order.Status" Large="true" />
+                </div>
+
+                <section class="card-muted card-pad" aria-labelledby="tracking-title">
+                    <h2 id="tracking-title" class="t-headline-sm" style="margin-bottom: var(--s-xl)">@L["Order.Tracking"]</h2>
+                    <OrderTimeline Status="@order.Status" Date="order.Date" />
+                </section>
+
+                <div class="detail-grid">
+                    <div class="col gap-lg">
+                        <h2 class="t-headline-sm">@L["Order.Items"]</h2>
+                        @foreach (var group in order.OrderItems.GroupBy(i => i.SellerName))
+                        {
+                            <section class="seller-group">
+                                <div class="card-head">
+                                    <span class="t-title-md flex items-center gap-sm"><AppIcon Name="storefront" /> @(group.Key ?? "-")</span>
+                                    <span class="t-body-sm muted">@string.Format(L["Orders.Units"], group.Sum(i => i.Units))</span>
+                                </div>
+                                @foreach (var item in group)
+                                {
+                                    <div class="cart-line">
+                                        <a href="@($"products/{item.ProductSlug}")" class="cart-thumb"><img onerror="this.removeAttribute('src')" src="@item.PictureUrl" alt="@item.ProductName" loading="lazy" /></a>
+                                        <div class="col flex-1 gap-xs">
+                                            <a href="@($"products/{item.ProductSlug}")" class="t-title-md">@item.ProductName</a>
+                                            <span class="t-body-sm muted">@string.Format(L["Order.Qty"], item.Units) · @Fmt.Price(item.UnitPrice)</span>
+                                        </div>
+                                        <span class="price">@Fmt.Price(item.UnitPrice * item.Units)</span>
+                                    </div>
+                                }
+                            </section>
+                        }
+                    </div>
+
+                    <div class="col gap-lg">
+                        <section class="card-muted card-pad-xl">
+                            <h2 class="t-title-md">@L["Order.ShippingAddress"]</h2>
+                            <p class="t-body-md mt-sm">
+                                <strong>@order.ContactName</strong><br />
+                                @order.Street<br />
+                                @(string.IsNullOrEmpty(order.State) ? order.City : $"{order.State} / {order.City}") @order.ZipCode
+                            </p>
+                            @if (!string.IsNullOrEmpty(order.Phone))
+                            {
+                                <p class="t-body-sm muted mt-xs">@order.Phone</p>
+                            }
+                        </section>
+                        <section class="card-muted card-pad-xl col gap-sm">
+                            <h2 class="t-title-md">@L["Order.PaymentSummary"]</h2>
+                            @if (!string.IsNullOrEmpty(order.CardLast4))
+                            {
+                                <div class="summary-row"><span class="muted">@L["Order.Card"]</span><span class="t-mono">•••• @order.CardLast4</span></div>
+                            }
+                            <div class="summary-row"><span class="muted">@L["Cart.Subtotal"]</span><span class="num">@Fmt.Price(order.ItemsTotal)</span></div>
+                            <div class="summary-row"><span class="muted">@(order.ShippingMethod == "same-day" ? L["Checkout.SameDay"] : L["Checkout.StepShipping"])</span><span class="num @(order.ShippingFee == 0 ? "text-success" : null)">@(order.ShippingFee == 0 ? L["Common.Free"] : Fmt.Price(order.ShippingFee))</span></div>
+                            <div class="summary-total"><span class="t-title-md">@L["Checkout.Total"]</span><span class="t-headline-sm num">@Fmt.Price(order.Total)</span></div>
+                        </section>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public string OrderNumber { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private const int MaxAttempts = 8;
+
+    private OrderDetail order;
+    private bool error;
+    private int attempts;
+    private readonly CancellationTokenSource cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        if (state.User.Identity?.IsAuthenticated != true)
+            return;
+
+        try
+        {
+            //right after checkout the order may not exist yet
+            while (order == null && attempts < MaxAttempts && !cts.IsCancellationRequested)
+            {
+                order = await OrderService.GetOrderAsync(OrderNumber);
+                attempts++;
+
+                if (order == null && attempts < MaxAttempts)
+                {
+                    StateHasChanged();
+                    await Task.Delay(1500, cts.Token);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (HttpRequestException)
+        {
+            error = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        cts.Dispose();
+    }
+}

@@ -1,0 +1,120 @@
+@page "/account/orders"
+@inject IOrderService OrderService
+
+<PageTitle>@L["Nav.Orders"] · SellingBudy</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page page-tight">
+            <div class="flex items-end justify-between gap-lg wrap" style="padding-bottom: var(--s-lg); border-bottom: 1px solid var(--c-outline)">
+                <div>
+                    <h1 class="t-headline-lg">@L["Nav.Orders"]</h1>
+                    <p class="muted mt-xs">@L["Orders.Subtitle"]</p>
+                </div>
+                @if (orders != null)
+                {
+                    <div class="scroll-x" role="tablist">
+                        <button type="button" role="tab" aria-selected="@(filter == "all")" class="pill @(filter == "all" ? "active" : null)" @onclick='() => filter = "all"'>@string.Format(L["Orders.FilterAll"], orders.Count)</button>
+                        <button type="button" role="tab" aria-selected="@(filter == "active")" class="pill @(filter == "active" ? "active" : null)" @onclick='() => filter = "active"'>@string.Format(L["Orders.FilterActive"], orders.Count(IsActive))</button>
+                        <button type="button" role="tab" aria-selected="@(filter == "delivered")" class="pill @(filter == "delivered" ? "active" : null)" @onclick='() => filter = "delivered"'>@string.Format(L["Orders.FilterDelivered"], orders.Count(IsDelivered))</button>
+                    </div>
+                }
+            </div>
+
+            @if (error)
+            {
+                <Notice Kind="error">@L["Error.OrdersUnavailable"]</Notice>
+            }
+            else if (orders == null)
+            {
+                <div class="skeleton" style="height: 200px"></div>
+            }
+            else if (!Filtered.Any())
+            {
+                <EmptyState Icon="package_2" Title="@L["Orders.EmptyTitle"]" Text="@L["Orders.EmptyText"]">
+                    <a href="" class="btn btn-primary">@L["Home.StartShopping"]</a>
+                </EmptyState>
+            }
+            else
+            {
+                <div class="col gap-xl">
+                    @foreach (var order in Filtered)
+                    {
+                        var sellers = order.Items.Select(i => i.SellerName).Where(s => s != null).Distinct().ToList();
+                        <article class="order-card" @key="order.OrderNumber">
+                            <div class="order-card-head">
+                                <div class="flex items-center gap-xl wrap t-body-sm">
+                                    <span><span class="muted">@L["Orders.OrderNo"]</span> <span class="t-mono">@Fmt.OrderNumber(order.OrderNumber, order.Date)</span></span>
+                                    <span><span class="muted">@L["Orders.Date"]</span> @Fmt.Date(order.Date)</span>
+                                    <span class="hide-mobile"><span class="muted">@L["Common.Seller"]</span> @string.Join(", ", sellers)</span>
+                                </div>
+                                <OrderStatusBadge Status="@order.Status" />
+                            </div>
+                            <div class="order-card-body">
+                                <div class="thumbs">
+                                    @foreach (var item in order.Items.Take(3))
+                                    {
+                                        <img class="order-thumb" onerror="this.removeAttribute('src')" src="@item.PictureUrl" alt="" loading="lazy" />
+                                    }
+                                </div>
+                                <div class="col flex-1 gap-xs">
+                                    <span class="t-title-md clamp-2">@order.Items.FirstOrDefault()?.ProductName</span>
+                                    <span class="t-body-sm muted">
+                                        @if (order.Items.Count > 1)
+                                        {
+                                            @string.Format(L["Orders.MoreItems"], order.Items.Count - 1)
+                                            <span> · </span>
+                                        }
+                                        @string.Format(L["Orders.Units"], order.ItemCount)
+                                    </span>
+                                </div>
+                                <span class="price">@Fmt.Price(order.Total)</span>
+                                <a href="@($"account/orders/{order.OrderNumber}")" class="btn btn-outline btn-sm">@L["Orders.Details"]</a>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private List<OrderSummary> orders;
+    private string filter = "all";
+    private bool error;
+
+    private static bool IsActive(OrderSummary o) => OrderStatusMap.ToStage(o.Status) is OrderStage.Preparing or OrderStage.Shipped;
+
+    private static bool IsDelivered(OrderSummary o) => OrderStatusMap.ToStage(o.Status) == OrderStage.Delivered;
+
+    private IEnumerable<OrderSummary> Filtered => filter switch
+    {
+        "active" => orders.Where(IsActive),
+        "delivered" => orders.Where(IsDelivered),
+        _ => orders
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        if (state.User.Identity?.IsAuthenticated != true)
+            return;
+
+        try
+        {
+            orders = await OrderService.GetMyOrdersAsync();
+        }
+        catch (HttpRequestException)
+        {
+            error = true;
+        }
+    }
+}
