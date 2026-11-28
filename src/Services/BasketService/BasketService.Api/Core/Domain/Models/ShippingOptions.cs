@@ -7,10 +7,11 @@ namespace BasketService.Api.Core.Domain.Models
 
         public const string SameDay = "same-day";
 
-        public static decimal FeeFor(string method) => method switch
+        //standard shipping is paid per seller, the offer fee of each seller group
+        public static decimal FeeFor(string method, CustomerBasket basket) => method switch
         {
             SameDay => 89m,
-            _ => 0m
+            _ => basket.Items.GroupBy(i => i.SellerId).Sum(g => g.Max(i => i.ShippingFee))
         };
 
         public static string Normalize(string method) => method == SameDay ? SameDay : Standard;

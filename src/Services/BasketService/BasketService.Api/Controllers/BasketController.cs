@@ -96,7 +96,7 @@ namespace BasketService.Api.Controllers
                 ContactName = basketCheckout.ContactName,
                 Phone = basketCheckout.Phone,
                 ShippingMethod = ShippingOptions.Normalize(basketCheckout.ShippingMethod),
-                ShippingFee = ShippingOptions.FeeFor(ShippingOptions.Normalize(basketCheckout.ShippingMethod))
+                ShippingFee = ShippingOptions.FeeFor(ShippingOptions.Normalize(basketCheckout.ShippingMethod), basket)
             };
 
             try
