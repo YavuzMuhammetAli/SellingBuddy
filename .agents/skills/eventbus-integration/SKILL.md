@@ -162,10 +162,10 @@ Publish **after** your own state is saved (e.g. after `SaveEntitiesAsync`).
 
 | Event | Publisher | Consumers | Payload |
 |---|---|---|---|
-| `OrderCreatedIntegrationEvent` | BasketService (checkout) | OrderService | user, address, card info, basket items |
+| `OrderCreatedIntegrationEvent` | BasketService (checkout) | OrderService | `OrderId` (generated at checkout and returned to the client), user, contact name, phone, address, card info, shipping method + fee, basket items with offer and seller |
 | `OrderStartedIntegrationEvent` | OrderService | BasketService, PaymentService | `UserName`, `OrderId` |
-| `OrderPaymentSuccessIntegrationEvent` | PaymentService | NotificationService | `OrderId` |
-| `OrderPaymentFailedIntegrationEvent` | PaymentService | NotificationService | `OrderId`, `ErrorMessage` |
+| `OrderPaymentSuccessIntegrationEvent` | PaymentService | NotificationService, OrderService (sets paid) | `OrderId` |
+| `OrderPaymentFailedIntegrationEvent` | PaymentService | NotificationService, OrderService (sets cancelled) | `OrderId`, `ErrorMessage` |
 
 Add a row here when you add a new event.
 

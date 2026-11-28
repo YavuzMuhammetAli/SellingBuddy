@@ -154,7 +154,13 @@ public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = 
 
 - Consumes `OrderCreatedIntegrationEvent` (from Basket) → handler maps it to
   `CreateOrderCommand` and sends it with `IMediator`.
+- The order id comes from the event (`OrderId`, created by Basket at checkout), so the
+  client can open the order page right away. A second event with the same id is skipped.
+- `CreateOrderCommand.WithCheckoutDetails(...)` carries contact name, phone, shipping
+  method and fee; order items carry `SellerId`, `SellerName`, `ProductSlug`.
 - Publishes `OrderStartedIntegrationEvent` after the order is saved.
+- Consumes `OrderPaymentSuccessIntegrationEvent` → `SetPaidStatus()` and
+  `OrderPaymentFailedIntegrationEvent` → `SetCancelledStatus()`.
 - Handler registration + subscription happen in `OrderService.Api/Program.cs`
   (see `eventbus-integration`).
 

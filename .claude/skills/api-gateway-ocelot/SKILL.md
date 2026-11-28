@@ -88,6 +88,8 @@ Upstream → downstream map:
 | `/auth` | IdentityService | `/api/auth` |
 | `/basket` | BasketService | `/api/basket` (current user's basket) |
 | `/basket/{everything}` | BasketService | `/api/basket/{everything}` |
+| `/wishlist` | BasketService | `/api/wishlist` (current user's product ids) |
+| `/wishlist/{everything}` | BasketService | `/api/wishlist/{everything}` (POST / DELETE `{productId}`) |
 | `/order` | OrderService | `/api/order` (current user's orders) |
 | `/order/{everything}` | OrderService | `/api/order/{everything}` |
 
@@ -111,7 +113,7 @@ public class BasketController : ControllerBase
     [HttpPost("items")]
     public async Task<ActionResult> AddBasketItemAsync([FromBody] AddBasketItemRequest request)
     {
-        //item read from catalog first
+        //item and its offers read from catalog first
         var item = await _catalogService.GetCatalogItemAsync(request.CatalogItemId);
         var basket = await _basketService.GetBasketAsync(request.BasketId);
         ...
@@ -122,6 +124,10 @@ public class BasketController : ControllerBase
 ```
 
 Aggregator paths start with `api/` so they never collide with Ocelot upstream paths.
+
+`AddBasketItemRequest` has an optional `OfferId`. Price, old price, seller, shipping fee
+and delivery days always come from the catalog offer (the best offer when `OfferId` is
+empty), never from the client. Out of stock offers are rejected with 400.
 
 Typed clients call **the gateway itself** (`urls:gateway`, `http://localhost:5131/`
 locally, `http://localhost:8080/` in docker), so Ocelot + Consul resolve the downstream
@@ -138,6 +144,11 @@ public class HttpClientDelegatingHandler : DelegatingHandler
         var authorizationHeader = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString();
         if (!string.IsNullOrEmpty(authorizationHeader))
             request.Headers.TryAddWithoutValidation("Authorization", authorizationHeader);
+
+        //language forwarded so catalog names match the storefront culture
+        var language = _httpContextAccessor.HttpContext?.Request.Headers.AcceptLanguage.ToString();
+        if (!string.IsNullOrEmpty(language))
+            request.Headers.TryAddWithoutValidation("Accept-Language", language);
 
         return base.SendAsync(request, cancellationToken);
     }
