@@ -192,6 +192,8 @@
   <data name="Home.TrendingText" xml:space="preserve"><value>The most viewed and loved picks this week.</value></data>
   <data name="Home.Trust" xml:space="preserve"><value>Why SellingBudy</value></data>
   <data name="Home.ViewCampaign" xml:space="preserve"><value>View Campaign</value></data>
+  <data name="Language.en" xml:space="preserve"><value>English</value></data>
+  <data name="Language.tr" xml:space="preserve"><value>Turkish</value></data>
   <data name="Listing.AllCount" xml:space="preserve"><value>All ({0})</value></data>
   <data name="Listing.EmptyText" xml:space="preserve"><value>Try removing some filters or browse another category.</value></data>
   <data name="Listing.EmptyTitle" xml:space="preserve"><value>No products match these filters</value></data>
@@ -263,6 +265,7 @@
   <data name="Product.OtherOffers" xml:space="preserve"><value>Other Seller Offers ({0})</value></data>
   <data name="Product.OtherOffersText" xml:space="preserve"><value>Compare verified sellers offering the same product by price and delivery time.</value></data>
   <data name="Product.OutOfStock" xml:space="preserve"><value>Out of Stock</value></data>
+  <data name="Product.ReviewLanguage" xml:space="preserve"><value>Written in {0}</value></data>
   <data name="Product.Reviews" xml:space="preserve"><value>{0} reviews</value></data>
   <data name="Product.SellerCount" xml:space="preserve"><value>{0} sellers</value></data>
   <data name="Product.SellerScore" xml:space="preserve"><value>Seller rating: {0} ({1} sales)</value></data>

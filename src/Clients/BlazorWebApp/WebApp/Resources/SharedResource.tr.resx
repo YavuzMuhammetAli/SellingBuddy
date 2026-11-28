@@ -192,6 +192,8 @@
   <data name="Home.TrendingText" xml:space="preserve"><value>Bu hafta en çok incelenen ve beğenilen seçimler.</value></data>
   <data name="Home.Trust" xml:space="preserve"><value>Neden SellingBudy</value></data>
   <data name="Home.ViewCampaign" xml:space="preserve"><value>Kampanyayı İncele</value></data>
+  <data name="Language.en" xml:space="preserve"><value>İngilizce</value></data>
+  <data name="Language.tr" xml:space="preserve"><value>Türkçe</value></data>
   <data name="Listing.AllCount" xml:space="preserve"><value>Tümü ({0})</value></data>
   <data name="Listing.EmptyText" xml:space="preserve"><value>Bazı filtreleri kaldırmayı ya da başka bir kategoriye göz atmayı deneyin.</value></data>
   <data name="Listing.EmptyTitle" xml:space="preserve"><value>Bu filtrelerle eşleşen ürün yok</value></data>
@@ -263,6 +265,7 @@
   <data name="Product.OtherOffers" xml:space="preserve"><value>Diğer Satıcı Teklifleri ({0})</value></data>
   <data name="Product.OtherOffersText" xml:space="preserve"><value>Aynı ürünü sunan onaylı satıcıları fiyat ve teslimat süresine göre karşılaştırın.</value></data>
   <data name="Product.OutOfStock" xml:space="preserve"><value>Stokta Yok</value></data>
+  <data name="Product.ReviewLanguage" xml:space="preserve"><value>{0} yazıldı</value></data>
   <data name="Product.Reviews" xml:space="preserve"><value>{0} değerlendirme</value></data>
   <data name="Product.SellerCount" xml:space="preserve"><value>{0} farklı satıcı</value></data>
   <data name="Product.SellerScore" xml:space="preserve"><value>Satıcı Puanı: {0} ({1} satış)</value></data>

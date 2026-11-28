@@ -361,24 +361,21 @@ namespace CatalogService.Api.Infrastructure.Migrations
                     b.Property<int>("CatalogItemId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Comment", "CatalogService.Api.Core.Domain.CatalogReview.Comment#LocalizedText", b1 =>
-                        {
-                            b1.Property<string>("En")
-                                .IsRequired()
-                                .HasMaxLength(2000)
-                                .HasColumnType("nvarchar(2000)");
-
-                            b1.Property<string>("Tr")
-                                .IsRequired()
-                                .HasMaxLength(2000)
-                                .HasColumnType("nvarchar(2000)");
-                        });
 
                     b.HasKey("Id");
 

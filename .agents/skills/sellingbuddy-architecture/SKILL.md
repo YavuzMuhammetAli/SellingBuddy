@@ -68,6 +68,8 @@ its container name (`c_catalogservice`, `c_basketservice`, ...).
   shipping fee, delivery days), categories with children, specs, reviews and campaigns.
   `CatalogItem.Price` / `OldPrice` / `AvailableStock` mirror the best offer.
   Content is bilingual (`LocalizedText`), resolved from `Accept-Language` (tr / en).
+  Reviews are the exception: they keep the text and `LanguageCode` they were written
+  in and are never translated; the WebApp marks reviews written in another language.
 - **Basket** items keep the chosen `OfferId` and seller; standard shipping is the highest
   fee per seller summed, same day is a flat fee (`ShippingOptions.FeeFor`). The wishlist is a
   Redis set `wishlist:{user}` (`api/wishlist`).
@@ -94,7 +96,7 @@ properties). Events are matched by name, so never share an "events" project.
 - Class, method, property, variable, route, table, column, config key, log message:
   **English only**. Never Turkish words, never Turkish characters (`ç ğ ı ö ş ü`).
 - The only Turkish allowed: WebApp translations in `Resources/*.tr.resx` and the `Tr`
-  values of `CatalogService.Api/Infrastructure/Setup/catalog-seed.json` (bilingual
+  values and original review comments of `CatalogService.Api/Infrastructure/Setup/catalog-seed.json` (bilingual
   catalog content, `LocalizedText` → `X_En` / `X_Tr` columns, picked by `Accept-Language`).
 - PascalCase types/methods, camelCase locals, `_camelCase` private fields.
 - Suffixes: `XxxIntegrationEvent`, `XxxIntegrationEventHandler`, `XxxCommand`,

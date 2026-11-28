@@ -79,7 +79,8 @@ namespace CatalogService.Api.Infrastructure.Setup
     {
         public string Author { get; set; }
         public int Rating { get; set; }
-        public LocalizedText Comment { get; set; }
+        public string Comment { get; set; }
+        public string Language { get; set; }
         public int DaysAgo { get; set; }
     }
 

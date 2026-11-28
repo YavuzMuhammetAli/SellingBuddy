@@ -30,7 +30,8 @@ namespace CatalogService.Api.Infrastructure.EntityConfigurations
 
             builder.Property(r => r.AuthorName).HasMaxLength(100).IsRequired();
 
-            builder.HasLocalizedText(r => r.Comment, 2000);
+            builder.Property(r => r.Comment).HasMaxLength(2000).IsRequired();
+            builder.Property(r => r.LanguageCode).HasMaxLength(8).IsRequired();
         }
     }
 

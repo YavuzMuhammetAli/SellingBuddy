@@ -92,7 +92,8 @@ namespace CatalogService.Api.Infrastructure.Context
                     {
                         AuthorName = r.Author,
                         Rating = r.Rating,
-                        Comment = r.Comment ?? new LocalizedText(),
+                        Comment = r.Comment ?? string.Empty,
+                        LanguageCode = r.Language ?? "tr",
                         CreatedAt = now.AddDays(-r.DaysAgo)
                     }).ToList()
                 };

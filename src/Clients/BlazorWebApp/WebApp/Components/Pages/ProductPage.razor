@@ -1,4 +1,5 @@
 @page "/products/{Slug}"
+@using System.Globalization
 @inject ICatalogService CatalogService
 @inject StorefrontState State
 @inject NavigationManager Navigation
@@ -187,7 +188,12 @@
                                     <span class="t-body-sm muted">@Ago(review.CreatedAt)</span>
                                 </div>
                                 <div class="mt-xs"><RatingDisplay Value="review.Rating" /></div>
-                                <p class="t-body-md muted mt-xs">@review.Comment</p>
+                                @* reviews stay in the language they were written in *@
+                                <p class="t-body-md muted mt-xs" lang="@review.LanguageCode">@review.Comment</p>
+                                @if (!string.IsNullOrEmpty(review.LanguageCode) && review.LanguageCode != CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)
+                                {
+                                    <span class="t-body-sm muted mt-xs flex items-center gap-xs"><AppIcon Name="language" Size="16" /> @string.Format(L["Product.ReviewLanguage"], LanguageName(review.LanguageCode))</span>
+                                }
                             </article>
                         }
                     </div>
@@ -254,6 +260,13 @@
 
         var days = offer.DeliveryDaysMin == offer.DeliveryDaysMax ? $"{offer.DeliveryDaysMax}" : $"{offer.DeliveryDaysMin}-{offer.DeliveryDaysMax}";
         return string.Format(L["Product.DeliveryDays"], days);
+    }
+
+    //language names come from resources, unknown codes are shown as they are
+    private string LanguageName(string code)
+    {
+        var name = L[$"Language.{code}"];
+        return name.ResourceNotFound ? code.ToUpperInvariant() : name.Value;
     }
 
     private string Ago(DateTime date)

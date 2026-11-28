@@ -43,7 +43,7 @@ MSYS_NO_PATHCONV=1 docker run --rm --network sellingbuddy_net_backendservices -e
 ## Hard rules
 
 - **English only** in code: names, routes, tables, config keys, log messages. No Turkish words or characters.
-  The only exceptions are translations in `*.tr.resx` (WebApp UI text) and the `Tr` values in `catalog-seed.json`.
+  The only exceptions are translations in `*.tr.resx` (WebApp UI text) and Turkish catalog text in `catalog-seed.json` (`Tr` values and original review comments).
 - **Comments** are short, lowercase, `//` with no space, saying what was added or why:
   `//logging class added`, `//consul registration added`. Only on meaningful blocks. Remove template noise comments.
 - Services never reference each other's projects. Sync calls go through the gateway; async calls go through the EventBus.

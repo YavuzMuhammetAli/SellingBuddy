@@ -99,10 +99,10 @@
         { "label": { "en": "Weight", "tr": "Ağırlık" }, "value": { "en": "250 g", "tr": "250 g" } }
       ],
       "reviews": [
-        { "author": "Emre K.", "rating": 5, "daysAgo": 2, "comment": { "en": "Noise cancelling is excellent and it stays comfortable for hours. Arrived the next day.", "tr": "Gürültü engelleme mükemmel, saatlerce rahatsız etmiyor. Ertesi gün elimdeydi." } },
-        { "author": "Selin A.", "rating": 5, "daysAgo": 9, "comment": { "en": "Calls are clear even outside. Worth every penny.", "tr": "Dışarıda bile görüşmeler çok net. Fiyatını hak ediyor." } },
-        { "author": "Burak T.", "rating": 5, "daysAgo": 15, "comment": { "en": "Battery easily lasts a full week of commuting.", "tr": "Pil bir haftalık yol boyunca rahatça yetiyor." } },
-        { "author": "Deniz Y.", "rating": 4, "daysAgo": 21, "comment": { "en": "Great sound, the case could be smaller.", "tr": "Ses harika, kutusu biraz daha küçük olabilirdi." } }
+        { "author": "Emre K.", "rating": 5, "daysAgo": 2, "comment": "Gürültü engelleme mükemmel, saatlerce rahatsız etmiyor. Ertesi gün elimdeydi.", "language": "tr" },
+        { "author": "Selin A.", "rating": 5, "daysAgo": 9, "comment": "Dışarıda bile görüşmeler çok net. Fiyatını hak ediyor.", "language": "tr" },
+        { "author": "Burak T.", "rating": 5, "daysAgo": 15, "comment": "Pil bir haftalık yol boyunca rahatça yetiyor.", "language": "tr" },
+        { "author": "Deniz Y.", "rating": 4, "daysAgo": 21, "comment": "Ses harika, kutusu biraz daha küçük olabilirdi.", "language": "tr" }
       ]
     },
     {
@@ -119,8 +119,8 @@
         { "label": { "en": "Color", "tr": "Renk" }, "value": { "en": "Platinum Silver", "tr": "Platin Gümüş" } }
       ],
       "reviews": [
-        { "author": "Ayse D.", "rating": 5, "daysAgo": 4, "comment": { "en": "The silver color looks even better in person.", "tr": "Gümüş rengi gerçekte daha da güzel duruyor." } },
-        { "author": "Can M.", "rating": 4, "daysAgo": 11, "comment": { "en": "Very good, fast delivery.", "tr": "Çok iyi, teslimat hızlıydı." } }
+        { "author": "Ayse D.", "rating": 5, "daysAgo": 4, "comment": "Gümüş rengi gerçekte daha da güzel duruyor.", "language": "tr" },
+        { "author": "Can M.", "rating": 4, "daysAgo": 11, "comment": "Çok iyi, teslimat hızlıydı.", "language": "tr" }
       ]
     },
     {
@@ -135,8 +135,8 @@
         { "label": { "en": "Contents", "tr": "Kutu İçeriği" }, "value": { "en": "Headphones, watch, charging cables", "tr": "Kulaklık, saat, şarj kabloları" } }
       ],
       "reviews": [
-        { "author": "Mert O.", "rating": 5, "daysAgo": 6, "comment": { "en": "Great value bundle.", "tr": "Fiyat performans açısından çok iyi bir paket." } },
-        { "author": "Ece B.", "rating": 4, "daysAgo": 18, "comment": { "en": "Headphones are very good, the watch is basic.", "tr": "Kulaklık çok iyi, saat temel düzeyde." } }
+        { "author": "Mert O.", "rating": 5, "daysAgo": 6, "comment": "Fiyat performans açısından çok iyi bir paket.", "language": "tr" },
+        { "author": "Ece B.", "rating": 4, "daysAgo": 18, "comment": "Kulaklık çok iyi, saat temel düzeyde.", "language": "tr" }
       ]
     },
     {
@@ -154,9 +154,9 @@
         { "label": { "en": "Battery Life", "tr": "Pil Ömrü" }, "value": { "en": "Up to 18 hours", "tr": "18 saate kadar" } }
       ],
       "reviews": [
-        { "author": "Zeynep K.", "rating": 5, "daysAgo": 3, "comment": { "en": "Light and elegant, the screen is very bright.", "tr": "Hafif ve şık, ekranı çok parlak." } },
-        { "author": "Kerem S.", "rating": 5, "daysAgo": 12, "comment": { "en": "Sleep tracking is accurate.", "tr": "Uyku takibi çok doğru." } },
-        { "author": "Ali R.", "rating": 4, "daysAgo": 25, "comment": { "en": "Battery could be better.", "tr": "Pil daha iyi olabilirdi." } }
+        { "author": "Zeynep K.", "rating": 5, "daysAgo": 3, "comment": "Hafif ve şık, ekranı çok parlak.", "language": "tr" },
+        { "author": "Kerem S.", "rating": 5, "daysAgo": 12, "comment": "Uyku takibi çok doğru.", "language": "tr" },
+        { "author": "Ali R.", "rating": 4, "daysAgo": 25, "comment": "Pil daha iyi olabilirdi.", "language": "tr" }
       ]
     },
     {
@@ -172,8 +172,8 @@
         { "label": { "en": "Connection", "tr": "Bağlantı" }, "value": { "en": "Bluetooth, 2.4 GHz, USB-C", "tr": "Bluetooth, 2.4 GHz, USB-C" } }
       ],
       "reviews": [
-        { "author": "Onur C.", "rating": 5, "daysAgo": 7, "comment": { "en": "Typing feels amazing.", "tr": "Yazma hissi muhteşem." } },
-        { "author": "Gizem H.", "rating": 4, "daysAgo": 14, "comment": { "en": "Very good, a bit loud.", "tr": "Çok iyi, biraz sesli." } }
+        { "author": "Onur C.", "rating": 5, "daysAgo": 7, "comment": "Yazma hissi muhteşem.", "language": "tr" },
+        { "author": "Gizem H.", "rating": 4, "daysAgo": 14, "comment": "Çok iyi, biraz sesli.", "language": "tr" }
       ]
     },
     {
@@ -189,8 +189,8 @@
         { "label": { "en": "Laptop Sleeve", "tr": "Laptop Bölmesi" }, "value": { "en": "Up to 14 inch", "tr": "14 inç'e kadar" } }
       ],
       "reviews": [
-        { "author": "Elif N.", "rating": 5, "daysAgo": 5, "comment": { "en": "Leather quality is great.", "tr": "Deri kalitesi harika." } },
-        { "author": "Tolga U.", "rating": 4, "daysAgo": 19, "comment": { "en": "Stylish, a little heavy.", "tr": "Şık, biraz ağır." } }
+        { "author": "Elif N.", "rating": 5, "daysAgo": 5, "comment": "Deri kalitesi harika.", "language": "tr" },
+        { "author": "Tolga U.", "rating": 4, "daysAgo": 19, "comment": "Şık, biraz ağır.", "language": "tr" }
       ]
     },
     {
@@ -205,8 +205,8 @@
         { "label": { "en": "Material", "tr": "Malzeme" }, "value": { "en": "70% wool, 30% polyester", "tr": "%70 yün, %30 polyester" } }
       ],
       "reviews": [
-        { "author": "Merve L.", "rating": 5, "daysAgo": 8, "comment": { "en": "Fits perfectly and keeps warm.", "tr": "Tam oturdu, çok sıcak tutuyor." } },
-        { "author": "Sena G.", "rating": 5, "daysAgo": 13, "comment": { "en": "Beautiful fabric.", "tr": "Kumaşı çok güzel." } }
+        { "author": "Merve L.", "rating": 5, "daysAgo": 8, "comment": "Tam oturdu, çok sıcak tutuyor.", "language": "tr" },
+        { "author": "Sena G.", "rating": 5, "daysAgo": 13, "comment": "Kumaşı çok güzel.", "language": "tr" }
       ]
     },
     {
@@ -222,8 +222,8 @@
         { "label": { "en": "Dishwasher Safe", "tr": "Bulaşık Makinesi" }, "value": { "en": "Yes", "tr": "Uygun" } }
       ],
       "reviews": [
-        { "author": "Ceren P.", "rating": 5, "daysAgo": 2, "comment": { "en": "Even nicer than the photos.", "tr": "Fotoğraflardan bile güzel." } },
-        { "author": "Baris E.", "rating": 5, "daysAgo": 16, "comment": { "en": "Perfect gift.", "tr": "Mükemmel bir hediye." } }
+        { "author": "Ceren P.", "rating": 5, "daysAgo": 2, "comment": "Fotoğraflardan bile güzel.", "language": "tr" },
+        { "author": "Baris E.", "rating": 5, "daysAgo": 16, "comment": "Mükemmel bir hediye.", "language": "tr" }
       ]
     },
     {
@@ -239,8 +239,8 @@
         { "label": { "en": "Drop", "tr": "Topuk Farkı" }, "value": { "en": "8 mm", "tr": "8 mm" } }
       ],
       "reviews": [
-        { "author": "Hakan V.", "rating": 5, "daysAgo": 6, "comment": { "en": "Very light and comfortable.", "tr": "Çok hafif ve rahat." } },
-        { "author": "Irem F.", "rating": 4, "daysAgo": 20, "comment": { "en": "Runs a bit small.", "tr": "Biraz dar kalıp." } }
+        { "author": "Hakan V.", "rating": 5, "daysAgo": 6, "comment": "Çok hafif ve rahat.", "language": "tr" },
+        { "author": "Irem F.", "rating": 4, "daysAgo": 20, "comment": "Biraz dar kalıp.", "language": "tr" }
       ]
     },
     {
@@ -256,7 +256,7 @@
         { "label": { "en": "Material", "tr": "Malzeme" }, "value": { "en": "EVA hard shell", "tr": "EVA sert kabuk" } }
       ],
       "reviews": [
-        { "author": "Yusuf A.", "rating": 5, "daysAgo": 4, "comment": { "en": "Fits perfectly.", "tr": "Tam oturuyor." } }
+        { "author": "Yusuf A.", "rating": 5, "daysAgo": 4, "comment": "Tam oturuyor.", "language": "tr" }
       ]
     }
   ],

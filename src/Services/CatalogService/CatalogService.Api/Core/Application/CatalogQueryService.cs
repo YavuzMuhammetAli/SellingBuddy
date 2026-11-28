@@ -158,7 +158,7 @@ namespace CatalogService.Api.Core.Application
                 }).ToList(),
                 RatingDistribution = BuildDistribution(item),
                 Reviews = item.Reviews.OrderByDescending(r => r.CreatedAt).Take(5)
-                    .Select(r => new ReviewViewModel { AuthorName = r.AuthorName, Rating = r.Rating, Comment = r.Comment.Resolve(), CreatedAt = r.CreatedAt }).ToList()
+                    .Select(r => new ReviewViewModel { AuthorName = r.AuthorName, Rating = r.Rating, Comment = r.Comment, LanguageCode = r.LanguageCode, CreatedAt = r.CreatedAt }).ToList()
             };
 
             //parent category first, then the item category
@@ -178,7 +178,7 @@ namespace CatalogService.Api.Core.Application
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync(cancellationToken);
 
-            return reviews.Select(r => new ReviewViewModel { AuthorName = r.AuthorName, Rating = r.Rating, Comment = r.Comment.Resolve(), CreatedAt = r.CreatedAt }).ToList();
+            return reviews.Select(r => new ReviewViewModel { AuthorName = r.AuthorName, Rating = r.Rating, Comment = r.Comment, LanguageCode = r.LanguageCode, CreatedAt = r.CreatedAt }).ToList();
         }
 
         //seeded reviews give the shape, total review count gives the size

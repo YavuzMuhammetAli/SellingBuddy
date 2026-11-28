@@ -11,7 +11,10 @@ namespace CatalogService.Api.Core.Domain
         //1 to 5
         public int Rating { get; set; }
 
-        public LocalizedText Comment { get; set; } = new();
+        //reviews keep the language they were written in, they are never translated
+        public string Comment { get; set; }
+
+        public string LanguageCode { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }

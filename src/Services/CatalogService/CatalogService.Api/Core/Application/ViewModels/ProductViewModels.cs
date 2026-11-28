@@ -119,6 +119,8 @@ namespace CatalogService.Api.Core.Application.ViewModels
 
         public string Comment { get; set; }
 
+        public string LanguageCode { get; set; }
+
         public DateTime CreatedAt { get; set; }
     }
 }
