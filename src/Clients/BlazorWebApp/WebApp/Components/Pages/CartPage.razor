@@ -1,0 +1,243 @@
+@page "/cart"
+@inject IBasketService BasketService
+@inject IWishlistService WishlistService
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Nav.Cart"] · SellingBudy</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page page-tight">
+            <div class="flex items-end justify-between gap-lg wrap" style="padding-bottom: var(--s-lg); border-bottom: 1px solid var(--c-outline)">
+                <div>
+                    <h1 class="t-headline-lg">@L["Nav.Cart"]</h1>
+                    @if (basket?.Items.Any() == true)
+                    {
+                        <p class="muted mt-xs">@string.Format(L["Cart.Subtitle"], basket.Count, basket.SellerCount)</p>
+                    }
+                </div>
+                <a href="" class="btn-link only-mobile">@L["Cart.BackToShopping"]</a>
+            </div>
+
+            @if (error)
+            {
+                <Notice Kind="error">@L["Error.BasketUnavailable"]</Notice>
+            }
+            else if (basket == null)
+            {
+                <div class="skeleton" style="height: 240px"></div>
+            }
+            else if (!basket.Items.Any())
+            {
+                <EmptyState Icon="shopping_bag" Title="@L["Cart.EmptyTitle"]" Text="@L["Cart.EmptyText"]">
+                    <a href="" class="btn btn-primary">@L["Home.StartShopping"]</a>
+                </EmptyState>
+            }
+            else
+            {
+                <div class="cart-layout">
+                    <div class="col gap-xl">
+                        @foreach (var group in basket.Items.GroupBy(i => i.SellerId))
+                        {
+                            var first = group.First();
+                            var groupShipping = group.Max(i => i.ShippingFee);
+                            <section class="seller-group" aria-label="@first.SellerName">
+                                <div class="card-head">
+                                    <span class="flex items-center gap-sm t-title-md">
+                                        <AppIcon Name="storefront" Class="text-primary" />
+                                        @string.Format(L["Common.SellerLabel"], first.SellerName)
+                                    </span>
+                                    @if (groupShipping == 0)
+                                    {
+                                        <span class="badge badge-success">@L["Product.FreeShipping"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="t-label-md muted">@string.Format(L["Product.ShippingFee"], Fmt.Price(groupShipping))</span>
+                                    }
+                                </div>
+                                @foreach (var item in group)
+                                {
+                                    <div class="cart-line" @key="item.Id">
+                                        <a href="@($"products/{item.ProductSlug}")" class="cart-thumb"><img src="@item.PictureUrl" alt="@NameOf(item)" loading="lazy" /></a>
+                                        <div class="col flex-1 gap-xs">
+                                            <div class="flex justify-between gap-md">
+                                                <div class="col gap-xs">
+                                                    <span class="pcard-brand hide-mobile">@item.BrandName</span>
+                                                    <a href="@($"products/{item.ProductSlug}")" class="t-title-md">@NameOf(item)</a>
+                                                    <span class="t-body-sm muted">@Dispatch(item)</span>
+                                                </div>
+                                                <div class="col items-end">
+                                                    <span class="price">@Fmt.Price(item.UnitPrice * item.Quantity)</span>
+                                                    @if (item.OldUnitPrice > item.UnitPrice)
+                                                    {
+                                                        <span class="price-old hide-mobile">@Fmt.Price(item.OldUnitPrice * item.Quantity)</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="cart-line-foot">
+                                                <QuantityStepper Small="true" Value="item.Quantity" Min="1" Max="10" Disabled="busy" ValueChanged="q => SetQuantityAsync(item, q)" />
+                                                <div class="flex items-center gap-lg">
+                                                    <button type="button" class="text-action" disabled="@busy" @onclick="() => SaveForLaterAsync(item)"><AppIcon Name="bookmark" /> <span class="hide-mobile">@L["Cart.SaveForLater"]</span></button>
+                                                    <button type="button" class="text-action danger" disabled="@busy" @onclick="() => RemoveAsync(item)"><AppIcon Name="delete" /> <span class="hide-mobile">@L["Cart.Remove"]</span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </section>
+                        }
+                        <a href="" class="btn-link hide-mobile"><AppIcon Name="arrow_back" /> @L["Cart.ContinueShopping"]</a>
+                    </div>
+
+                    <aside class="summary" aria-label="@L["Cart.Summary"]">
+                        <h2 class="t-headline-sm" style="padding-bottom: var(--s-md); border-bottom: 1px solid var(--c-outline)">@L["Cart.Summary"]</h2>
+                        <form class="coupon" @onsubmit="() => couponInfo = true">
+                            <input class="input" placeholder="@L["Cart.CouponPlaceholder"]" aria-label="@L["Cart.Coupon"]" @bind="coupon" />
+                            <button type="submit" class="btn btn-outline">@L["Cart.Apply"]</button>
+                        </form>
+                        @if (couponInfo)
+                        {
+                            <Notice>@L["Cart.CouponNotAvailable"]</Notice>
+                        }
+                        <div class="col gap-sm">
+                            <div class="summary-row"><span class="muted">@L["Cart.Subtotal"]</span><span class="num">@Fmt.Price(basket.ListTotal)</span></div>
+                            @if (basket.DiscountTotal > 0)
+                            {
+                                <div class="summary-row"><span class="muted">@L["Cart.Discounts"]</span><span class="num text-success">-@Fmt.Price(basket.DiscountTotal)</span></div>
+                            }
+                            <div class="summary-row"><span class="muted">@L["Cart.ShippingFee"]</span><span class="num @(basket.ShippingTotal == 0 ? "text-success" : null)">@(basket.ShippingTotal == 0 ? L["Common.Free"] : Fmt.Price(basket.ShippingTotal))</span></div>
+                            <div class="summary-row"><span class="muted">@L["Cart.Vat"]</span><span class="muted">@L["Cart.VatIncluded"]</span></div>
+                        </div>
+                        <div class="summary-total">
+                            <span class="t-title-lg">@L["Cart.GrandTotal"]</span>
+                            <span class="t-headline-md num">@Fmt.Price(basket.GrandTotal)</span>
+                        </div>
+                        <a href="checkout" class="btn btn-primary btn-lg btn-block">@L["Cart.Checkout"] <AppIcon Name="arrow_forward" /></a>
+                        <span class="flex items-center justify-center gap-xs t-body-sm muted"><AppIcon Name="lock" Class="text-success" /> @L["Cart.SecurePayment"]</span>
+                    </aside>
+                </div>
+
+                <div class="dock">
+                    <div class="col">
+                        <span class="t-body-sm muted">@L["Cart.GrandTotal"]</span>
+                        <span class="t-headline-sm num">@Fmt.Price(basket.GrandTotal)</span>
+                    </div>
+                    <a href="checkout" class="btn btn-primary flex-1">@L["Cart.Checkout"]</a>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    private Basket basket;
+    private Dictionary<int, string> names = new();
+    private bool error;
+    private bool busy;
+    private string coupon;
+    private bool couponInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        if (state.User.Identity?.IsAuthenticated != true)
+            return;
+
+        try
+        {
+            basket = await BasketService.GetBasketAsync();
+            await LoadNamesAsync();
+        }
+        catch (HttpRequestException)
+        {
+            error = true;
+        }
+    }
+
+    //names come from the catalog so they follow the current language
+    private async Task LoadNamesAsync()
+    {
+        try
+        {
+            var products = await CatalogService.GetItemsByIdsAsync(basket.Items.Select(i => i.ProductId));
+            names = products.ToDictionary(p => p.Id, p => p.Name);
+        }
+        catch (HttpRequestException)
+        {
+            names = new Dictionary<int, string>();
+        }
+    }
+
+    private string NameOf(BasketItem item) => names.GetValueOrDefault(item.ProductId) ?? item.ProductName;
+
+    private string Dispatch(BasketItem item) => item.DeliveryDaysMax <= 1
+        ? L["Cart.ShipsTomorrow"]
+        : string.Format(L["Cart.ShipsInDays"], item.DeliveryDaysMax);
+
+    private async Task SaveAsync()
+    {
+        basket = await BasketService.UpdateBasketAsync(basket);
+        State.SetCartCount(basket.Count);
+    }
+
+    private async Task SetQuantityAsync(BasketItem item, int quantity)
+    {
+        await RunAsync(async () =>
+        {
+            item.Quantity = quantity;
+            await SaveAsync();
+        });
+    }
+
+    private async Task RemoveAsync(BasketItem item)
+    {
+        await RunAsync(async () =>
+        {
+            basket.Items.Remove(item);
+            await SaveAsync();
+            State.ShowToast(L["Toast.RemovedFromCart"]);
+        });
+    }
+
+    //save for later moves the item to the wishlist
+    private async Task SaveForLaterAsync(BasketItem item)
+    {
+        await RunAsync(async () =>
+        {
+            if (!State.WishlistIds.Contains(item.ProductId))
+                await State.ToggleWishlistAsync(item.ProductId);
+
+            basket.Items.Remove(item);
+            await SaveAsync();
+            State.ShowToast(L["Toast.SavedForLater"]);
+        });
+    }
+
+    private async Task RunAsync(Func<Task> action)
+    {
+        busy = true;
+
+        try
+        {
+            await action();
+        }
+        catch (HttpRequestException)
+        {
+            State.ShowToast(L["Error.Generic"], true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

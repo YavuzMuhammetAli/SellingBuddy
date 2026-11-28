@@ -1,0 +1,103 @@
+@page "/wishlist"
+@implements IDisposable
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Nav.Wishlist"] · SellingBudy</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page page-tight">
+            <div style="padding-bottom: var(--s-lg); border-bottom: 1px solid var(--c-outline)">
+                <h1 class="t-headline-lg">@L["Nav.Wishlist"]</h1>
+                <p class="muted mt-xs">@string.Format(L["Wishlist.Saved"], visible.Count)</p>
+            </div>
+
+            @if (loading)
+            {
+                <SkeletonGrid Count="3" Class="cols-3" />
+            }
+            else if (!visible.Any())
+            {
+                <EmptyState Icon="favorite" Title="@L["Wishlist.EmptyTitle"]" Text="@L["Wishlist.EmptyText"]">
+                    <a href="" class="btn btn-primary">@L["Wishlist.Explore"]</a>
+                </EmptyState>
+            }
+            else
+            {
+                <div class="product-grid cols-3">
+                    @foreach (var product in visible)
+                    {
+                        <article class="pcard" @key="product.Id">
+                            <a class="pcard-media" href="@($"products/{product.Slug}")"><img src="@product.PictureUri" alt="@product.Name" loading="lazy" /></a>
+                            <div class="pcard-fav"><WishlistButton ProductId="product.Id" /></div>
+                            <div class="pcard-body">
+                                <span class="pcard-brand">@product.BrandName · @product.SellerName</span>
+                                <a href="@($"products/{product.Slug}")" class="pcard-title clamp-2">@product.Name</a>
+                                <span class="price mt-xs">@Fmt.Price(product.Price)</span>
+                                <button type="button" class="btn btn-primary btn-block mt-md" disabled="@(adding == product.Id || product.AvailableStock <= 0)" @onclick="() => AddAsync(product)">
+                                    @(product.AvailableStock > 0 ? L["Product.AddToCart"] : L["Product.OutOfStock"])
+                                </button>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<ProductSummary> products = new();
+    private bool loading = true;
+    private int? adding;
+
+    //removed items disappear right away without a reload
+    private List<ProductSummary> visible => products.Where(p => State.WishlistIds.Contains(p.Id)).ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        State.Changed += OnChanged;
+        await State.EnsureLoadedAsync();
+
+        try
+        {
+            products = await CatalogService.GetItemsByIdsAsync(State.WishlistIds);
+        }
+        catch (HttpRequestException)
+        {
+            State.ShowToast(L["Error.CatalogUnavailable"], true);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task AddAsync(ProductSummary product)
+    {
+        adding = product.Id;
+
+        try
+        {
+            await State.AddToCartAsync(product.Id, product.OfferId);
+            State.ShowToast(L["Toast.AddedToCart"]);
+        }
+        catch (HttpRequestException)
+        {
+            State.ShowToast(L["Error.Generic"], true);
+        }
+        finally
+        {
+            adding = null;
+        }
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.Changed -= OnChanged;
+}

@@ -1,0 +1,278 @@
+@page "/checkout"
+@layout CheckoutLayout
+@using System.Globalization
+@inject IBasketService BasketService
+@inject ICatalogService CatalogService
+@inject StorefrontState State
+
+<PageTitle>@L["Checkout.Title"] · SellingBudy</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page page-tight">
+            @if (orderId.HasValue)
+            {
+                <div class="card success-card">
+                    <span class="success-icon"><AppIcon Name="check_circle" Filled="true" /></span>
+                    <h1 class="t-headline-md">@L["Checkout.SuccessTitle"]</h1>
+                    <p class="muted">@string.Format(L["Checkout.SuccessText"], OrderNumber)</p>
+                    <span class="t-mono badge badge-outline badge-lg">@OrderNumber</span>
+                    <div class="flex gap-sm wrap justify-center">
+                        <a href="@($"account/orders/{orderId}")" class="btn btn-primary">@L["Checkout.TrackOrder"]</a>
+                        <a href="" class="btn btn-outline">@L["Cart.ContinueShopping"]</a>
+                    </div>
+                </div>
+            }
+            else if (basket == null)
+            {
+                <div class="skeleton" style="height: 400px"></div>
+            }
+            else if (!basket.Items.Any())
+            {
+                <EmptyState Icon="shopping_bag" Title="@L["Cart.EmptyTitle"]" Text="@L["Cart.EmptyText"]">
+                    <a href="" class="btn btn-primary">@L["Home.StartShopping"]</a>
+                </EmptyState>
+            }
+            else
+            {
+                <h1 class="t-headline-lg">@L["Checkout.Title"]</h1>
+
+                <div class="cart-layout">
+                    <form class="col gap-xl" id="checkout-form" @onsubmit="SubmitAsync" novalidate>
+                        <section class="co-section">
+                            <h2 class="t-headline-sm">1. @L["Checkout.StepAddress"]</h2>
+                            <div class="form-grid">
+                                <Field Label="@L["Checkout.FullName"]" Error="@Err("name")"><input class="input @Bad("name")" autocomplete="name" @bind="form.ContactName" /></Field>
+                                <Field Label="@L["Checkout.Phone"]" Error="@Err("phone")"><input class="input @Bad("phone")" type="tel" autocomplete="tel" @bind="form.Phone" /></Field>
+                                <Field Label="@L["Checkout.Country"]">
+                                    <select class="select" @bind="form.Country"><option value="Turkey">@L["Checkout.CountryTurkey"]</option></select>
+                                </Field>
+                                <Field Label="@L["Checkout.CityDistrict"]" Error="@Err("city")">
+                                    <div class="flex gap-sm">
+                                        <input class="input @Bad("city")" placeholder="@L["Checkout.City"]" autocomplete="address-level1" @bind="form.City" />
+                                        <input class="input" placeholder="@L["Checkout.District"]" autocomplete="address-level2" @bind="form.District" />
+                                    </div>
+                                </Field>
+                                <div class="span-2"><Field Label="@L["Checkout.Address"]" Error="@Err("street")"><input class="input @Bad("street")" autocomplete="street-address" @bind="form.Street" /></Field></div>
+                                <Field Label="@L["Checkout.ZipCode"]" Error="@Err("zip")"><input class="input @Bad("zip")" inputmode="numeric" autocomplete="postal-code" @bind="form.ZipCode" /></Field>
+                            </div>
+                        </section>
+
+                        <section class="co-section">
+                            <h2 class="t-headline-sm">2. @L["Checkout.ShippingOption"]</h2>
+                            <div class="col gap-md">
+                                <label class="radio-card @(form.ShippingMethod == "standard" ? "selected" : null)">
+                                    <input type="radio" name="shipping" checked="@(form.ShippingMethod == "standard")" @onchange='() => form.ShippingMethod = "standard"' />
+                                    <span class="col flex-1"><span class="t-title-md">@L["Checkout.Standard"]</span><span class="t-body-sm muted">@L["Checkout.StandardEta"]</span></span>
+                                    <span class="t-label-lg text-success">@(basket.ShippingTotal == 0 ? L["Common.Free"] : Fmt.Price(basket.ShippingTotal))</span>
+                                </label>
+                                <label class="radio-card @(form.ShippingMethod == "same-day" ? "selected" : null)">
+                                    <input type="radio" name="shipping" checked="@(form.ShippingMethod == "same-day")" @onchange='() => form.ShippingMethod = "same-day"' />
+                                    <span class="col flex-1"><span class="t-title-md">@L["Checkout.SameDay"]</span><span class="t-body-sm muted">@L["Checkout.SameDayEta"]</span></span>
+                                    <span class="t-label-lg">@Fmt.Price(SameDayFee)</span>
+                                </label>
+                            </div>
+                        </section>
+
+                        <section class="co-section">
+                            <h2 class="t-headline-sm">3. @L["Checkout.PaymentMethod"]</h2>
+                            <div class="form-grid">
+                                <div class="span-2"><Field Label="@L["Checkout.CardNumber"]" Error="@Err("card")"><input class="input input-mono @Bad("card")" inputmode="numeric" autocomplete="cc-number" placeholder="4111 1111 1111 1111" @bind="form.CardNumber" /></Field></div>
+                                <Field Label="@L["Checkout.Expiry"]" Error="@Err("expiry")"><input class="input input-mono @Bad("expiry")" autocomplete="cc-exp" placeholder="MM/YY" @bind="form.CardExpiry" /></Field>
+                                <Field Label="CVV" Error="@Err("cvv")"><input class="input input-mono @Bad("cvv")" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="4" @bind="form.CardSecurityNumber" /></Field>
+                                <label class="checkbox span-2"><input type="checkbox" @bind="form.BillingSameAsShipping" /> @L["Checkout.BillingSame"]</label>
+                                @if (!form.BillingSameAsShipping)
+                                {
+                                    <div class="span-2"><Notice>@L["Checkout.BillingNotAvailable"]</Notice></div>
+                                }
+                            </div>
+                        </section>
+                    </form>
+
+                    <aside class="summary" aria-label="@L["Cart.Summary"]">
+                        <h2 class="t-headline-sm">@L["Cart.Summary"]</h2>
+                        <div class="col gap-md">
+                            @foreach (var item in basket.Items)
+                            {
+                                <div class="mini-line">
+                                    <img src="@item.PictureUrl" alt="" />
+                                    <div class="col flex-1">
+                                        <span class="t-label-lg clamp-2">@(names.GetValueOrDefault(item.ProductId) ?? item.ProductName)</span>
+                                        <span class="t-body-sm muted">@string.Format(L["Checkout.SellerQty"], item.SellerName, item.Quantity)</span>
+                                    </div>
+                                    <span class="t-label-lg num">@Fmt.Price(item.UnitPrice * item.Quantity)</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="col gap-sm" style="padding-top: var(--s-md); border-top: 1px solid var(--c-outline)">
+                            <div class="summary-row"><span class="muted">@L["Cart.Subtotal"]</span><span class="num">@Fmt.Price(basket.ListTotal)</span></div>
+                            @if (basket.DiscountTotal > 0)
+                            {
+                                <div class="summary-row"><span class="muted">@L["Cart.Discounts"]</span><span class="num text-success">-@Fmt.Price(basket.DiscountTotal)</span></div>
+                            }
+                            <div class="summary-row"><span class="muted">@L["Checkout.StepShipping"]</span><span class="num @(ShippingFee == 0 ? "text-success" : null)">@(ShippingFee == 0 ? L["Common.Free"] : Fmt.Price(ShippingFee))</span></div>
+                        </div>
+                        <div class="summary-total">
+                            <span class="t-title-lg">@L["Checkout.Total"]</span>
+                            <span class="t-headline-md num">@Fmt.Price(Total)</span>
+                        </div>
+                        @if (submitError)
+                        {
+                            <Notice Kind="error">@L["Checkout.Failed"]</Notice>
+                        }
+                        <button type="submit" form="checkout-form" class="btn btn-primary btn-lg btn-block hide-mobile" disabled="@busy">@L["Checkout.Confirm"]</button>
+                    </aside>
+                </div>
+
+                <div class="dock no-nav">
+                    <button type="submit" form="checkout-form" class="btn btn-primary btn-block" disabled="@busy">@string.Format(L["Checkout.ConfirmMobile"], Fmt.Price(Total))</button>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; }
+
+    //same value as ShippingOptions in the basket service
+    private const decimal SameDayFee = 89m;
+
+    private Basket basket;
+    private Dictionary<int, string> names = new();
+    private readonly CheckoutForm form = new();
+    private Dictionary<string, string> errors = new();
+    private bool busy;
+    private bool submitError;
+    private Guid? orderId;
+    private DateTime orderDate;
+
+    private decimal ShippingFee => form.ShippingMethod == "same-day" ? SameDayFee : basket.ShippingTotal;
+
+    private decimal Total => basket.ItemsTotal + ShippingFee;
+
+    private string OrderNumber => Fmt.OrderNumber(orderId?.ToString(), orderDate);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        if (state.User.Identity?.IsAuthenticated != true)
+            return;
+
+        form.ContactName = State.Session?.DisplayName;
+
+        try
+        {
+            basket = await BasketService.GetBasketAsync();
+
+            //names follow the current language, the basket keeps the one from add time
+            var products = await CatalogService.GetItemsByIdsAsync(basket.Items.Select(i => i.ProductId));
+            names = products.ToDictionary(p => p.Id, p => p.Name);
+        }
+        catch (HttpRequestException)
+        {
+            basket = new Basket();
+            submitError = true;
+        }
+    }
+
+    private string Err(string key) => errors.GetValueOrDefault(key);
+
+    private string Bad(string key) => errors.ContainsKey(key) ? "invalid" : null;
+
+    private bool Validate()
+    {
+        errors = new Dictionary<string, string>();
+        var required = L["Validation.Required"].Value;
+
+        if (string.IsNullOrWhiteSpace(form.ContactName)) errors["name"] = required;
+        if (string.IsNullOrWhiteSpace(form.Phone) || form.Phone.Count(char.IsDigit) < 10) errors["phone"] = L["Validation.Phone"];
+        if (string.IsNullOrWhiteSpace(form.City)) errors["city"] = required;
+        if (string.IsNullOrWhiteSpace(form.Street)) errors["street"] = required;
+        if (string.IsNullOrWhiteSpace(form.ZipCode)) errors["zip"] = required;
+
+        var digits = new string((form.CardNumber ?? string.Empty).Where(char.IsDigit).ToArray());
+        if (digits.Length < 13 || digits.Length > 19) errors["card"] = L["Validation.CardNumber"];
+
+        if (ParseExpiry(form.CardExpiry) is not DateTime expiry || expiry < DateTime.UtcNow.Date) errors["expiry"] = L["Validation.Expiry"];
+
+        if (string.IsNullOrWhiteSpace(form.CardSecurityNumber) || form.CardSecurityNumber.Length < 3 || !form.CardSecurityNumber.All(char.IsDigit)) errors["cvv"] = L["Validation.Cvv"];
+
+        return !errors.Any();
+    }
+
+    //MM/YY becomes the last day of that month
+    private static DateTime? ParseExpiry(string value)
+    {
+        var parts = (value ?? string.Empty).Split('/', StringSplitOptions.TrimEntries);
+
+        if (parts.Length != 2 || !int.TryParse(parts[0], out var month) || !int.TryParse(parts[1], out var year) || month is < 1 or > 12)
+            return null;
+
+        year = year < 100 ? 2000 + year : year;
+        return new DateTime(year, month, DateTime.DaysInMonth(year, month), 0, 0, 0, DateTimeKind.Utc);
+    }
+
+    private static int CardType(string digits) => digits.FirstOrDefault() switch
+    {
+        '3' => 1,
+        '5' => 3,
+        _ => 2
+    };
+
+    private async Task SubmitAsync()
+    {
+        submitError = false;
+
+        if (!Validate())
+            return;
+
+        busy = true;
+
+        try
+        {
+            var digits = new string(form.CardNumber.Where(char.IsDigit).ToArray());
+
+            orderId = await BasketService.CheckoutAsync(new BasketCheckoutRequest
+            {
+                ContactName = form.ContactName.Trim(),
+                Phone = form.Phone.Trim(),
+                ShippingMethod = form.ShippingMethod,
+                City = form.City.Trim(),
+                State = form.District?.Trim(),
+                Street = form.Street.Trim(),
+                Country = form.Country,
+                ZipCode = form.ZipCode.Trim(),
+                CardNumber = digits,
+                CardHolderName = form.ContactName.Trim(),
+                CardExpiration = ParseExpiry(form.CardExpiry).Value,
+                CardSecurityNumber = form.CardSecurityNumber,
+                CardTypeId = CardType(digits),
+                Buyer = State.Session?.UserName
+            });
+
+            if (orderId.HasValue)
+            {
+                orderDate = DateTime.UtcNow;
+                State.SetCartCount(0);
+            }
+            else
+            {
+                submitError = true;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            submitError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}
